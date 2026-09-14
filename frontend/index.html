@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial AI Control Center</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="dashboard-wrapper">
+    <!-- TOP HEADER -->
+    <header class="main-header">
+        <div class="header-left">
+            <h1>INDUSTRIAL AI</h1>
+            <div class="subtitle">INTELLIGENT MACHINE INVESTIGATION</div>
+        </div>
+        <div class="header-right">
+            <div class="machine-label">MACHINE 101</div>
+            <div class="system-status-indicator">
+                <span class="sys-stat"><span class="pulse-dot"></span> SYSTEM ONLINE</span>
+                <span class="sys-stat"><span class="pulse-dot"></span> TELEMETRY CONNECTED</span>
+                <span class="sys-stat"><span class="pulse-dot"></span> AI ENGINE READY</span>
+                <span class="sys-stat"><span class="pulse-dot"></span> INVESTIGATION READY</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 3-COLUMN MONITORING LAYOUT -->
+    <section class="monitoring-grid">
+        
+        <!-- LEFT: MACHINE HEALTH & ALERTS -->
+        <div class="monitoring-panel left-panel">
+            <div class="panel-header">MACHINE HEALTH</div>
+            <div class="health-container">
+                <div class="health-circle">
+                    <svg viewBox="0 0 100 100">
+                        <circle class="bg-circle" cx="50" cy="50" r="45"></circle>
+                        <circle class="progress-circle" id="health-progress" cx="50" cy="50" r="45"></circle>
+                    </svg>
+                    <div class="health-value"><span id="health-score-val">100</span><span class="percent">%</span></div>
+                </div>
+                <div class="health-score-label">HEALTH SCORE</div>
+                <div class="health-status" id="health-status-text">NORMAL</div>
+            </div>
+
+            <div class="panel-header mt-auto">SYSTEM STATUS</div>
+            <ul class="system-status-list">
+                <li><span class="status-dot green"></span> SYSTEM ONLINE</li>
+                <li><span class="status-dot green"></span> AI READY</li>
+                <li><span class="status-dot green"></span> MACHINE ONLINE</li>
+            </ul>
+
+            <div class="panel-header mt-30">SYSTEM ALERTS</div>
+            <div class="alerts-panel" id="alertsPanel">
+                <div class="alert-box alert-normal">
+                    <div class="alert-title">NORMAL</div>
+                    <div class="alert-desc">Machine operating within expected temperature range.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER: DIGITAL TWIN -->
+        <div class="monitoring-panel center-panel">
+            <div class="dt-scene">
+                <div class="dt-grid-floor"></div>
+                
+                <div class="dt-machine-3d">
+                    <!-- Machine Base -->
+                    <div class="m-base"></div>
+                    <!-- Machine Core / Body (Main Unit / Temp Sensor area) -->
+                    <div class="m-core interactive-comp" id="comp-main" data-comp="Main Unit" data-tel="status">
+                        <div class="m-panel-front">
+                            <div class="m-vent"></div>
+                            <div class="m-vent"></div>
+                            <div class="m-vent"></div>
+                        </div>
+                        <div class="m-panel-side"></div>
+                    </div>
+                    <!-- Temperature Sensor -->
+                    <div class="m-sensor interactive-comp" id="comp-temp" data-comp="Temperature Sensor" data-tel="temperature">
+                        <div class="sensor-dot"></div>
+                    </div>
+                    <!-- Cooling Fan on top -->
+                    <div class="m-fan-housing interactive-comp" id="comp-fan" data-comp="Cooling Fan" data-tel="fan">
+                        <div class="m-fan-blade" id="dt-fan"></div>
+                    </div>
+                    
+                    <!-- Pipes -->
+                    <div class="m-pipe pipe-left interactive-comp" id="comp-coolant" data-comp="Coolant System" data-tel="coolant"></div>
+                    <div class="m-pipe pipe-right interactive-comp" id="comp-pressure" data-comp="Pressure System" data-tel="pressure"></div>
+                    
+                    <!-- Scanner and effects -->
+                    <div class="dt-scanner-ring"></div>
+                    <div class="status-light" id="dt-status-light"></div>
+                    <div class="machine-scan-line"></div>
+                </div>
+
+                <div class="dt-overlay-labels">
+                    <div class="dt-title">MACHINE 101</div>
+                    <div class="dt-sub">INDUSTRIAL COOLING UNIT</div>
+                    <div class="dt-id">ID: 101-A</div>
+                </div>
+
+                <div class="component-inspection-panel" id="inspectionPanel">
+                    <div id="inspection-empty">
+                        <div class="ins-title">COMPONENT INSPECTION</div>
+                        <div class="ins-empty-text">SELECT A MACHINE COMPONENT</div>
+                    </div>
+                    <div id="inspection-data" class="hidden">
+                        <div class="ins-title">COMPONENT INSPECTION</div>
+                        <div class="ins-row">
+                            <span class="ins-label">COMPONENT</span>
+                            <span class="ins-val text-cyan" id="ins-comp-name">--</span>
+                        </div>
+                        <div class="ins-row">
+                            <span class="ins-label">STATUS</span>
+                            <span class="ins-val text-green" id="ins-comp-status">--</span>
+                        </div>
+                        <div class="ins-row">
+                            <span class="ins-label">VALUE</span>
+                            <span class="ins-val" id="ins-comp-value">--</span>
+                        </div>
+                        <button class="ins-btn" id="ins-ask-btn">AUTO-FILL INVESTIGATION</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: LIVE TELEMETRY -->
+        <div class="monitoring-panel right-panel">
+            <div class="panel-header" id="tel-header-title">LIVE TELEMETRY</div>
+            
+            <div class="telemetry-grid">
+                <div class="telemetry-card">
+                    <div class="tel-label">TEMPERATURE</div>
+                    <div class="tel-value" id="tel-temp">--&deg;C</div>
+                </div>
+                <div class="telemetry-card">
+                    <div class="tel-label">RPM</div>
+                    <div class="tel-value" id="tel-rpm">--</div>
+                </div>
+                <div class="telemetry-card">
+                    <div class="tel-label">PRESSURE</div>
+                    <div class="tel-value"><span id="tel-pressure">--</span> <span class="unit">bar</span></div>
+                </div>
+                <div class="telemetry-card">
+                    <div class="tel-label">COOLANT</div>
+                    <div class="tel-value"><span id="tel-coolant">--</span>%</div>
+                </div>
+                <div class="telemetry-card">
+                    <div class="tel-label">VIBRATION</div>
+                    <div class="tel-value text-cyan" id="tel-vibration">--</div>
+                </div>
+                <div class="telemetry-card">
+                    <div class="tel-label">FAN</div>
+                    <div class="tel-value text-cyan" id="tel-fan">--</div>
+                </div>
+            </div>
+
+            <div class="panel-header mt-auto">RECENT ACTIVITY</div>
+            <div class="activity-log" id="activityLog">
+                <div class="activity-item">
+                    <div class="act-time">Just now</div>
+                    <div class="act-desc">System initialized</div>
+                </div>
+            </div>
+
+            <div class="panel-header mt-30" style="display:flex; justify-content:space-between; align-items:center;">
+                DEMO MODE
+                <span id="demo-indicator" style="font-size:9px; color:var(--text-secondary); letter-spacing:1px; display:none;">SIMULATED TELEMETRY</span>
+            </div>
+            <div class="sim-controls">
+                <button class="sim-btn active" id="sim-live">LIVE</button>
+                <button class="sim-btn" id="sim-normal">NORMAL</button>
+                <button class="sim-btn" id="sim-warning">WARN</button>
+                <button class="sim-btn" id="sim-critical">CRIT</button>
+            </div>
+            
+            <div class="demo-actions" style="display:flex; gap:10px; margin-top:10px;">
+                <button id="btn-start-demo" style="flex:1; height:35px; font-size:12px; padding:0;">START DEMO INCIDENT</button>
+                <button id="btn-reset-demo" style="flex:1; height:35px; font-size:12px; padding:0; background:transparent; border-color:var(--text-secondary); color:var(--text-secondary);">RESET DEMO</button>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- INVESTIGATION AREA -->
+    <section class="investigation-area">
+        <div class="inv-header">
+            <h2>AI INVESTIGATION</h2>
+            <div class="inv-subtitle">Evidence-based investigation of Machine 101</div>
+        </div>
+
+        <div class="inv-layout-grid">
+            <!-- LEFT: CONSOLE & PIPELINE -->
+            <div class="inv-left-col">
+                <div class="inv-console">
+                    <textarea id="question" placeholder="Ask a question about Machine 101...&#10;Example: Is Machine 101 overheating?"></textarea>
+                    <button id="investigateBtn">
+                        <span class="btn-text">RUN INVESTIGATION</span>
+                    </button>
+                </div>
+
+                <!-- INVESTIGATION PIPELINE -->
+                <div class="pipeline-container">
+                    <div class="pipe-node" id="node-agent">
+                        <div class="node-circle">01</div>
+                        <div class="node-label">AGENT</div>
+                        <div class="node-status">WAITING</div>
+                    </div>
+                    <div class="pipe-connector" id="conn-1"></div>
+                    <div class="pipe-node" id="node-manual">
+                        <div class="node-circle">02</div>
+                        <div class="node-label">MANUAL</div>
+                        <div class="node-status">WAITING</div>
+                    </div>
+                    <div class="pipe-connector" id="conn-2"></div>
+                    <div class="pipe-node" id="node-vision">
+                        <div class="node-circle">03</div>
+                        <div class="node-label">VISION</div>
+                        <div class="node-status">WAITING</div>
+                    </div>
+                    <div class="pipe-connector" id="conn-3"></div>
+                    <div class="pipe-node" id="node-fusion">
+                        <div class="node-circle">04</div>
+                        <div class="node-label">FUSION</div>
+                        <div class="node-status">WAITING</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: HISTORY -->
+            <div class="inv-right-col">
+                <div class="panel-header">INVESTIGATION HISTORY</div>
+                <div class="history-list" id="historyList">
+                    <div class="history-empty">No previous investigations</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESULT AREA -->
+        <div id="aiResult" class="hidden">
+            <!-- Dynamically injected -->
+        </div>
+
+        <!-- INCIDENT REPORT AREA -->
+        <div id="incidentReportContainer" class="hidden">
+            <div class="report-header">
+                <h3>INCIDENT REPORT</h3>
+                <button id="btn-export-report" class="btn-small">EXPORT REPORT (TXT)</button>
+            </div>
+            <div id="incidentReportContent" class="report-content">
+                <!-- Dynamically injected -->
+            </div>
+        </div>
+    </section>
+
+    <!-- MAINTENANCE & TIMELINE AREA -->
+    <section class="maintenance-area">
+        <div class="maintenance-grid">
+            
+            <!-- MAINTENANCE INTELLIGENCE -->
+            <div class="maint-panel">
+                <div class="panel-header">MAINTENANCE RISK ASSESSMENT</div>
+                
+                <div class="maint-status-row">
+                    <div class="maint-box">
+                        <div class="maint-label">MAINTENANCE STATUS</div>
+                        <div class="maint-value" id="maint-status">READY</div>
+                    </div>
+                    <div class="maint-box">
+                        <div class="maint-label">RISK LEVEL</div>
+                        <div class="maint-value text-green" id="maint-risk">LOW</div>
+                    </div>
+                </div>
+                
+                <div class="maint-action-box">
+                    <div class="maint-label">NEXT ACTION</div>
+                    <div class="maint-action-text" id="maint-action">Continue routine monitoring and scheduled maintenance.</div>
+                </div>
+            </div>
+
+            <!-- EVENT TIMELINE -->
+            <div class="timeline-panel">
+                <div class="panel-header">MACHINE EVENT TIMELINE</div>
+                <div class="timeline-container" id="eventTimeline">
+                    <!-- Events injected dynamically -->
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

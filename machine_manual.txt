@@ -1,0 +1,33 @@
+MACHINE 101 - MAINTENANCE MANUAL
+
+Machine: Industrial Cooling Unit 101
+
+Normal operating temperature:
+60°C to 80°C
+
+Warning temperature:
+Above 80°C
+
+Critical temperature:
+Above 95°C
+
+Maintenance schedule:
+The cooling system should be inspected every 30 days.
+
+If temperature exceeds 80°C:
+1. Check the cooling fan.
+2. Check for dust or blockage.
+3. Check coolant level.
+4. Inspect the temperature sensor.
+
+If temperature exceeds 95°C:
+Immediately stop the machine and perform a safety inspection.
+
+Common causes of overheating:
+- Cooling fan failure
+- Dust accumulation
+- Low coolant level
+- Faulty temperature sensor
+
+Last maintenance:
+Machine 101 was last serviced 18 days ago.
