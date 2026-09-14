@@ -4,6 +4,43 @@ from sentence_transformers import SentenceTransformer
 import base64
 import sys
 import json
+import os
+
+AI_PROVIDER = os.environ.get("AI_PROVIDER", "LOCAL_OLLAMA")
+
+class AIProviderError(Exception):
+    pass
+
+def generate_ai_response(model, prompt, images=None):
+    if AI_PROVIDER == "LOCAL_OLLAMA":
+        payload = {
+            "model": model,
+            "prompt": prompt,
+            "stream": False
+        }
+        if images:
+            payload["images"] = images
+        
+        try:
+            response = requests.post("http://localhost:11434/api/generate", json=payload)
+            response.raise_for_status()
+            
+            try:
+                json_data = response.json()
+            except ValueError as e:
+                raise AIProviderError(f"Invalid JSON response from local AI: {e}") from e
+                
+            if "response" not in json_data:
+                raise AIProviderError("Malformed JSON response from local AI: 'response' key missing.")
+                
+            return json_data["response"]
+        except requests.exceptions.RequestException as e:
+            raise AIProviderError(f"Error connecting to local AI: {e}") from e
+    elif AI_PROVIDER == "CLOUD_AI":
+        # Cloud AI integration goes here
+        raise AIProviderError("Cloud AI provider not yet fully implemented.")
+    raise AIProviderError("Unknown AI provider.")
+
 
 raw_input = sys.stdin.read().strip()
 try:
@@ -60,16 +97,16 @@ or
 BOTH
 """
 
-response = requests.post(
-    "http://localhost:11434/api/generate",
-    json={
-        "model": "qwen2.5:7b",
-        "prompt": decision_prompt,
-        "stream": False
-    }
-)
-
-decision = response.json()["response"].strip()
+try:
+    decision = generate_ai_response("qwen2.5:7b", decision_prompt).strip()
+except AIProviderError as e:
+    print("Agent decision: ERROR")
+    print("\n------------------------------------------")
+    print(f"**INVESTIGATION FAILED**\n\nAI Error:\n`{str(e)}`")
+    print("\n==========================================")
+    print("Evidence-based investigation complete.")
+    print("==========================================")
+    sys.exit(1)
 
 print("Agent decision:", decision)
 
@@ -118,13 +155,18 @@ if "IMAGE_ANALYSIS" in decision or "BOTH" in decision:
     print("\n[3] Analyzing machine image...")
 
     image_path = "ChatGPT Image Sep 13, 2026, 01_44_35 PM.png"
-
-    with open(image_path, "rb") as f:
-        image_base64 = base64.b64encode(
-            f.read()
-        ).decode("utf-8")
-
-    image_prompt = f"""
+    
+    try:
+        with open(image_path, "rb") as f:
+            image_base64 = base64.b64encode(
+                f.read()
+            ).decode("utf-8")
+    except Exception as e:
+        image_analysis = f"Error reading machine image file: {e}"
+        print("✗ Image read failed.")
+    
+    if "image_analysis" not in locals():
+        image_prompt = f"""
 Analyze the industrial machine image.
 
 Question:
@@ -136,20 +178,16 @@ observed in the image.
 Do not guess measurements.
 Do not assume something is visible if it is not.
 """
-
-    image_response = requests.post(
-        "http://localhost:11434/api/generate",
-        json={
-            "model": "qwen2.5vl:7b",
-            "prompt": image_prompt,
-            "images": [image_base64],
-            "stream": False
-        }
-    )
-
-    image_analysis = image_response.json()["response"]
-
-    print("✓ Image evidence retrieved.")
+        try:
+            image_analysis = generate_ai_response("qwen2.5vl:7b", image_prompt, [image_base64])
+            print("✓ Image evidence retrieved.")
+        except AIProviderError as e:
+            print("\n------------------------------------------")
+            print(f"**INVESTIGATION FAILED**\n\nAI Error:\n`{str(e)}`")
+            print("\n==========================================")
+            print("Evidence-based investigation complete.")
+            print("==========================================")
+            sys.exit(1)
 
 
 
@@ -234,16 +272,10 @@ IMPORTANT REASONING RULES:
 6. The goal is to make the investigation auditable: OBSERVATION -> EVIDENCE -> SUPPORT LEVEL -> ASSESSMENT -> ACTION.
 """
 
-final_response = requests.post(
-    "http://localhost:11434/api/generate",
-    json={
-        "model": "qwen2.5vl:7b",
-        "prompt": final_prompt,
-        "stream": False
-    }
-)
-
-report = final_response.json()["response"]
+try:
+    report = generate_ai_response("qwen2.5vl:7b", final_prompt)
+except AIProviderError as e:
+    report = f"**INVESTIGATION FAILED**\n\nAI Error:\n`{str(e)}`"
 
 
 
