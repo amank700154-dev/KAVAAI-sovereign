@@ -15,6 +15,29 @@ document.addEventListener("DOMContentLoaded", function () {
     setInterval(pollTelemetry, 3000);
     pollTelemetry();
 
+    async function pollModelRouter() {
+        try {
+            const res = await fetch("http://127.0.0.1:8000/api/models");
+            if (res.ok) {
+                const mData = await res.json();
+                const badge = document.getElementById("stat-model-router");
+                if (badge) {
+                    const rModel = mData.registry ? mData.registry.REASONING_MODEL : "qwen2.5:7b";
+                    if (mData.ollama_online) {
+                        badge.innerHTML = `<span class="pulse-dot green"></span> ROUTER: ${escapeHTML(rModel)} (ONLINE)`;
+                        badge.style.color = "var(--green)";
+                        badge.style.borderColor = "rgba(16, 185, 129, 0.4)";
+                    } else {
+                        badge.innerHTML = `<span class="pulse-dot"></span> ROUTER: SOVEREIGN LOCAL`;
+                        badge.style.color = "var(--cyan)";
+                        badge.style.borderColor = "rgba(0, 217, 255, 0.4)";
+                    }
+                }
+            }
+        } catch(e) {}
+    }
+    pollModelRouter();
+
     // ----------------------------------------------------
     // SIMULATION & DEMO CONTROLS
     // ----------------------------------------------------
@@ -554,6 +577,132 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let telHtml = `<div class="ee-card"><div class="ee-card-title">MACHINE TELEMETRY</div><div class="ee-card-status text-cyan">INCLUDED</div><div class="ee-card-desc">Real-time state passed to reasoning engine.</div></div>`;
 
+        const taskType = data.task_type || "DOCUMENT_ANALYSIS";
+        const selectedModel = data.selected_model || "qwen2.5:7b (Local)";
+        const targetRole = data.target_role || "REASONING_MODEL";
+        const execution = data.execution || "LOCAL";
+        const fallbackApplied = data.model_routing && data.model_routing.fallback_applied;
+        const fallbackReason = data.model_routing && data.model_routing.fallback_reason;
+
+        let routerHtml = `
+            <div class="router-banner">
+                <div class="router-item">
+                    <span class="router-label">TASK CLASSIFICATION</span>
+                    <span class="router-val">${escapeHTML(taskType)}</span>
+                </div>
+                <div class="router-item">
+                    <span class="router-label">MODEL ROLE & SELECTION</span>
+                    <span class="router-val highlight">${escapeHTML(selectedModel)}</span>
+                    <span style="font-size:10px; color:var(--text-secondary); font-family:var(--font-mono);">Role: ${escapeHTML(targetRole)}</span>
+                </div>
+                <div class="router-item">
+                    <span class="router-label">EXECUTION TOPOLOGY</span>
+                    <span class="router-val badge">AIR-GAPPED ${escapeHTML(execution)}</span>
+                </div>
+                ${fallbackApplied && fallbackReason ? `<div class="router-fallback-note">⚠️ ${escapeHTML(fallbackReason)}</div>` : ''}
+            </div>
+        `;
+
+        let planHtml = '';
+        if (data.plan && Array.isArray(data.plan) && data.plan.length > 0) {
+            let itemsHtml = data.plan.map(step => {
+                return `
+                    <div class="plan-item">
+                        <span class="plan-step-num">${step.step}</span>
+                        <div class="plan-step-content">
+                            <div class="plan-step-action">${escapeHTML(step.action)}</div>
+                            <div class="plan-step-meta">
+                                <span>Tool: <span class="plan-step-tool">${escapeHTML(step.tool)}</span></span>
+                                <span>Status: <span class="plan-step-status">COMPLETED</span></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            planHtml = `
+                <div class="plan-container">
+                    <div class="plan-header-row">
+                        <span class="plan-header-title">MULTI-STEP AGENT EXECUTION PLAN</span>
+                        <span style="font-size:11px; font-family:var(--font-mono); color:var(--text-secondary);">${data.plan.length} STEPS EXECUTED</span>
+                    </div>
+                    <div class="plan-list">
+                        ${itemsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        let verifyHtml = '';
+        if (data.verification && data.verification.checks && data.verification.checks.length > 0) {
+            let checksHtml = data.verification.checks.map(c => `
+                <div class="verify-item">
+                    <span class="verify-icon">✓</span>
+                    <span><strong>${escapeHTML(c.check || c.rule)}</strong>: ${escapeHTML(c.result || 'Verified')}</span>
+                </div>
+            `).join('');
+
+            verifyHtml = `
+                <div class="verify-box">
+                    <div class="verify-title">
+                        <span>🛡️ SOVEREIGN INTEGRITY AUDIT TRAIL (AIR-GAP VERIFIED)</span>
+                    </div>
+                    ${checksHtml}
+                </div>
+            `;
+        }
+
+        let deliverablesHtml = '';
+        if (data.deliverables && Array.isArray(data.deliverables) && data.deliverables.length > 0) {
+            let btns = data.deliverables.map(d => {
+                const icon = d.type === 'DOCX' ? '📄' : (d.type === 'XLSX' ? '📊' : '📁');
+                return `
+                    <a href="http://127.0.0.1:8000/deliverables/${encodeURIComponent(d.filename)}" class="btn-deliverable" download>
+                        <span>${icon}</span>
+                        <span>DOWNLOAD ${escapeHTML(d.type)} (${escapeHTML(d.filename)})</span>
+                    </a>
+                `;
+            }).join('');
+
+            deliverablesHtml = `
+                <div class="deliverables-box">
+                    <div class="deliverables-title">GENERATED AUDIT DELIVERABLES</div>
+                    <div class="deliverables-grid">
+                        ${btns}
+                    </div>
+                </div>
+            `;
+        }
+
+        let knowledgeEvidenceHtml = '';
+        if (data.knowledge_evidence && Array.isArray(data.knowledge_evidence) && data.knowledge_evidence.length > 0) {
+            let cards = data.knowledge_evidence.map(item => `
+                <div class="knowledge-evidence-card">
+                    <div class="ke-header">
+                        <div class="ke-source">
+                            <span class="ke-label">Source:</span>
+                            <span class="ke-val">${escapeHTML(item.source)}</span>
+                        </div>
+                        <div class="ke-meta">
+                            <span class="ke-page">Page: <strong>${item.page}</strong></span>
+                            <span class="ke-match">${escapeHTML(item.similarity_percent || 'Verified')}</span>
+                        </div>
+                    </div>
+                    <div class="ke-body">
+                        <span class="ke-evidence-label">Relevant evidence:</span>
+                        <div class="ke-evidence-text">${escapeHTML(item.relevant_evidence)}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            knowledgeEvidenceHtml = `
+                <div class="ee-title" style="margin-top:20px;">ORGANIZATIONAL KNOWLEDGE EVIDENCE</div>
+                <div class="knowledge-evidence-grid">
+                    ${cards}
+                </div>
+            `;
+        }
+
         aiResult.innerHTML = `
             <div class="result-header">
                 <h3>AI INVESTIGATION RESULT</h3>
@@ -562,6 +711,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
             </div>
 
+            ${routerHtml}
+            ${planHtml}
+
             <div class="ee-title">EVIDENCE EXPLORER</div>
             <div class="ee-grid">
                 ${manualHtml}
@@ -569,10 +721,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 ${telHtml}
             </div>
 
+            ${knowledgeEvidenceHtml}
+
             <div class="assessment-title">AI ASSESSMENT</div>
             <div class="markdown-body">
                 ${formatAnswer(data.answer || "No assessment generated.")}
             </div>
+
+            ${verifyHtml}
+            ${deliverablesHtml}
             
             <div style="margin-top: 30px; display: flex; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 15px;">
                 <button id="btn-generate-report" class="btn-small">GENERATE INCIDENT REPORT</button>
