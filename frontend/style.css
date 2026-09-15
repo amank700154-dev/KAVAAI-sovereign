@@ -430,6 +430,13 @@ button:disabled { opacity: 0.5; border-color: var(--text-secondary); color: var(
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 @keyframes fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes machine-float { 0% { transform: rotateX(-15deg) rotateY(35deg) translateY(0); } 100% { transform: rotateX(-15deg) rotateY(35deg) translateY(-10px); } }
+@keyframes machine-vib {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(var(--vib-x, 1px)) translateY(var(--vib-y, 1px)); }
+    50% { transform: translateX(calc(var(--vib-x, 1px) * -1)); }
+    75% { transform: translateX(var(--vib-x, 1px)) translateY(calc(var(--vib-y, 1px) * -1)); }
+    100% { transform: translateX(0); }
+}
 
 /* RESPONSIVE */
 @media (max-width: 1200px) {
