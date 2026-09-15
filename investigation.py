@@ -6,40 +6,36 @@ import sys
 import json
 import os
 
-AI_PROVIDER = os.environ.get("AI_PROVIDER", "LOCAL_OLLAMA")
+AI_PROVIDER = "LOCAL_OLLAMA"
 
 class AIProviderError(Exception):
     pass
 
 def generate_ai_response(model, prompt, images=None):
-    if AI_PROVIDER == "LOCAL_OLLAMA":
-        payload = {
-            "model": model,
-            "prompt": prompt,
-            "stream": False
-        }
-        if images:
-            payload["images"] = images
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False
+    }
+    if images:
+        payload["images"] = images
+    
+    try:
+        response = requests.post("http://localhost:11434/api/generate", json=payload, timeout=90)
+        response.raise_for_status()
         
         try:
-            response = requests.post("http://localhost:11434/api/generate", json=payload)
-            response.raise_for_status()
+            json_data = response.json()
+        except ValueError as e:
+            raise AIProviderError(f"Invalid JSON response from local AI: {e}") from e
             
-            try:
-                json_data = response.json()
-            except ValueError as e:
-                raise AIProviderError(f"Invalid JSON response from local AI: {e}") from e
-                
-            if "response" not in json_data:
-                raise AIProviderError("Malformed JSON response from local AI: 'response' key missing.")
-                
-            return json_data["response"]
-        except requests.exceptions.RequestException as e:
-            raise AIProviderError(f"Error connecting to local AI: {e}") from e
-    elif AI_PROVIDER == "CLOUD_AI":
-        # Cloud AI integration goes here
-        raise AIProviderError("Cloud AI provider not yet fully implemented.")
-    raise AIProviderError("Unknown AI provider.")
+        if "response" not in json_data:
+            raise AIProviderError("Malformed JSON response from local AI: 'response' key missing.")
+            
+        return json_data["response"]
+    except requests.exceptions.RequestException as e:
+        raise AIProviderError(f"Error connecting to local AI engine (Ollama at localhost:11434): {e}") from e
+
 
 
 raw_input = sys.stdin.read().strip()
@@ -154,18 +150,18 @@ if "IMAGE_ANALYSIS" in decision or "BOTH" in decision:
 
     print("\n[3] Analyzing machine image...")
 
-    image_path = "ChatGPT Image Sep 13, 2026, 01_44_35 PM.png"
-    
-    try:
-        with open(image_path, "rb") as f:
-            image_base64 = base64.b64encode(
-                f.read()
-            ).decode("utf-8")
-    except Exception as e:
-        image_analysis = f"Error reading machine image file: {e}"
-        print("✗ Image read failed.")
-    
-    if "image_analysis" not in locals():
+    image_base64 = data.get("image_base64", "") if isinstance(data, dict) else ""
+    if not image_base64:
+        image_path = data.get("image_path", "ChatGPT Image Sep 13, 2026, 01_44_35 PM.png") if isinstance(data, dict) else "ChatGPT Image Sep 13, 2026, 01_44_35 PM.png"
+        
+        try:
+            with open(image_path, "rb") as f:
+                image_base64 = base64.b64encode(f.read()).decode("utf-8")
+        except Exception as e:
+            image_analysis = f"Error reading machine image file: {e}"
+            print(f"✗ Image read failed: {e}")
+
+    if image_base64:
         image_prompt = f"""
 Analyze the industrial machine image.
 
@@ -188,6 +184,8 @@ Do not assume something is visible if it is not.
             print("Evidence-based investigation complete.")
             print("==========================================")
             sys.exit(1)
+    elif not image_analysis:
+        image_analysis = "No image available for visual inspection."
 
 
 

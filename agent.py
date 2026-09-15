@@ -1,6 +1,4 @@
 import requests
-import requests
-
 
 question = input("Enter your question: ")
 
@@ -58,61 +56,19 @@ IMAGE_ANALYSIS
 BOTH
 """
 
+try:
+    response = requests.post(
+        "http://localhost:11434/api/generate",
+        json={
+            "model": "qwen2.5:7b",
+            "prompt": prompt,
+            "stream": False
+        },
+        timeout=30
+    )
+    decision = response.json()["response"].strip()
+    print("\nAGENT DECISION:")
+    print(decision)
+except Exception as e:
+    print(f"\nError communicating with local AI engine: {e}")
 
-response = requests.post(
-    "http://localhost:11434/api/generate",
-    json={
-        "model": "qwen2.5:7b",
-        "prompt": prompt,
-        "stream": False
-    }
-)
-
-
-decision = response.json()["response"].strip()
-
-
-print("\nAGENT DECISION:")
-print(decision)
-question = input("Enter your question: ")
-
-prompt = f"""
-You are the decision-making agent for an industrial AI system.
-
-User question:
-{question}
-
-Decide which tools are needed to answer the question.
-
-Available tools:
-1. MANUAL_SEARCH — search the industrial maintenance documents.
-2. IMAGE_ANALYSIS — inspect the machine image.
-3. BOTH — use both manual and image.
-
-Return ONLY one of:
-MANUAL_SEARCH
-IMAGE_ANALYSIS
-BOTH
-
-Choose:
-- MANUAL_SEARCH when the question is about maintenance procedures,
-  specifications, temperature limits, schedules, or instructions.
-- IMAGE_ANALYSIS when the question requires inspecting something
-  physically visible in the image.
-- BOTH when the question requires both document information
-  and visual inspection.
-"""
-
-response = requests.post(
-    "http://localhost:11434/api/generate",
-    json={
-        "model": "qwen2.5:7b",
-        "prompt": prompt,
-        "stream": False
-    }
-)
-
-decision = response.json()["response"].strip()
-
-print("\nAGENT DECISION:")
-print(decision)
