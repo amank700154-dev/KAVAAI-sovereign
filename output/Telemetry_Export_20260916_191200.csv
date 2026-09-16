@@ -1,6 +1,0 @@
-Parameter,Recorded_Value,SOP_Normal_Band,Unit,Compliance_Status
-Temperature,84,60-80,Celsius,WARNING
-Fan_RPM,1200,1200-1400,RPM,NORMAL
-Coolant_Pressure,2.35,2.0-3.5,bar,NORMAL
-Coolant_Level,68,60-100,Percent,NORMAL
-Radiator_Dust_Coverage,25,0-10,Percent,WARNING
