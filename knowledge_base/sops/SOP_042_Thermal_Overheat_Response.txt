@@ -1,0 +1,26 @@
+STANDARD OPERATING PROCEDURE: SOP-042
+TITLE: Industrial Unit Thermal Overheating Response Protocol
+DOCUMENT ID: SOP-042-REV-3
+APPLICABILITY: All Machine 101 Units and High-Capacity Industrial Cooling Modules
+
+1. PURPOSE & SCOPE
+This standard operating procedure defines mandatory engineering protocols when Machine 101 exhibits thermal variance or exceeds standard operating boundaries.
+
+2. TEMPERATURE BOUNDARIES
+- Optimal Band: 60°C to 75°C
+- Nominal Upper Bound: 80°C
+- Thermal Warning Threshold: > 80°C (Requires Level-1 Operator Intervention)
+- Critical Safety Trip Threshold: > 95°C (Requires Immediate Emergency Stop)
+
+3. STEP-BY-STEP OPERATIONAL RESPONSE
+Phase 1: Warning Band Detection (80°C - 95°C)
+1. Verify Cooling Fan operation: Ensure fan RPM is between 1200 and 1400 RPM.
+2. Inspect intake louvers and radiator grill for dust, lint, or debris obstruction.
+3. Check coolant reservoir fluid level: Must remain between 60% and 100% capacity.
+4. Verify temperature sensor thermocouple calibration using an infrared handheld probe.
+
+Phase 2: Critical Trip Condition (> 95°C)
+1. Press emergency stop circuit immediately.
+2. Isolate main power breaker Q101.
+3. Initiate incident logging in the local compliance portal.
+4. Do not restart without written authorization from the Chief Maintenance Engineer.

@@ -1,0 +1,16 @@
+{
+  "roles": {
+    "REASONING_MODEL": "qwen2.5:7b",
+    "CODING_MODEL": "qwen2.5:7b",
+    "VISION_MODEL": "qwen2.5vl:7b",
+    "EMBEDDING_MODEL": "all-MiniLM-L6-v2"
+  },
+  "ollama": {
+    "host": "http://localhost:11434",
+    "timeout_seconds": 90
+  },
+  "air_gap": {
+    "enforce_local_only": true,
+    "allow_external_wan": false
+  }
+}

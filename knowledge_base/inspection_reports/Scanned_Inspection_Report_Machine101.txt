@@ -1,0 +1,51 @@
+================================================================================
+INDUSTRIAL FACILITY INSPECTION REPORT
+SOVEREIGN COMPLIANCE & SAFETY VERIFICATION
+================================================================================
+REPORT ID: IR-2026-0914-A
+DATE OF INSPECTION: September 14, 2026 (14:30 IST)
+FACILITY: Plant Alpha, Heavy Industrial Machinery Bay 3
+EQUIPMENT TAG: ICU-101-A (Machine 101 - Industrial Cooling Unit)
+MANUFACTURER: Sovereign Heavy Dynamics Corp
+SERIAL NUMBER: SHD-2024-M101-9982
+
+INSPECTION CONDUCTED BY:
+Lead Mechanical Inspector: R. Sharma (Badge: ENG-4421)
+Witnessed By: Plant Safety Officer K. Varma (Badge: SAF-1092)
+
+1. REASON FOR INSPECTION:
+Operator routine shift inspection flagged continuous temperature rise above normal 
+baseline. Shift supervisor requested comprehensive thermal and visual assessment.
+
+2. RECORDED SENSOR TELEMETRY & MEASUREMENTS:
+- Core Operating Temperature: 84.2°C (Warning threshold >80°C exceeded)
+- Primary Ventilation Fan: ACTIVE (Speed: 1240 RPM)
+- Coolant System Pressure: 2.35 bar (Normal operational range: 2.0 - 3.5 bar)
+- Coolant Reservoir Level: 68% (Safe minimum threshold: 60%)
+- Baseline Vibration Index: 0.19 mm/s (Maximum allowable: 0.30 mm/s)
+- Ambient Bay Temperature: 28.5°C
+
+3. PHYSICAL & VISUAL INSPECTION OBSERVATIONS:
+- Ventilation Fan Assembly: Casing intact. Fan motor rotating at 1240 RPM. No 
+  audible bearing squeal or mechanical imbalance detected.
+- Radiator Louvers & Intake Grill: Visual inspection reveals moderate lint and 
+  industrial airborne dust accumulation covering approximately 20% to 30% of the 
+  radiator surface area. Airflow intake is partially restricted.
+- Coolant Hoses & Seals: Zero visible leakage, drips, or pressure weeping along 
+  primary or secondary delivery loops.
+- Thermocouple / Sensor Well: Thermocouple securely seated in thermowell; verified 
+  against handheld thermal probe (probe reading: 84.0°C).
+
+4. INITIAL FIELD ASSESSMENT:
+The thermal variance (84.2°C vs nominal 80°C limit) is directly correlated with 
+restricted convective heat dissipation due to 20-30% radiator fin dust coverage. 
+Cooling fan RPM (1240 RPM) and coolant fluid reserves (68%) remain within safe 
+parameters per equipment specifications.
+
+5. INSPECTOR RECOMMENDATION:
+Request Chief Maintenance Engineer review findings against SOP-042 and issue an 
+official Engineering Approval Note for continued conditional operation pending 
+scheduled cleaning of radiator fins within 48 hours.
+
+INSPECTOR SIGNATURE: [Signed: R. Sharma, Lead Inspector ENG-4421]
+================================================================================
