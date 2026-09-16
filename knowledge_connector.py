@@ -158,6 +158,8 @@ class KnowledgeConnector:
         - Category
         Does NOT expose raw database internals or embeddings.
         """
+        import time
+        t0 = time.time()
         collection = self._get_collection()
         if collection.count() == 0:
             # Auto-seed with default manual if empty
@@ -221,6 +223,19 @@ class KnowledgeConnector:
                 "relevant_evidence": clean_text.strip(),
                 "citation": f"[Source: {source_file} | Page: {page_num} | Match: {sim_pct}%]"
             })
+
+        try:
+            from sovereignty_monitor import get_monitor
+            dur_ms = round((time.time() - t0) * 1000, 2)
+            get_monitor().record_rag_op(
+                query=query,
+                top_k=top_k,
+                chunks_retrieved=len(evidence_list),
+                collection=self.collection_name,
+                latency_ms=dur_ms
+            )
+        except Exception:
+            pass
 
         return evidence_list
 

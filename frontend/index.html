@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Industrial AI Control Center</title>
+    <title>KAVAAI Sovereign - Industrial AI Workbench</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,287 +12,897 @@
     <!-- TOP HEADER -->
     <header class="main-header">
         <div class="header-left">
-            <h1>INDUSTRIAL AI</h1>
-            <div class="subtitle">INTELLIGENT MACHINE INVESTIGATION</div>
+            <div class="brand-badge">SIH26117 AIR-GAPPED WORKBENCH</div>
+            <h1>KAVAAI SOVEREIGN</h1>
+            <div class="subtitle">INDUSTRIAL AI CONTROL CENTER &bull; ON-PREMISE MACHINE INVESTIGATION</div>
         </div>
         <div class="header-right">
-            <div class="machine-label">MACHINE 101</div>
+            <div class="machine-label">ASSET: MACHINE 101</div>
             <div class="system-status-indicator">
-                <span class="sys-stat" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.08); color: var(--green);"><span class="pulse-dot green"></span> AIR-GAP: VERIFIED (0 WAN)</span>
-                <span class="sys-stat" id="stat-model-router" style="border-color: rgba(0, 217, 255, 0.4); background: rgba(0, 217, 255, 0.08); color: var(--cyan);"><span class="pulse-dot"></span> MODEL ROUTER: SOVEREIGN</span>
-                <span class="sys-stat"><span class="pulse-dot"></span> SYSTEM ONLINE</span>
-                <span class="sys-stat"><span class="pulse-dot"></span> TELEMETRY CONNECTED</span>
-                <span class="sys-stat"><span class="pulse-dot"></span> AI ENGINE READY</span>
-                <span class="sys-stat"><span class="pulse-dot"></span> INVESTIGATION READY</span>
+                <span class="sys-stat" id="stat-airgap" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.08); color: var(--green);"><span class="pulse-dot green"></span> AIR-GAP: VERIFIED (0 WAN)</span>
+                <span class="sys-stat" id="stat-model-router" style="border-color: rgba(0, 217, 255, 0.4); background: rgba(0, 217, 255, 0.08); color: var(--cyan);"><span class="pulse-dot"></span> ROUTER: LOCAL QWEN2.5</span>
+                <span class="sys-stat" id="stat-system-online"><span class="pulse-dot green"></span> LOCAL LOOPBACK (127.0.0.1)</span>
             </div>
         </div>
     </header>
 
-    <!-- 3-COLUMN MONITORING LAYOUT -->
-    <section class="monitoring-grid">
-        
-        <!-- LEFT: MACHINE HEALTH & ALERTS -->
-        <div class="monitoring-panel left-panel">
-            <div class="panel-header">MACHINE HEALTH</div>
-            <div class="health-container">
-                <div class="health-circle">
-                    <svg viewBox="0 0 100 100">
-                        <circle class="bg-circle" cx="50" cy="50" r="45"></circle>
-                        <circle class="progress-circle" id="health-progress" cx="50" cy="50" r="45"></circle>
-                    </svg>
-                    <div class="health-value"><span id="health-score-val">100</span><span class="percent">%</span></div>
-                </div>
-                <div class="health-score-label">HEALTH SCORE</div>
-                <div class="health-status" id="health-status-text">NORMAL</div>
+    <!-- PRIMARY WORKBENCH NAVIGATION -->
+    <nav class="workbench-nav" id="workbenchNav">
+        <button class="nav-tab active" data-tab="overview">
+            <span class="nav-tab-icon">📊</span>
+            <span class="nav-tab-text">1. Overview</span>
+        </button>
+        <button class="nav-tab" data-tab="agent">
+            <span class="nav-tab-icon">⚡</span>
+            <span class="nav-tab-text">2. Agent Workspace</span>
+        </button>
+        <button class="nav-tab" data-tab="documents">
+            <span class="nav-tab-icon">📄</span>
+            <span class="nav-tab-text">3. Documents</span>
+        </button>
+        <button class="nav-tab" data-tab="knowledge">
+            <span class="nav-tab-icon">🧠</span>
+            <span class="nav-tab-text">4. Knowledge Base</span>
+        </button>
+        <button class="nav-tab" data-tab="vision">
+            <span class="nav-tab-icon">👁️</span>
+            <span class="nav-tab-text">5. Vision</span>
+        </button>
+        <button class="nav-tab" data-tab="codelab">
+            <span class="nav-tab-icon">💻</span>
+            <span class="nav-tab-text">6. Code Lab</span>
+        </button>
+        <button class="nav-tab" data-tab="deliverables">
+            <span class="nav-tab-icon">📦</span>
+            <span class="nav-tab-text">7. Deliverables</span>
+        </button>
+        <button class="nav-tab" data-tab="security">
+            <span class="nav-tab-icon">🛡️</span>
+            <span class="nav-tab-text">8. Security Monitor</span>
+        </button>
+    </nav>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 1: OVERVIEW -->
+    <!-- ==================================================================== -->
+    <div class="tab-pane active" id="pane-overview">
+        <!-- SYSTEM STATE SUMMARY BAR -->
+        <div class="sys-summary-ribbon">
+            <div class="ribbon-card">
+                <div class="ribbon-label">LOCAL AI ENGINE</div>
+                <div class="ribbon-val" id="ov-ai-status">OLLAMA / SOVEREIGN</div>
+                <div class="ribbon-sub" id="ov-ai-sub">Local Inference Ready</div>
             </div>
-
-            <div class="panel-header mt-auto">SYSTEM STATUS</div>
-            <ul class="system-status-list">
-                <li><span class="status-dot green"></span> SYSTEM ONLINE</li>
-                <li><span class="status-dot green"></span> AI READY</li>
-                <li><span class="status-dot green"></span> MACHINE ONLINE</li>
-            </ul>
-
-            <div class="panel-header mt-30">SYSTEM ALERTS</div>
-            <div class="alerts-panel" id="alertsPanel">
-                <div class="alert-box alert-normal">
-                    <div class="alert-title">NORMAL</div>
-                    <div class="alert-desc">Machine operating within expected temperature range.</div>
-                </div>
+            <div class="ribbon-card">
+                <div class="ribbon-label">ACTIVE REASONING MODEL</div>
+                <div class="ribbon-val text-cyan" id="ov-active-model">qwen2.5:7b</div>
+                <div class="ribbon-sub">Coding: qwen2.5 | Vision: qwen2.5vl</div>
+            </div>
+            <div class="ribbon-card">
+                <div class="ribbon-label">RAG / CHROMADB STATUS</div>
+                <div class="ribbon-val text-green" id="ov-rag-status">22 CHUNKS INDEXED</div>
+                <div class="ribbon-sub">all-MiniLM-L6-v2 Embeddings</div>
+            </div>
+            <div class="ribbon-card">
+                <div class="ribbon-label">HOST &amp; GPU COMPUTE</div>
+                <div class="ribbon-val text-green" id="ov-gpu-status">GPU ACTIVE</div>
+                <div class="ribbon-sub" id="ov-compute-sub">NVIDIA RTX 3050 &bull; 12 CPU Cores</div>
+            </div>
+            <div class="ribbon-card">
+                <div class="ribbon-label">KNOWLEDGE BASE FILES</div>
+                <div class="ribbon-val text-cyan" id="ov-kb-files">4 CONFIDENTIAL DOCS</div>
+                <div class="ribbon-sub">SOPs, Manuals, Inspection Reports</div>
+            </div>
+            <div class="ribbon-card">
+                <div class="ribbon-label">SOVEREIGNTY STATUS</div>
+                <div class="ribbon-val text-green" id="ov-sov-status">APP GUARD ENFORCED</div>
+                <div class="ribbon-sub">0 WAN Calls &bull; Loopback Only</div>
             </div>
         </div>
 
-        <!-- CENTER: DIGITAL TWIN -->
-        <div class="monitoring-panel center-panel">
-            <div class="dt-scene">
-                <div class="dt-grid-floor"></div>
+        <!-- 3-COLUMN MONITORING LAYOUT -->
+        <section class="monitoring-grid">
+            <!-- LEFT: MACHINE HEALTH & ALERTS -->
+            <div class="monitoring-panel left-panel">
+                <div class="panel-header">MACHINE HEALTH</div>
+                <div class="health-container">
+                    <div class="health-circle">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="bg-circle" cx="50" cy="50" r="45"></circle>
+                            <circle class="progress-circle" id="health-progress" cx="50" cy="50" r="45"></circle>
+                        </svg>
+                        <div class="health-value"><span id="health-score-val">100</span><span class="percent">%</span></div>
+                    </div>
+                    <div class="health-score-label">HEALTH SCORE</div>
+                    <div class="health-status" id="health-status-text">NORMAL</div>
+                </div>
+
+                <div class="panel-header mt-auto">SYSTEM STATUS</div>
+                <ul class="system-status-list">
+                    <li><span class="status-dot green"></span> SYSTEM ONLINE</li>
+                    <li><span class="status-dot green"></span> AI READY</li>
+                    <li><span class="status-dot green"></span> MACHINE ONLINE</li>
+                </ul>
+
+                <div class="panel-header mt-30">SYSTEM ALERTS</div>
+                <div class="alerts-panel" id="alertsPanel">
+                    <div class="alert-box alert-normal">
+                        <div class="alert-title">NORMAL</div>
+                        <div class="alert-desc">Machine operating within expected temperature range.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CENTER: DIGITAL TWIN -->
+            <div class="monitoring-panel center-panel">
+                <div class="dt-scene">
+                    <div class="dt-grid-floor"></div>
+                    <div class="dt-machine-3d">
+                        <div class="m-base"></div>
+                        <div class="m-core interactive-comp" id="comp-main" data-comp="Main Unit" data-tel="status">
+                            <div class="m-panel-front">
+                                <div class="m-vent"></div>
+                                <div class="m-vent"></div>
+                                <div class="m-vent"></div>
+                            </div>
+                            <div class="m-panel-side"></div>
+                        </div>
+                        <div class="m-sensor interactive-comp" id="comp-temp" data-comp="Temperature Sensor" data-tel="temperature">
+                            <div class="sensor-dot"></div>
+                        </div>
+                        <div class="m-fan-housing interactive-comp" id="comp-fan" data-comp="Cooling Fan" data-tel="fan">
+                            <div class="m-fan-blade" id="dt-fan"></div>
+                        </div>
+                        <div class="m-pipe pipe-left interactive-comp" id="comp-coolant" data-comp="Coolant System" data-tel="coolant"></div>
+                        <div class="m-pipe pipe-right interactive-comp" id="comp-pressure" data-comp="Pressure System" data-tel="pressure"></div>
+                        <div class="dt-scanner-ring"></div>
+                        <div class="status-light" id="dt-status-light"></div>
+                        <div class="machine-scan-line"></div>
+                    </div>
+
+                    <div class="dt-overlay-labels">
+                        <div class="dt-title">MACHINE 101</div>
+                        <div class="dt-sub">INDUSTRIAL COOLING UNIT</div>
+                        <div class="dt-id">ID: 101-A</div>
+                    </div>
+
+                    <div class="component-inspection-panel" id="inspectionPanel">
+                        <div id="inspection-empty">
+                            <div class="ins-title">COMPONENT INSPECTION</div>
+                            <div class="ins-empty-text">SELECT A MACHINE COMPONENT</div>
+                        </div>
+                        <div id="inspection-data" class="hidden">
+                            <div class="ins-title">COMPONENT INSPECTION</div>
+                            <div class="ins-row">
+                                <span class="ins-label">COMPONENT</span>
+                                <span class="ins-val text-cyan" id="ins-comp-name">--</span>
+                            </div>
+                            <div class="ins-row">
+                                <span class="ins-label">STATUS</span>
+                                <span class="ins-val text-green" id="ins-comp-status">--</span>
+                            </div>
+                            <div class="ins-row">
+                                <span class="ins-label">VALUE</span>
+                                <span class="ins-val" id="ins-comp-value">--</span>
+                            </div>
+                            <button class="ins-btn" id="ins-ask-btn">AUTO-FILL INVESTIGATION</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: LIVE TELEMETRY -->
+            <div class="monitoring-panel right-panel">
+                <div class="panel-header" id="tel-header-title">LIVE TELEMETRY</div>
+                <div class="telemetry-grid">
+                    <div class="telemetry-card">
+                        <div class="tel-label">TEMPERATURE</div>
+                        <div class="tel-value" id="tel-temp">--&deg;C</div>
+                    </div>
+                    <div class="telemetry-card">
+                        <div class="tel-label">RPM</div>
+                        <div class="tel-value" id="tel-rpm">--</div>
+                    </div>
+                    <div class="telemetry-card">
+                        <div class="tel-label">PRESSURE</div>
+                        <div class="tel-value"><span id="tel-pressure">--</span> <span class="unit">bar</span></div>
+                    </div>
+                    <div class="telemetry-card">
+                        <div class="tel-label">COOLANT</div>
+                        <div class="tel-value"><span id="tel-coolant">--</span>%</div>
+                    </div>
+                    <div class="telemetry-card">
+                        <div class="tel-label">VIBRATION</div>
+                        <div class="tel-value text-cyan" id="tel-vibration">--</div>
+                    </div>
+                    <div class="telemetry-card">
+                        <div class="tel-label">FAN</div>
+                        <div class="tel-value text-cyan" id="tel-fan">--</div>
+                    </div>
+                </div>
+
+                <div class="panel-header mt-auto">RECENT ACTIVITY</div>
+                <div class="activity-log" id="activityLog">
+                    <div class="activity-item">
+                        <div class="act-time">Just now</div>
+                        <div class="act-desc">System initialized</div>
+                    </div>
+                </div>
+
+                <div class="panel-header mt-30" style="display:flex; justify-content:space-between; align-items:center;">
+                    DEMO MODE
+                    <span id="demo-indicator" style="font-size:9px; color:var(--text-secondary); letter-spacing:1px; display:none;">SIMULATED TELEMETRY</span>
+                </div>
+                <div class="sim-controls">
+                    <button class="sim-btn active" id="sim-live">LIVE</button>
+                    <button class="sim-btn" id="sim-normal">NORMAL</button>
+                    <button class="sim-btn" id="sim-warning">WARN</button>
+                    <button class="sim-btn" id="sim-critical">CRIT</button>
+                </div>
                 
-                <div class="dt-machine-3d">
-                    <!-- Machine Base -->
-                    <div class="m-base"></div>
-                    <!-- Machine Core / Body (Main Unit / Temp Sensor area) -->
-                    <div class="m-core interactive-comp" id="comp-main" data-comp="Main Unit" data-tel="status">
-                        <div class="m-panel-front">
-                            <div class="m-vent"></div>
-                            <div class="m-vent"></div>
-                            <div class="m-vent"></div>
+                <div class="demo-actions" style="display:flex; gap:10px; margin-top:10px;">
+                    <button id="btn-start-demo" style="flex:1; height:35px; font-size:12px; padding:0;">START DEMO INCIDENT</button>
+                    <button id="btn-reset-demo" style="flex:1; height:35px; font-size:12px; padding:0; background:transparent; border-color:var(--text-secondary); color:var(--text-secondary);">RESET DEMO</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MAINTENANCE & TIMELINE AREA -->
+        <section class="maintenance-area" style="margin-top: 20px;">
+            <div class="maintenance-grid">
+                <div class="maint-panel">
+                    <div class="panel-header">MAINTENANCE RISK ASSESSMENT</div>
+                    <div class="maint-status-row">
+                        <div class="maint-box">
+                            <div class="maint-label">MAINTENANCE STATUS</div>
+                            <div class="maint-value" id="maint-status">READY</div>
                         </div>
-                        <div class="m-panel-side"></div>
-                    </div>
-                    <!-- Temperature Sensor -->
-                    <div class="m-sensor interactive-comp" id="comp-temp" data-comp="Temperature Sensor" data-tel="temperature">
-                        <div class="sensor-dot"></div>
-                    </div>
-                    <!-- Cooling Fan on top -->
-                    <div class="m-fan-housing interactive-comp" id="comp-fan" data-comp="Cooling Fan" data-tel="fan">
-                        <div class="m-fan-blade" id="dt-fan"></div>
-                    </div>
-                    
-                    <!-- Pipes -->
-                    <div class="m-pipe pipe-left interactive-comp" id="comp-coolant" data-comp="Coolant System" data-tel="coolant"></div>
-                    <div class="m-pipe pipe-right interactive-comp" id="comp-pressure" data-comp="Pressure System" data-tel="pressure"></div>
-                    
-                    <!-- Scanner and effects -->
-                    <div class="dt-scanner-ring"></div>
-                    <div class="status-light" id="dt-status-light"></div>
-                    <div class="machine-scan-line"></div>
-                </div>
-
-                <div class="dt-overlay-labels">
-                    <div class="dt-title">MACHINE 101</div>
-                    <div class="dt-sub">INDUSTRIAL COOLING UNIT</div>
-                    <div class="dt-id">ID: 101-A</div>
-                </div>
-
-                <div class="component-inspection-panel" id="inspectionPanel">
-                    <div id="inspection-empty">
-                        <div class="ins-title">COMPONENT INSPECTION</div>
-                        <div class="ins-empty-text">SELECT A MACHINE COMPONENT</div>
-                    </div>
-                    <div id="inspection-data" class="hidden">
-                        <div class="ins-title">COMPONENT INSPECTION</div>
-                        <div class="ins-row">
-                            <span class="ins-label">COMPONENT</span>
-                            <span class="ins-val text-cyan" id="ins-comp-name">--</span>
+                        <div class="maint-box">
+                            <div class="maint-label">RISK LEVEL</div>
+                            <div class="maint-value text-green" id="maint-risk">LOW</div>
                         </div>
-                        <div class="ins-row">
-                            <span class="ins-label">STATUS</span>
-                            <span class="ins-val text-green" id="ins-comp-status">--</span>
+                    </div>
+                    <div class="maint-action-box">
+                        <div class="maint-label">NEXT ACTION</div>
+                        <div class="maint-action-text" id="maint-action">Continue routine monitoring and scheduled maintenance.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-panel">
+                    <div class="panel-header">MACHINE EVENT TIMELINE</div>
+                    <div class="timeline-container" id="eventTimeline">
+                        <!-- Events injected dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 2: AGENT WORKSPACE -->
+    <!-- ==================================================================== -->
+    <div class="tab-pane" id="pane-agent">
+        <section class="investigation-area">
+            <div class="inv-header">
+                <h2>AGENTIC ORCHESTRATION WORKSPACE</h2>
+                <div class="inv-subtitle">Autonomous multi-source evidence reasoning, SOP cross-checking &amp; deliverable synthesis</div>
+            </div>
+
+            <div class="inv-layout-grid">
+                <!-- LEFT: CONSOLE, PIPELINE & AGENT PLAN -->
+                <div class="inv-left-col">
+                    <div class="inv-console">
+                        <div class="prompt-chips">
+                            <span class="chip-label">QUICK PROMPTS:</span>
+                            <button class="chip-btn" data-prompt="Analyze this inspection report, identify important findings, retrieve the relevant local SOP/manual information, assess the findings using available evidence, and generate an approval note.">Killer Workflow (Approval Note)</button>
+                            <button class="chip-btn" data-prompt="Write a Python program to analyze this CSV and calculate maintenance statistics.">CSV Maintenance Code</button>
+                            <button class="chip-btn" data-prompt="Is Machine 101 overheating? Compare current temperature telemetry with SOP-042 threshold limits.">Overheating vs SOP-042</button>
                         </div>
-                        <div class="ins-row">
-                            <span class="ins-label">VALUE</span>
-                            <span class="ins-val" id="ins-comp-value">--</span>
+                        
+                        <textarea id="question" placeholder="Ask a question about Machine 101 or analyze an inspection report...&#10;Example: Analyze this inspection report, identify important findings, retrieve the relevant local SOP/manual information, assess the findings using available evidence, and generate an approval note."></textarea>
+                        
+                        <button id="investigateBtn">
+                            <span class="btn-text">RUN AGENT INVESTIGATION</span>
+                        </button>
+                        
+                        <div class="upload-bar" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:10px;">
+                            <label class="btn-upload" style="background:rgba(16,42,77,0.8); border:1px solid var(--border-cyan); padding:8px 14px; border-radius:4px; font-family:var(--font-mono); font-size:11px; cursor:pointer; color:var(--cyan); display:inline-flex; align-items:center; gap:6px;">
+                                <input type="file" id="reportUploadInput" accept=".pdf,.png,.jpg,.jpeg,.txt,.docx,.csv" style="display:none;">
+                                <span>📄 UPLOAD CONFIDENTIAL REPORT / CSV</span>
+                            </label>
+                            <span id="currentReportBadge" style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); background:rgba(255,255,255,0.04); padding:6px 12px; border-radius:4px; border:1px solid var(--border-color);">
+                                Active Doc: <strong>Scanned_Inspection_Report_Machine101.pdf</strong>
+                            </span>
                         </div>
-                        <button class="ins-btn" id="ins-ask-btn">AUTO-FILL INVESTIGATION</button>
+
+                        <button id="btn-primary-demo" style="margin-top:10px; width:100%; height:40px; background:linear-gradient(135deg, rgba(0, 217, 255, 0.22), rgba(16, 185, 129, 0.22)); border:1px solid var(--cyan); color:#ffffff; font-family:var(--font-heading); font-size:13px; font-weight:700; letter-spacing:1px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                            ⚡ PRIMARY DEMO: ANALYZE SCANNED REPORT &amp; PREPARE APPROVAL NOTE
+                        </button>
+                        <button id="btn-secondary-demo" style="margin-top:8px; width:100%; height:38px; background:linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(59, 130, 246, 0.22)); border:1px solid #a855f7; color:#ffffff; font-family:var(--font-heading); font-size:12px; font-weight:700; letter-spacing:1px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                            ⚡ SECONDARY DEMO: WRITE PYTHON PROGRAM &amp; ANALYZE CSV STATISTICS
+                        </button>
+                    </div>
+
+                    <!-- REAL AGENT EXECUTION PLAN CHECKLIST -->
+                    <div class="agent-live-plan-card">
+                        <div class="plan-card-header">
+                            <span class="plan-title">REAL AGENT EXECUTION PLAN</span>
+                            <span class="plan-status-badge" id="planOverallStatus">STANDBY</span>
+                        </div>
+                        <div class="plan-steps-list" id="planStepsContainer">
+                            <div class="plan-step-row" id="pstep-1">
+                                <span class="step-indicator">○</span>
+                                <span class="step-num">Step 1</span>
+                                <span class="step-desc">Ingest &amp; parse confidential document (Scanned Inspection Report)</span>
+                                <span class="step-tool-badge">READ_FILE</span>
+                            </div>
+                            <div class="plan-step-row" id="pstep-2">
+                                <span class="step-indicator">○</span>
+                                <span class="step-num">Step 2</span>
+                                <span class="step-desc">Perform local OCR &amp; analyze physical component images</span>
+                                <span class="step-tool-badge">OCR / VISION</span>
+                            </div>
+                            <div class="plan-step-row" id="pstep-3">
+                                <span class="step-indicator">○</span>
+                                <span class="step-num">Step 3</span>
+                                <span class="step-desc">Query organizational knowledge base for SOP thresholds &amp; limits</span>
+                                <span class="step-tool-badge">SEARCH_KB</span>
+                            </div>
+                            <div class="plan-step-row" id="pstep-4">
+                                <span class="step-indicator">○</span>
+                                <span class="step-num">Step 4</span>
+                                <span class="step-desc">Synthesize evidence &amp; execute AST safe mathematical verification</span>
+                                <span class="step-tool-badge">EXEC_PYTHON</span>
+                            </div>
+                            <div class="plan-step-row" id="pstep-5">
+                                <span class="step-indicator">○</span>
+                                <span class="step-num">Step 5</span>
+                                <span class="step-desc">Generate official Approval Note DOCX &amp; verify structural schema</span>
+                                <span class="step-tool-badge">GENERATE_DOCX</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PIPELINE VISUAL NODES (PRESERVED) -->
+                    <div class="pipeline-container">
+                        <div class="pipe-node" id="node-agent">
+                            <div class="node-circle">01</div>
+                            <div class="node-label">AGENT</div>
+                            <div class="node-status">WAITING</div>
+                        </div>
+                        <div class="pipe-connector" id="conn-1"></div>
+                        <div class="pipe-node" id="node-manual">
+                            <div class="node-circle">02</div>
+                            <div class="node-label">MANUAL</div>
+                            <div class="node-status">WAITING</div>
+                        </div>
+                        <div class="pipe-connector" id="conn-2"></div>
+                        <div class="pipe-node" id="node-vision">
+                            <div class="node-circle">03</div>
+                            <div class="node-label">VISION</div>
+                            <div class="node-status">WAITING</div>
+                        </div>
+                        <div class="pipe-connector" id="conn-3"></div>
+                        <div class="pipe-node" id="node-fusion">
+                            <div class="node-circle">04</div>
+                            <div class="node-label">FUSION</div>
+                            <div class="node-status">WAITING</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: EXECUTION METADATA & HISTORY -->
+                <div class="inv-right-col">
+                    <!-- MODEL SELECTED CARD -->
+                    <div class="exec-info-card" id="cardModelSelected">
+                        <div class="exec-card-title">MODEL SELECTED</div>
+                        <div class="exec-card-grid">
+                            <div class="exec-item">
+                                <span class="exec-label">TASK TYPE:</span>
+                                <span class="exec-val text-cyan" id="execTaskType">MULTIMODAL_INVESTIGATION</span>
+                            </div>
+                            <div class="exec-item">
+                                <span class="exec-label">TARGET ROLE:</span>
+                                <span class="exec-val" id="execTargetRole">REASONING_MODEL</span>
+                            </div>
+                            <div class="exec-item">
+                                <span class="exec-label">SELECTED MODEL:</span>
+                                <span class="exec-val text-green" id="execSelectedModel">qwen2.5:7b</span>
+                            </div>
+                            <div class="exec-item">
+                                <span class="exec-label">EXECUTION:</span>
+                                <span class="exec-val text-green" id="execExecutionMode">LOCAL AIR-GAPPED</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TOOLS USED CARD -->
+                    <div class="exec-info-card" id="cardToolsUsed">
+                        <div class="exec-card-title">TOOLS USED</div>
+                        <div class="tools-used-list" id="toolsUsedList">
+                            <div class="tool-tag">READ_FILE</div>
+                            <div class="tool-tag">SEARCH_KNOWLEDGE_BASE</div>
+                            <div class="tool-tag">OCR_DOCUMENT</div>
+                            <div class="tool-tag">ANALYZE_IMAGE</div>
+                            <div class="tool-tag">GENERATE_APPROVAL_NOTE</div>
+                            <div class="tool-tag">VERIFY_FILE</div>
+                        </div>
+                    </div>
+
+                    <!-- INVESTIGATION HISTORY -->
+                    <div class="panel-header">INVESTIGATION HISTORY</div>
+                    <div class="history-list" id="historyList">
+                        <div class="history-empty">No previous investigations</div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- RIGHT: LIVE TELEMETRY -->
-        <div class="monitoring-panel right-panel">
-            <div class="panel-header" id="tel-header-title">LIVE TELEMETRY</div>
-            
-            <div class="telemetry-grid">
-                <div class="telemetry-card">
-                    <div class="tel-label">TEMPERATURE</div>
-                    <div class="tel-value" id="tel-temp">--&deg;C</div>
-                </div>
-                <div class="telemetry-card">
-                    <div class="tel-label">RPM</div>
-                    <div class="tel-value" id="tel-rpm">--</div>
-                </div>
-                <div class="telemetry-card">
-                    <div class="tel-label">PRESSURE</div>
-                    <div class="tel-value"><span id="tel-pressure">--</span> <span class="unit">bar</span></div>
-                </div>
-                <div class="telemetry-card">
-                    <div class="tel-label">COOLANT</div>
-                    <div class="tel-value"><span id="tel-coolant">--</span>%</div>
-                </div>
-                <div class="telemetry-card">
-                    <div class="tel-label">VIBRATION</div>
-                    <div class="tel-value text-cyan" id="tel-vibration">--</div>
-                </div>
-                <div class="telemetry-card">
-                    <div class="tel-label">FAN</div>
-                    <div class="tel-value text-cyan" id="tel-fan">--</div>
-                </div>
-            </div>
-
-            <div class="panel-header mt-auto">RECENT ACTIVITY</div>
-            <div class="activity-log" id="activityLog">
-                <div class="activity-item">
-                    <div class="act-time">Just now</div>
-                    <div class="act-desc">System initialized</div>
-                </div>
-            </div>
-
-            <div class="panel-header mt-30" style="display:flex; justify-content:space-between; align-items:center;">
-                DEMO MODE
-                <span id="demo-indicator" style="font-size:9px; color:var(--text-secondary); letter-spacing:1px; display:none;">SIMULATED TELEMETRY</span>
-            </div>
-            <div class="sim-controls">
-                <button class="sim-btn active" id="sim-live">LIVE</button>
-                <button class="sim-btn" id="sim-normal">NORMAL</button>
-                <button class="sim-btn" id="sim-warning">WARN</button>
-                <button class="sim-btn" id="sim-critical">CRIT</button>
-            </div>
-            
-            <div class="demo-actions" style="display:flex; gap:10px; margin-top:10px;">
-                <button id="btn-start-demo" style="flex:1; height:35px; font-size:12px; padding:0;">START DEMO INCIDENT</button>
-                <button id="btn-reset-demo" style="flex:1; height:35px; font-size:12px; padding:0; background:transparent; border-color:var(--text-secondary); color:var(--text-secondary);">RESET DEMO</button>
-            </div>
-        </div>
-
-    </section>
-
-    <!-- INVESTIGATION AREA -->
-    <section class="investigation-area">
-        <div class="inv-header">
-            <h2>AI INVESTIGATION</h2>
-            <div class="inv-subtitle">Evidence-based investigation of Machine 101</div>
-        </div>
-
-        <div class="inv-layout-grid">
-            <!-- LEFT: CONSOLE & PIPELINE -->
-            <div class="inv-left-col">
-                <div class="inv-console">
-                    <textarea id="question" placeholder="Ask a question about Machine 101...&#10;Example: Is Machine 101 overheating?"></textarea>
-                    <button id="investigateBtn">
-                        <span class="btn-text">RUN INVESTIGATION</span>
-                    </button>
-                </div>
-
-                <!-- INVESTIGATION PIPELINE -->
-                <div class="pipeline-container">
-                    <div class="pipe-node" id="node-agent">
-                        <div class="node-circle">01</div>
-                        <div class="node-label">AGENT</div>
-                        <div class="node-status">WAITING</div>
-                    </div>
-                    <div class="pipe-connector" id="conn-1"></div>
-                    <div class="pipe-node" id="node-manual">
-                        <div class="node-circle">02</div>
-                        <div class="node-label">MANUAL</div>
-                        <div class="node-status">WAITING</div>
-                    </div>
-                    <div class="pipe-connector" id="conn-2"></div>
-                    <div class="pipe-node" id="node-vision">
-                        <div class="node-circle">03</div>
-                        <div class="node-label">VISION</div>
-                        <div class="node-status">WAITING</div>
-                    </div>
-                    <div class="pipe-connector" id="conn-3"></div>
-                    <div class="pipe-node" id="node-fusion">
-                        <div class="node-circle">04</div>
-                        <div class="node-label">FUSION</div>
-                        <div class="node-status">WAITING</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- RIGHT: HISTORY -->
-            <div class="inv-right-col">
-                <div class="panel-header">INVESTIGATION HISTORY</div>
-                <div class="history-list" id="historyList">
-                    <div class="history-empty">No previous investigations</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- RESULT AREA -->
-        <div id="aiResult" class="hidden">
-            <!-- Dynamically injected -->
-        </div>
-
-        <!-- INCIDENT REPORT AREA -->
-        <div id="incidentReportContainer" class="hidden">
-            <div class="report-header">
-                <h3>INCIDENT REPORT</h3>
-                <button id="btn-export-report" class="btn-small">EXPORT REPORT (TXT)</button>
-            </div>
-            <div id="incidentReportContent" class="report-content">
+            <!-- RESULT AREA -->
+            <div id="aiResult" class="hidden">
                 <!-- Dynamically injected -->
             </div>
-        </div>
-    </section>
 
-    <!-- MAINTENANCE & TIMELINE AREA -->
-    <section class="maintenance-area">
-        <div class="maintenance-grid">
-            
-            <!-- MAINTENANCE INTELLIGENCE -->
-            <div class="maint-panel">
-                <div class="panel-header">MAINTENANCE RISK ASSESSMENT</div>
-                
-                <div class="maint-status-row">
-                    <div class="maint-box">
-                        <div class="maint-label">MAINTENANCE STATUS</div>
-                        <div class="maint-value" id="maint-status">READY</div>
-                    </div>
-                    <div class="maint-box">
-                        <div class="maint-label">RISK LEVEL</div>
-                        <div class="maint-value text-green" id="maint-risk">LOW</div>
-                    </div>
+            <!-- INCIDENT REPORT AREA -->
+            <div id="incidentReportContainer" class="hidden">
+                <div class="report-header">
+                    <h3>INCIDENT REPORT</h3>
+                    <button id="btn-export-report" class="btn-small">EXPORT REPORT (TXT)</button>
                 </div>
-                
-                <div class="maint-action-box">
-                    <div class="maint-label">NEXT ACTION</div>
-                    <div class="maint-action-text" id="maint-action">Continue routine monitoring and scheduled maintenance.</div>
+                <div id="incidentReportContent" class="report-content">
+                    <!-- Dynamically injected -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 3: DOCUMENTS -->
+    <!-- ==================================================================== -->
+    <div class="tab-pane" id="pane-documents">
+        <div class="workbench-section-header">
+            <div>
+                <h2>CONFIDENTIAL DOCUMENT INTELLIGENCE</h2>
+                <div class="section-subtitle">Local on-premise parsing, OCR transcription &amp; vector ingestion</div>
+            </div>
+            <button class="btn-action-primary" id="btnRefreshDocs">🔄 REFRESH REPOSITORY</button>
+        </div>
+
+        <div class="workbench-grid-2col">
+            <!-- LEFT: DOCUMENT REPOSITORY TABLE -->
+            <div class="wb-panel">
+                <div class="panel-header">INDEXED DOCUMENT REPOSITORY</div>
+                <div class="table-scroll-container">
+                    <table class="wb-table" id="tableDocs">
+                        <thead>
+                            <tr>
+                                <th>FILENAME</th>
+                                <th>CATEGORY</th>
+                                <th>FORMAT</th>
+                                <th>SIZE</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="docsTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:20px; color:var(--text-secondary);">Loading confidential documents...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- EVENT TIMELINE -->
-            <div class="timeline-panel">
-                <div class="panel-header">MACHINE EVENT TIMELINE</div>
-                <div class="timeline-container" id="eventTimeline">
-                    <!-- Events injected dynamically -->
+            <!-- RIGHT: DOCUMENT INSPECTOR & INGESTION -->
+            <div class="wb-panel">
+                <div class="panel-header">DOCUMENT INSPECTION &amp; PARSER PREVIEW</div>
+                <div class="doc-inspect-box">
+                    <div class="doc-inspect-header">
+                        <span id="inspectDocName">Scanned_Inspection_Report_Machine101.pdf</span>
+                        <span class="badge-status-ok" id="inspectDocStatus">PARSED &amp; INDEXED</span>
+                    </div>
+                    <div class="doc-inspect-meta" id="inspectDocMeta">
+                        Category: INSPECTION_REPORTS &bull; Pages: 1 &bull; Local OCR: Verified
+                    </div>
+                    <div class="doc-inspect-content" id="inspectDocContent">
+[CONFIDENTIAL INDUSTRIAL FIELD INSPECTION REPORT]
+REPORT ID: IR-2026-0914-A
+MACHINE UNIT: Machine 101 (Tag: ICU-101-A)
+PRIMARY DEFECT FINDINGS:
+1. Core Operating Temperature: 84.2°C during full shift. Exceeds standard operating envelope.
+2. Cooling Fan Tachometer: Measured 1240 RPM. Fan blade structure intact.
+3. Air intake louvers and radiator grill show 20-30% lint and airborne dust accumulation.
+4. Coolant reservoir level confirmed at 68% capacity.
+RECOMMENDATION: Forward to engineering for formal Approval Note evaluation.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 4: KNOWLEDGE BASE -->
+    <!-- ==================================================================== -->
+    <div class="tab-pane" id="pane-knowledge">
+        <div class="workbench-section-header">
+            <div>
+                <h2>LOCAL ORGANIZATIONAL KNOWLEDGE BASE</h2>
+                <div class="section-subtitle">ChromaDB air-gapped vector store &bull; Zero WAN external embeddings</div>
+            </div>
+            <button class="btn-action-primary" id="btnSyncKB">⚡ SYNC &amp; RE-INDEX KNOWLEDGE DIRECTORY</button>
+        </div>
+
+        <div class="workbench-grid-2col">
+            <!-- LEFT: CHROMA VECTOR SEARCH SANDBOX -->
+            <div class="wb-panel">
+                <div class="panel-header">SEMANTIC RETRIEVAL SANDBOX</div>
+                <div class="search-sandbox-controls">
+                    <input type="text" id="kbSearchQuery" class="wb-input" placeholder="Enter semantic query (e.g. SOP-042 temperature warning threshold)..." value="SOP-042 thermal overheat threshold">
+                    <div class="search-params-row">
+                        <select id="kbCategoryFilter" class="wb-select">
+                            <option value="">ALL CATEGORIES</option>
+                            <option value="sops">SOPS</option>
+                            <option value="manuals">MANUALS</option>
+                            <option value="inspection_reports">INSPECTION REPORTS</option>
+                            <option value="maintenance">MAINTENANCE</option>
+                            <option value="safety">SAFETY</option>
+                        </select>
+                        <select id="kbTopK" class="wb-select" style="max-width:110px;">
+                            <option value="3">Top 3 Chunks</option>
+                            <option value="5">Top 5 Chunks</option>
+                            <option value="1">Top 1 Chunk</option>
+                        </select>
+                        <button class="btn-action-primary" id="btnRunKBSearch">SEARCH KB</button>
+                    </div>
+                </div>
+
+                <div class="panel-header mt-20">SEMANTIC EVIDENCE RESULTS</div>
+                <div class="kb-results-list" id="kbResultsList">
+                    <div class="knowledge-evidence-card">
+                        <div class="ke-header">
+                            <div class="ke-source">
+                                <span class="ke-label">SOURCE:</span>
+                                <span class="ke-val">SOP_042_Thermal_Overheat_Response.txt</span>
+                            </div>
+                            <div class="ke-meta">
+                                <span class="ke-page">Page 1</span>
+                                <span class="ke-match">72.8% Match</span>
+                            </div>
+                        </div>
+                        <div class="ke-body">
+                            <div class="ke-evidence-label">EVIDENCE:</div>
+                            <div class="ke-evidence-text">TEMPERATURE BOUNDARIES:
+- Optimal Band: 60°C to 75°C
+- Nominal Upper Bound: 80°C
+- Thermal Warning Threshold: > 80°C (Requires Level-1 Operator Intervention)
+- Critical Safety Trip Threshold: > 95°C (Requires Immediate Emergency Stop)</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            <!-- RIGHT: ORGANIZATIONAL CATEGORY DIRECTORIES -->
+            <div class="wb-panel">
+                <div class="panel-header">ORGANIZATIONAL KNOWLEDGE CATALOG</div>
+                <div class="kb-catalog-grid" id="kbCatalogGrid">
+                    <div class="catalog-card">
+                        <div class="cat-card-title">📁 SOPS / STANDARD OPERATING PROCEDURES</div>
+                        <div class="cat-card-desc">SOP-042 Thermal Response Protocol, Emergency Shutdown Protocols</div>
+                        <div class="cat-card-meta">Collection: industrial_documents &bull; Verified Air-Gap</div>
+                    </div>
+                    <div class="catalog-card">
+                        <div class="cat-card-title">📁 MAINTENANCE MANUALS</div>
+                        <div class="cat-card-desc">Machine 101 Engineering Manual Rev 2, Cooling System Schematics</div>
+                        <div class="cat-card-meta">Collection: industrial_documents &bull; Verified Air-Gap</div>
+                    </div>
+                    <div class="catalog-card">
+                        <div class="cat-card-title">📁 FIELD INSPECTION REPORTS</div>
+                        <div class="cat-card-desc">Scanned inspection logs, defect surveys, calibration certificates</div>
+                        <div class="cat-card-meta">Collection: industrial_documents &bull; Verified Air-Gap</div>
+                    </div>
+                    <div class="catalog-card">
+                        <div class="cat-card-title">📁 SAFETY &amp; ENGINEERING CODES</div>
+                        <div class="cat-card-desc">OSHA thermal safety standards, machine guarding compliance rules</div>
+                        <div class="cat-card-meta">Collection: industrial_documents &bull; Verified Air-Gap</div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </section>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 5: VISION -->
+    <!-- ==================================================================== -->
+    <div class="tab-pane" id="pane-vision">
+        <div class="workbench-section-header">
+            <div>
+                <h2>MULTIMODAL INDUSTRIAL VISION INSPECTOR</h2>
+                <div class="section-subtitle">Local vision analysis of equipment photos, defects, and surface conditions</div>
+            </div>
+        </div>
+
+        <div class="workbench-grid-2col">
+            <!-- LEFT: PHYSICAL COMPONENT PHOTO VIEWER -->
+            <div class="wb-panel">
+                <div class="panel-header">EQUIPMENT INSPECTION IMAGERY</div>
+                <div class="vision-img-frame">
+                    <img src="ChatGPT Image Sep 13, 2026, 01_44_35 PM.png" alt="Machine 101 Inspection" class="vision-preview-img" id="visionImagePreview" onerror="this.style.display='none'">
+                    <div class="vision-caption">Inspection Image: Machine 101 Radiator &amp; Fan Assembly (IR-2026-0914-A)</div>
+                </div>
+            </div>
+
+            <!-- RIGHT: VISION REASONING CONSOLE -->
+            <div class="wb-panel">
+                <div class="panel-header">VISUAL DEFECT ANALYZER</div>
+                <div class="vision-controls">
+                    <label class="wb-label">INSPECTION PROMPT:</label>
+                    <textarea id="visionPromptInput" class="wb-textarea" rows="3">Inspect radiator intake fins, cooling fan housing, and casing condition for defects, cracks, or dust accumulation.</textarea>
+                    <button class="btn-action-primary" id="btnRunVisionAnalysis" style="width:100%; margin-top:10px;">👁️ RUN LOCAL VISION ANALYSIS</button>
+                </div>
+
+                <div class="panel-header mt-20">VISUAL OBSERVATION FINDINGS</div>
+                <div class="vision-result-card" id="visionOutputCard">
+                    <div class="v-finding-item">
+                        <span class="v-label">RADIATOR INTAKE FINS:</span>
+                        <span class="v-val text-orange">20% - 30% lint &amp; dust accumulation observed. Airflow restricted.</span>
+                    </div>
+                    <div class="v-finding-item">
+                        <span class="v-label">COOLING FAN HOUSING:</span>
+                        <span class="v-val text-green">Fan blades intact. Zero structural fracture or bearing seizure detected.</span>
+                    </div>
+                    <div class="v-finding-item">
+                        <span class="v-label">CASING CONDITION:</span>
+                        <span class="v-val text-green">No external coolant leakage. Paint finish nominal.</span>
+                    </div>
+                    <div class="v-finding-item">
+                        <span class="v-label">TELEMETRY CORRELATION:</span>
+                        <span class="v-val text-cyan">Elevated temperature (84.2°C) is directly caused by dust airflow impedance at nominal 1240 RPM.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 6: CODE LAB -->
+    <!-- ==================================================================== -->
+    <div class="tab-pane" id="pane-codelab">
+        <div class="workbench-section-header">
+            <div>
+                <h2>AST-VALIDATED LOCAL CODE LAB</h2>
+                <div class="section-subtitle">Sandboxed Python execution for technical calculations, margin evaluation &amp; data verification</div>
+            </div>
+            <div class="security-tag-pill">🔒 AST ISOLATION ENFORCED (ZERO SHELL / ZERO OS)</div>
+        </div>
+
+        <div class="workbench-grid-2col">
+            <!-- LEFT: CODE EDITOR & TEMPLATES -->
+            <div class="wb-panel">
+                <div class="panel-header">CALCULATION CODE RUNNER</div>
+                <div class="prompt-chips">
+                    <span class="chip-label">TEMPLATES:</span>
+                    <button class="chip-btn" id="codeTmplThermal">Thermal Variance Margin</button>
+                    <button class="chip-btn" id="codeTmplFan">Fan Efficiency Ratio</button>
+                    <button class="chip-btn" id="codeTmplDissipation">Coolant Delta Check</button>
+                </div>
+                <textarea id="codelabEditor" class="code-editor" spellcheck="false"># AST-Validated Industrial Calculation Sandbox
+measured_temp = 84.2
+sop_warning = 80.0
+sop_critical = 95.0
+
+# Calculate variance and safety margin
+variance = round(measured_temp - sop_warning, 2)
+margin_to_critical = round(sop_critical - measured_temp, 2)
+
+print(f"Variance above normal limit: +{variance} C")
+print(f"Remaining margin to critical trip: {margin_to_critical} C")
+if measured_temp > sop_warning and measured_temp < sop_critical:
+    print("STATUS: WARNING (Conditional Operation Allowed)")
+</textarea>
+                <button class="btn-action-primary" id="btnExecuteCode" style="margin-top:10px; width:100%;">⚡ EXECUTE SANDBOXED PYTHON</button>
+            </div>
+
+            <!-- RIGHT: EXECUTION OUTPUT & SECURITY GUARD -->
+            <div class="wb-panel">
+                <div class="panel-header">EXECUTION OBSERVATION &amp; STDOUT</div>
+                <div class="code-terminal" id="codelabTerminal">
+Variance above normal limit: +4.2 C
+Remaining margin to critical trip: 10.8 C
+STATUS: WARNING (Conditional Operation Allowed)
+                </div>
+
+                <div class="panel-header mt-20">SANDBOX SECURITY BOUNDARIES</div>
+                <div class="sandbox-security-box">
+                    <div class="sec-bound-row">
+                        <span class="sb-label">PROHIBITED MODULES:</span>
+                        <span class="sb-val text-red">os, sys, subprocess, socket, requests, urllib, builtins, eval, exec</span>
+                    </div>
+                    <div class="sec-bound-row">
+                        <span class="sb-label">ALLOWED MODULES:</span>
+                        <span class="sb-val text-green">math, statistics, datetime, json, re, itertools</span>
+                    </div>
+                    <div class="sec-bound-row">
+                        <span class="sb-label">CONTAINMENT:</span>
+                        <span class="sb-val text-green">AST Parse Tree Pre-Scan &bull; Zero Arbitrary Shell Execution</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 7: DELIVERABLES -->
+    <!-- ==================================================================== -->
+    <div class="tab-pane" id="pane-deliverables">
+        <div class="workbench-section-header">
+            <div>
+                <h2>CENTRAL DELIVERABLE REPOSITORY</h2>
+                <div class="section-subtitle">Physical files synthesized by KAVAAI Sovereign across 6 verified formats</div>
+            </div>
+            <button class="btn-action-primary" id="btnRefreshDeliverables">🔄 REFRESH DELIVERABLES</button>
+        </div>
+
+        <div class="wb-panel">
+            <div class="deliverable-filter-bar">
+                <button class="deliv-filter-btn active" data-fmt="ALL">ALL FORMATS</button>
+                <button class="deliv-filter-btn" data-fmt="DOCX">DOCX</button>
+                <button class="deliv-filter-btn" data-fmt="XLSX">XLSX</button>
+                <button class="deliv-filter-btn" data-fmt="PPTX">PPTX</button>
+                <button class="deliv-filter-btn" data-fmt="TXT">TXT</button>
+                <button class="deliv-filter-btn" data-fmt="CSV">CSV</button>
+                <button class="deliv-filter-btn" data-fmt="PY">PY</button>
+            </div>
+
+            <div class="table-scroll-container mt-16">
+                <table class="wb-table" id="tableDeliverables">
+                    <thead>
+                        <tr>
+                            <th>DELIVERABLE NAME</th>
+                            <th>FORMAT</th>
+                            <th>SIZE</th>
+                            <th>MODIFIED</th>
+                            <th>STRUCTURAL INTEGRITY</th>
+                            <th>DOWNLOAD</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deliverablesTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding:20px; color:var(--text-secondary);">Loading verified deliverables...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 8: SECURITY MONITOR -->
+    <!-- ==================================================================== -->
+    <div class="tab-pane" id="pane-security">
+        <section class="sovereignty-audit-area" id="sovereigntyAuditSection">
+            <!-- WARNING BANNER IF EXTERNAL EGRESS EVER DETECTED -->
+            <div id="sovWarningBanner" class="sov-warning-banner hidden">
+                <span class="banner-icon">⚠️</span>
+                <div class="banner-text">
+                    <strong>CRITICAL SOVEREIGNTY ALERT:</strong> External network egress detected! Confidential boundary compromised.
+                </div>
+                <span class="banner-badge">WAN ALERT</span>
+            </div>
+
+            <div class="sov-header">
+                <div class="sov-title-group">
+                    <div class="sov-eyebrow">SIH26117 MANDATORY COMPLIANCE</div>
+                    <h2>SOVEREIGNTY &amp; NETWORK AUDIT LAYER</h2>
+                    <div class="sov-subtitle">Real-time local loopback verification &bull; Zero confidential data egress &bull; Live WAN request interception</div>
+                </div>
+                <div class="sov-header-actions">
+                    <button id="btn-test-guard" class="btn-guard-test" title="Simulates an unauthorized outbound WAN request (api.openai.com) and verifies it is blocked">
+                        <span class="shield-icon">🛡️</span> TEST OUTBOUND WAN GUARD
+                    </button>
+                    <div id="guardTestFeedback" class="guard-test-feedback"></div>
+                </div>
+            </div>
+
+            <!-- 6 REQUIRED SECURITY CARDS -->
+            <div class="sov-cards-grid">
+                <!-- 1. SOVEREIGNTY STATUS -->
+                <div class="sov-card" id="card-sov-status">
+                    <div class="sov-card-header">
+                        <span class="sov-card-label">SOVEREIGNTY STATUS</span>
+                        <span class="sov-indicator-dot green" id="dot-sov-status"></span>
+                    </div>
+                    <div class="sov-card-value text-green" id="val-sov-status">VERIFIED LOCAL</div>
+                    <div class="sov-card-sub" id="sub-sov-status">Application Guard Enforced</div>
+                </div>
+
+                <!-- 2. LOCAL AI CALLS -->
+                <div class="sov-card" id="card-local-ai">
+                    <div class="sov-card-header">
+                        <span class="sov-card-label">LOCAL AI CALLS</span>
+                        <span class="sov-card-icon">⚡</span>
+                    </div>
+                    <div class="sov-card-value text-cyan" id="val-local-ai">0</div>
+                    <div class="sov-card-sub">100% on-premise local Ollama inference</div>
+                </div>
+
+                <!-- 3. EXTERNAL CALLS -->
+                <div class="sov-card" id="card-external-calls">
+                    <div class="sov-card-header">
+                        <span class="sov-card-label">EXTERNAL CALLS</span>
+                        <span class="sov-card-icon">🌐</span>
+                    </div>
+                    <div class="sov-card-value text-green" id="val-external-calls">0</div>
+                    <div class="sov-card-sub">Zero WAN egress permitted</div>
+                </div>
+
+                <!-- 4. BLOCKED CALLS -->
+                <div class="sov-card" id="card-blocked-calls">
+                    <div class="sov-card-header">
+                        <span class="sov-card-label">BLOCKED CALLS</span>
+                        <span class="sov-card-icon">🚫</span>
+                    </div>
+                    <div class="sov-card-value text-orange" id="val-blocked-calls">0</div>
+                    <div class="sov-card-sub">Outbound requests intercepted</div>
+                </div>
+
+                <!-- 5. CLOUD PROVIDERS -->
+                <div class="sov-card" id="card-cloud-providers">
+                    <div class="sov-card-header">
+                        <span class="sov-card-label">CLOUD PROVIDERS</span>
+                        <span class="sov-card-icon">☁️</span>
+                    </div>
+                    <div class="sov-card-value text-green" id="val-cloud-providers">0</div>
+                    <div class="sov-card-sub">No external APIs configured</div>
+                </div>
+
+                <!-- 6. NETWORK STATUS -->
+                <div class="sov-card" id="card-network-status">
+                    <div class="sov-card-header">
+                        <span class="sov-card-label">NETWORK STATUS</span>
+                        <span class="sov-card-icon">🔒</span>
+                    </div>
+                    <div class="sov-card-value" id="val-network-status" style="font-size: 13px; line-height: 1.3;">127.0.0.1 LOOPBACK</div>
+                    <div class="sov-card-sub" id="sub-network-status">Physical WAN Disclosed</div>
+                </div>
+            </div>
+
+            <!-- AUDIT TRAIL LOG -->
+            <div class="sov-audit-trail-container">
+                <div class="audit-trail-header">
+                    <div class="audit-trail-title">
+                        <span>LIVE SECURITY &amp; NETWORK AUDIT TRAIL</span>
+                        <span class="audit-badge" id="auditEventCountBadge">0 EVENTS</span>
+                    </div>
+                    <div class="audit-trail-filters">
+                        <button class="audit-filter-btn active" data-filter="ALL">ALL</button>
+                        <button class="audit-filter-btn" data-filter="NETWORK_TRAFFIC">NETWORK</button>
+                        <button class="audit-filter-btn" data-filter="AI_MODEL_INFERENCE">AI CALLS</button>
+                        <button class="audit-filter-btn" data-filter="TOOL_EXECUTION">TOOLS</button>
+                        <button class="audit-filter-btn" data-filter="DOCUMENT_INTELLIGENCE">DOCUMENTS</button>
+                    </div>
+                </div>
+                <div class="audit-table-wrap">
+                    <table class="audit-table">
+                        <thead>
+                            <tr>
+                                <th>TIME</th>
+                                <th>CATEGORY</th>
+                                <th>OPERATION</th>
+                                <th>ENDPOINT</th>
+                                <th>CLASSIFICATION</th>
+                                <th>STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align:center; color:var(--text-secondary); padding:20px;">
+                                    Initializing security audit monitor...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
 
 </div>
 

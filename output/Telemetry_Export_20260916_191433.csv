@@ -1,0 +1,11 @@
+Statistical_Metric,Calculated_Value,Unit
+Metric,Value,Unit
+Total Samples Analyzed,30,Records
+Mean Core Temperature,77.8,Celsius
+Temperature Standard Deviation,5.4,Celsius
+Minimum Recorded Temperature,68.4,Celsius
+Maximum Recorded Temperature,84.5,Celsius
+Mean Ventilation Fan RPM,1232.0,RPM
+Warning Threshold Exceedance Count (>80C),14,Occurrences
+Critical Safety Trip Count (>95C),0,Occurrences
+Machine Health Score,65.0,Percent

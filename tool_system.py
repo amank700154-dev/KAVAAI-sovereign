@@ -34,6 +34,8 @@ import re
 import ast
 import json
 import math
+import statistics
+import csv
 import time
 import base64
 import zipfile
@@ -190,6 +192,7 @@ class BaseTool:
         Orchestrates Validation -> Execution -> Observation -> Logging.
         Returns standardized tool result.
         """
+        t0 = time.time()
         val_ok, val_err = self.validate(input_args)
         if not val_ok:
             res = {
@@ -200,6 +203,16 @@ class BaseTool:
                 "data": None
             }
             self._log_execution("FAILED", input_args, res["observation"])
+            try:
+                from sovereignty_monitor import get_monitor
+                get_monitor().record_tool_call(
+                    tool_name=self.name,
+                    status="FAILED",
+                    inputs=input_args,
+                    latency_ms=round((time.time() - t0) * 1000, 2)
+                )
+            except Exception:
+                pass
             return res
 
         try:
@@ -220,6 +233,16 @@ class BaseTool:
                 "error": exec_res.get("error")
             }
             self._log_execution(status, input_args, obs)
+            try:
+                from sovereignty_monitor import get_monitor
+                get_monitor().record_tool_call(
+                    tool_name=self.name,
+                    status=status,
+                    inputs=input_args,
+                    latency_ms=round((time.time() - t0) * 1000, 2)
+                )
+            except Exception:
+                pass
             return result
         except Exception as e:
             err_msg = str(e)
@@ -231,6 +254,16 @@ class BaseTool:
                 "data": None
             }
             self._log_execution("FAILED", input_args, res["observation"])
+            try:
+                from sovereignty_monitor import get_monitor
+                get_monitor().record_tool_call(
+                    tool_name=self.name,
+                    status="FAILED",
+                    inputs=input_args,
+                    latency_ms=round((time.time() - t0) * 1000, 2)
+                )
+            except Exception:
+                pass
             return res
 
     def _log_execution(self, status: str, input_args: Dict[str, Any], output_summary: str):
@@ -538,20 +571,41 @@ class ExecutePythonTool(BaseTool):
     def execute(self, input_args: Dict[str, Any]) -> Dict[str, Any]:
         code = input_args["code"]
         
+        def safe_import(name, globals=None, locals=None, fromlist=(), level=0):
+            allowed = {"math", "json", "datetime", "re", "random", "statistics", "csv"}
+            root_pkg = name.split(".")[0]
+            if root_pkg not in allowed:
+                raise ImportError(f"Security Violation: Import of module '{name}' is prohibited in sandbox.")
+            return __import__(name, globals, locals, fromlist, level)
+
+        def safe_open(file_path, mode="r", encoding="utf-8", **kwargs):
+            if any(m in mode for m in ["w", "a", "+", "x"]):
+                raise PermissionError("Security Violation: File write operations are prohibited via open() in sandbox.")
+            safe, resolved, err = ToolSecurity.is_safe_path(str(file_path), allow_write=False)
+            if not safe:
+                raise PermissionError(f"Security Violation: {err}")
+            return open(resolved, mode=mode, encoding=encoding, **kwargs)
+
         # Build safe isolated namespace
         safe_builtins = {
             "abs": abs, "all": all, "any": any, "bool": bool, "dict": dict,
             "enumerate": enumerate, "filter": filter, "float": float, "int": int,
             "len": len, "list": list, "map": map, "max": max, "min": min,
             "pow": pow, "range": range, "round": round, "set": set, "str": str,
-            "sum": sum, "tuple": tuple, "zip": zip, "print": print
+            "sum": sum, "tuple": tuple, "zip": zip, "print": print,
+            "open": safe_open,
+            "Exception": Exception, "ValueError": ValueError, "TypeError": TypeError,
+            "KeyError": KeyError, "IndexError": IndexError, "RuntimeError": RuntimeError,
+            "__import__": safe_import
         }
         
         safe_globals = {
             "__builtins__": safe_builtins,
             "math": math,
+            "statistics": statistics,
             "json": json,
-            "datetime": datetime
+            "datetime": datetime,
+            "csv": csv
         }
 
         # Redirect stdout
@@ -566,8 +620,15 @@ class ExecutePythonTool(BaseTool):
             stdout_str = redirected_stdout.getvalue().strip()
             elapsed_ms = round((time.time() - start_time) * 1000, 2)
 
-            # Return either printed output or resulting variables
-            clean_scope = {k: v for k, v in local_scope.items() if not k.startswith("_")}
+            # Return either printed output or resulting variables (ensuring json serializability)
+            clean_scope = {}
+            for k, v in local_scope.items():
+                if not k.startswith("_") and not callable(v):
+                    try:
+                        json.dumps(v)
+                        clean_scope[k] = v
+                    except Exception:
+                        clean_scope[k] = str(v)
             obs = stdout_str if stdout_str else f"Evaluated successfully ({len(clean_scope)} variables in scope: {list(clean_scope.keys())})"
             return {
                 "status": "SUCCESS",
@@ -749,7 +810,7 @@ class GenerateDocxTool(BaseTool):
         ok, msg = super().validate(input_args)
         if not ok:
             return ok, msg
-        fname = input_args.get("output_filename", "report.docx")
+        fname = input_args.get("output_filename") or "report.docx"
         safe, _, err = ToolSecurity.is_safe_path(fname, allow_write=True)
         if not safe:
             return False, err
@@ -833,7 +894,7 @@ class GenerateXlsxTool(BaseTool):
         ok, msg = super().validate(input_args)
         if not ok:
             return ok, msg
-        fname = input_args.get("output_filename", "audit.xlsx")
+        fname = input_args.get("output_filename") or "audit.xlsx"
         safe, _, err = ToolSecurity.is_safe_path(fname, allow_write=True)
         if not safe:
             return False, err
@@ -911,7 +972,7 @@ class GeneratePptxTool(BaseTool):
         ok, msg = super().validate(input_args)
         if not ok:
             return ok, msg
-        fname = input_args.get("output_filename", "presentation.pptx")
+        fname = input_args.get("output_filename") or "presentation.pptx"
         safe, _, err = ToolSecurity.is_safe_path(fname, allow_write=True)
         if not safe:
             return False, err
@@ -999,15 +1060,188 @@ class GeneratePptxTool(BaseTool):
         }
 
 
+class GenerateApprovalNoteTool(BaseTool):
+    """Generates an official engineering approval note with findings, SOP citations, and signature block."""
+    name = "GENERATE_APPROVAL_NOTE"
+    description = "Generates an authoritative, fully styled DOCX Approval Note with findings, SOP limits, traceable evidence, and signature block."
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "title": {"type": "string", "description": "Title of the approval note."},
+            "document_ref": {"type": "string", "description": "Audit document reference ID."},
+            "summary": {"type": "string", "description": "Executive summary of evaluation."},
+            "key_findings": {"type": "array", "items": {"type": "object"}, "description": "List of finding objects with parameter, measured_value, baseline, delta, compliance_state."},
+            "evidence": {"type": "array", "items": {"type": "object"}, "description": "List of evidence objects with source, modality, fact, citation."},
+            "sop_references": {"type": "array", "items": {"type": "object"}, "description": "List of SOP references with document_id, title, section, clause."},
+            "recommended_actions": {"type": "array", "items": {"type": "string"}, "description": "List of recommended actions."},
+            "assumptions_limitations": {"type": "array", "items": {"type": "string"}, "description": "List of assumptions and limitations."},
+            "output_filename": {"type": "string", "description": "Optional custom filename in output/."},
+            "approval_status": {"type": "string", "description": "Approval determination (APPROVED / CONDITIONAL APPROVAL / REJECTED)."}
+        },
+        "required": ["title", "document_ref", "summary"]
+    }
+
+    def validate(self, input_args: Dict[str, Any]) -> Tuple[bool, str]:
+        ok, msg = super().validate(input_args)
+        if not ok:
+            return ok, msg
+        fname = input_args.get("output_filename") or "approval_note.docx"
+        safe, _, err = ToolSecurity.is_safe_path(fname, allow_write=True)
+        if not safe:
+            return False, err
+        return True, ""
+
+    def execute(self, input_args: Dict[str, Any]) -> Dict[str, Any]:
+        from deliverable_generator import deliverable_gen
+        res = deliverable_gen.generate_approval_note(
+            title=input_args.get("title", "ENGINEERING APPROVAL NOTE"),
+            document_ref=input_args.get("document_ref", "DOC-REF-001"),
+            summary=input_args.get("summary", "Engineering assessment complete."),
+            key_findings=input_args.get("key_findings", []),
+            evidence=input_args.get("evidence", []),
+            sop_references=input_args.get("sop_references", []),
+            recommended_actions=input_args.get("recommended_actions", ["Follow standard operating procedure."]),
+            assumptions_limitations=input_args.get("assumptions_limitations", ["Evaluation conducted on-premise."]),
+            output_filename=input_args.get("output_filename"),
+            approval_status=input_args.get("approval_status", "CONDITIONAL APPROVAL"),
+            metadata=input_args.get("metadata")
+        )
+        return {
+            "status": "SUCCESS",
+            "data": res,
+            "observation": f"Generated DOCX Approval Note: {res['filename']} ({res['size_bytes']} bytes, status={res['approval_status']})"
+        }
+
+
+class GenerateTxtTool(BaseTool):
+    """Generates plain-text technical audit reports."""
+    name = "GENERATE_TXT"
+    description = "Generates clean, formal plain-text technical audit report files."
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "title": {"type": "string", "description": "Title of the technical report."},
+            "sections": {"type": "object", "description": "Dictionary of section headings and paragraphs."},
+            "metadata": {"type": "object", "description": "Optional metadata dictionary."},
+            "output_filename": {"type": "string", "description": "Target filename in output/."}
+        },
+        "required": ["title", "sections"]
+    }
+
+    def validate(self, input_args: Dict[str, Any]) -> Tuple[bool, str]:
+        ok, msg = super().validate(input_args)
+        if not ok:
+            return ok, msg
+        fname = input_args.get("output_filename") or "report.txt"
+        safe, _, err = ToolSecurity.is_safe_path(fname, allow_write=True)
+        if not safe:
+            return False, err
+        return True, ""
+
+    def execute(self, input_args: Dict[str, Any]) -> Dict[str, Any]:
+        from deliverable_generator import deliverable_gen
+        res = deliverable_gen.generate_txt(
+            title=input_args["title"],
+            sections=input_args["sections"],
+            metadata=input_args.get("metadata"),
+            output_filename=input_args.get("output_filename")
+        )
+        return {
+            "status": "SUCCESS",
+            "data": res,
+            "observation": f"Generated TXT deliverable: {res['filename']} ({res['size_bytes']} bytes)"
+        }
+
+
+class GenerateCsvTool(BaseTool):
+    """Generates clean CSV exports."""
+    name = "GENERATE_CSV"
+    description = "Generates RFC-4180 compliant CSV tabular deliverable files."
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "headers": {"type": "array", "items": {"type": "string"}, "description": "List of column headers."},
+            "rows": {"type": "array", "items": {"type": "array"}, "description": "Matrix of table rows."},
+            "output_filename": {"type": "string", "description": "Target filename in output/."}
+        },
+        "required": ["headers", "rows"]
+    }
+
+    def validate(self, input_args: Dict[str, Any]) -> Tuple[bool, str]:
+        ok, msg = super().validate(input_args)
+        if not ok:
+            return ok, msg
+        fname = input_args.get("output_filename") or "export.csv"
+        safe, _, err = ToolSecurity.is_safe_path(fname, allow_write=True)
+        if not safe:
+            return False, err
+        return True, ""
+
+    def execute(self, input_args: Dict[str, Any]) -> Dict[str, Any]:
+        from deliverable_generator import deliverable_gen
+        res = deliverable_gen.generate_csv(
+            headers=input_args["headers"],
+            rows=input_args["rows"],
+            output_filename=input_args.get("output_filename")
+        )
+        return {
+            "status": "SUCCESS",
+            "data": res,
+            "observation": f"Generated CSV deliverable: {res['filename']} ({res['size_bytes']} bytes, {res['rows_count']} rows)"
+        }
+
+
+class GeneratePyTool(BaseTool):
+    """Generates standalone Python verification scripts."""
+    name = "GENERATE_PY"
+    description = "Generates a standalone, executable Python verification script (.py) for testing sensor bounds and SOP limits."
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "script_name": {"type": "string", "description": "Name of the verification script."},
+            "description": {"type": "string", "description": "Script description."},
+            "telemetry_data": {"type": "object", "description": "Recorded telemetry data dictionary."},
+            "sop_thresholds": {"type": "object", "description": "SOP thresholds dictionary."},
+            "output_filename": {"type": "string", "description": "Target filename in output/."}
+        },
+        "required": ["script_name", "telemetry_data"]
+    }
+
+    def validate(self, input_args: Dict[str, Any]) -> Tuple[bool, str]:
+        ok, msg = super().validate(input_args)
+        if not ok:
+            return ok, msg
+        fname = input_args.get("output_filename") or "verify.py"
+        safe, _, err = ToolSecurity.is_safe_path(fname, allow_write=True)
+        if not safe:
+            return False, err
+        return True, ""
+
+    def execute(self, input_args: Dict[str, Any]) -> Dict[str, Any]:
+        from deliverable_generator import deliverable_gen
+        res = deliverable_gen.generate_py(
+            script_name=input_args.get("script_name", "Operational Verification"),
+            description=input_args.get("description", "Standalone operational envelope verification"),
+            telemetry_data=input_args.get("telemetry_data", {}),
+            sop_thresholds=input_args.get("sop_thresholds", {"temperature_warning_c": 80.0, "temperature_critical_c": 95.0}),
+            output_filename=input_args.get("output_filename")
+        )
+        return {
+            "status": "SUCCESS",
+            "data": res,
+            "observation": f"Generated PY script deliverable: {res['filename']} ({res['size_bytes']} bytes)"
+        }
+
+
 class VerifyFileTool(BaseTool):
     """12. VERIFY_FILE: Inspects deliverables for valid headers, non-empty size, and integrity."""
     name = "VERIFY_FILE"
-    description = "Verifies existence, non-empty size, and format integrity (magic bytes / zip schema) of output files."
+    description = "Verifies existence, non-empty size, and format integrity (magic bytes / zip schema / AST syntax) of output files."
     input_schema = {
         "type": "object",
         "properties": {
             "file_path": {"type": "string", "description": "Relative or absolute path to file in workspace."},
-            "expected_format": {"type": "string", "description": "Optional expected format (docx, xlsx, pptx, pdf, json, csv)."}
+            "expected_format": {"type": "string", "description": "Optional expected format (docx, xlsx, pptx, pdf, json, csv, py, txt)."}
         },
         "required": ["file_path"]
     }
@@ -1024,73 +1258,23 @@ class VerifyFileTool(BaseTool):
         return True, ""
 
     def execute(self, input_args: Dict[str, Any]) -> Dict[str, Any]:
+        from deliverable_generator import deliverable_gen
         _, resolved, _ = ToolSecurity.is_safe_path(input_args["file_path"], allow_write=False)
-        size = os.path.getsize(resolved)
-        if size == 0:
+        expected = input_args.get("expected_format")
+        res = deliverable_gen.verify_deliverable(resolved, expected_format=expected)
+        
+        if not res.get("verified"):
             return {
                 "status": "FAILED",
-                "error": "File exists but is empty (0 bytes).",
-                "observation": f"Verification FAILED: {os.path.basename(resolved)} is empty (0 bytes)."
-            }
-
-        ext = os.path.splitext(resolved)[1].lower().replace(".", "")
-        expected = input_args.get("expected_format", ext).lower().replace(".", "")
-        checks = [
-            {"check": "File Existence", "status": "PASSED"},
-            {"check": "Non-Zero Size", "status": "PASSED", "size_bytes": size}
-        ]
-
-        # Deep format integrity checks
-        format_valid = False
-        try:
-            if expected in ["docx", "xlsx", "pptx"]:
-                if zipfile.is_zipfile(resolved):
-                    with zipfile.ZipFile(resolved, "r") as z:
-                        namelist = z.namelist()
-                        if "[Content_Types].xml" in namelist:
-                            format_valid = True
-                            checks.append({"check": f"{expected.upper()} ZIP XML Structure", "status": "PASSED"})
-            elif expected == "pdf":
-                with open(resolved, "rb") as f:
-                    header = f.read(5)
-                if header == b"%PDF-":
-                    format_valid = True
-                    checks.append({"check": "PDF Magic Header (%PDF-)", "status": "PASSED"})
-            elif expected == "json":
-                with open(resolved, "r", encoding="utf-8") as f:
-                    json.load(f)
-                format_valid = True
-                checks.append({"check": "Valid JSON Syntax", "status": "PASSED"})
-            elif expected in ["csv", "txt", "md"]:
-                format_valid = True
-                checks.append({"check": "Text Encoding Integrity", "status": "PASSED"})
-            else:
-                format_valid = True
-                checks.append({"check": "Generic File Verification", "status": "PASSED"})
-        except Exception as e:
-            return {
-                "status": "FAILED",
-                "error": f"Format integrity check failed: {str(e)}",
-                "observation": f"Verification FAILED: {os.path.basename(resolved)} is corrupt: {str(e)}"
-            }
-
-        if not format_valid:
-            return {
-                "status": "FAILED",
-                "error": f"File is not a valid {expected.upper()} structure.",
-                "observation": f"Verification FAILED: {os.path.basename(resolved)} failed {expected.upper()} check."
+                "error": res.get("error", "Verification failed."),
+                "observation": f"Verification FAILED: {os.path.basename(resolved)} - {res.get('error')}",
+                "data": res
             }
 
         return {
             "status": "SUCCESS",
-            "data": {
-                "file_path": resolved,
-                "filename": os.path.basename(resolved),
-                "size_bytes": size,
-                "format": expected,
-                "checks": checks
-            },
-            "observation": f"Verification PASSED for {os.path.basename(resolved)} ({size} bytes, format={expected.upper()})"
+            "data": res,
+            "observation": f"Verification PASSED for {os.path.basename(resolved)} ({res['size_bytes']} bytes, format={res['format']})"
         }
 
 
@@ -1117,8 +1301,14 @@ class ToolRegistry:
             GenerateDocxTool(),
             GenerateXlsxTool(),
             GeneratePptxTool(),
+            GenerateTxtTool(),
+            GenerateCsvTool(),
+            GeneratePyTool(),
+            GenerateApprovalNoteTool(),
             VerifyFileTool()
         ]
+        for t in tools:
+            self.register(t)
         for t in tools:
             self.register(t)
 

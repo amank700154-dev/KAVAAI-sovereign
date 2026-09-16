@@ -1,0 +1,5 @@
+Parameter,Reading,Unit,Baseline_Min,Baseline_Max,Status
+Temperature,84.2,degC,60.0,80.0,WARNING
+Fan_Speed,1240,RPM,1200,1400,NORMAL
+Pressure,2.35,bar,2.0,3.5,NORMAL
+Coolant_Level,68,percent,60,100,NORMAL

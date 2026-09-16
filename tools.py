@@ -406,24 +406,60 @@ def tool_document_generate(doc_type: str, title: str, data: dict, output_filenam
         return {"status": "SUCCESS", "type": "XLSX", "filename": filename, "file_path": target_path}
 
     elif doc_type in ["pptx", "powerpoint", "slides", "presentation"]:
-        from tool_system import registry as ts_reg
-        res = ts_reg.invoke("GENERATE_PPTX", {
-            "title": title,
-            "slides": data.get("slides", [
-                {"title": "Executive Summary", "points": [data.get("summary", "Industrial investigation complete.")]},
-                {"title": "Evidence Analysis", "points": [str(data.get("evidence", "Telemetry verified against SOP limits."))]},
-                {"title": "Recommendations", "points": [str(data.get("recommendations", "Follow standard maintenance procedure."))]},
-                {"title": "Audit Verification", "points": [str(data.get("verification", "Automated sovereign audit passed."))]},
-            ]),
-            "output_filename": output_filename
-        })
-        if res.get("status") == "SUCCESS":
-            return {
-                "status": "SUCCESS",
-                "type": "PPTX",
-                "filename": res["data"]["filename"],
-                "file_path": res["data"]["file_path"]
-            }
+        from deliverable_generator import deliverable_gen
+        res = deliverable_gen.generate_pptx(
+            title=title,
+            subtitle=data.get("subtitle"),
+            slides=data.get("slides"),
+            output_filename=output_filename
+        )
+        return res
+
+    elif doc_type in ["txt", "text", "log"]:
+        from deliverable_generator import deliverable_gen
+        res = deliverable_gen.generate_txt(
+            title=title,
+            sections=data.get("sections", {"Summary": data.get("summary", "")}),
+            metadata=data.get("metadata"),
+            output_filename=output_filename
+        )
+        return res
+
+    elif doc_type in ["csv", "tabular"]:
+        from deliverable_generator import deliverable_gen
+        res = deliverable_gen.generate_csv(
+            headers=data.get("headers", ["Parameter", "Value"]),
+            rows=data.get("rows", []),
+            output_filename=output_filename
+        )
+        return res
+
+    elif doc_type in ["py", "python", "script"]:
+        from deliverable_generator import deliverable_gen
+        res = deliverable_gen.generate_py(
+            script_name=title,
+            description=data.get("description", "Automated telemetry verification script"),
+            telemetry_data=data.get("telemetry", {}),
+            sop_thresholds=data.get("sop_thresholds", {"temperature_warning_c": 80.0, "temperature_critical_c": 95.0}),
+            output_filename=output_filename
+        )
+        return res
+
+    elif doc_type in ["approval_note", "approval"]:
+        from deliverable_generator import deliverable_gen
+        res = deliverable_gen.generate_approval_note(
+            title=title,
+            document_ref=data.get("document_ref", "DOC-REF-001"),
+            summary=data.get("summary", ""),
+            key_findings=data.get("key_findings", []),
+            evidence=data.get("evidence", []),
+            sop_references=data.get("sop_references", []),
+            recommended_actions=data.get("recommended_actions", []),
+            assumptions_limitations=data.get("assumptions_limitations", []),
+            output_filename=output_filename,
+            approval_status=data.get("approval_status", "CONDITIONAL APPROVAL"),
+            metadata=data.get("metadata")
+        )
         return res
 
     else:
@@ -520,5 +556,10 @@ WRITE_SPREADSHEET = registry.get_tool("WRITE_SPREADSHEET")
 GENERATE_DOCX = registry.get_tool("GENERATE_DOCX")
 GENERATE_XLSX = registry.get_tool("GENERATE_XLSX")
 GENERATE_PPTX = registry.get_tool("GENERATE_PPTX")
+GENERATE_TXT = registry.get_tool("GENERATE_TXT")
+GENERATE_CSV = registry.get_tool("GENERATE_CSV")
+GENERATE_PY = registry.get_tool("GENERATE_PY")
+GENERATE_APPROVAL_NOTE = registry.get_tool("GENERATE_APPROVAL_NOTE")
 VERIFY_FILE = registry.get_tool("VERIFY_FILE")
+
 

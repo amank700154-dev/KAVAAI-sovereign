@@ -450,18 +450,32 @@ def process_document(file_path: str, enable_ocr: bool = True, enable_vision: boo
 
     category = check["category"]
     if category == "PDF":
-        return process_pdf_document(file_path, enable_ocr=enable_ocr)
+        doc = process_pdf_document(file_path, enable_ocr=enable_ocr)
     elif category == "IMAGE":
-        return process_image_document(file_path, enable_ocr=enable_ocr, enable_vision=enable_vision)
+        doc = process_image_document(file_path, enable_ocr=enable_ocr, enable_vision=enable_vision)
     elif category == "DOCX":
-        return process_docx_document(file_path)
+        doc = process_docx_document(file_path)
     elif category in ["TEXT", "DATA"]:
-        return process_text_document(file_path)
+        doc = process_text_document(file_path)
     else:
         doc = StructuredDocument(file_path)
         doc.status = "UNSUPPORTED"
         doc.processing_errors.append(f"Unrecognized file category: {category}")
-        return doc
+
+    try:
+        from sovereignty_monitor import get_monitor
+        ocr_done = any(p.ocr_status == "SUCCESS" for p in getattr(doc, "pages", []))
+        get_monitor().record_document_op(
+            filename=os.path.basename(file_path),
+            file_type=category,
+            pages=len(getattr(doc, "pages", [])),
+            ocr_performed=ocr_done,
+            status=getattr(doc, "status", "SUCCESS")
+        )
+    except Exception:
+        pass
+
+    return doc
 
 
 # ==============================================================================
