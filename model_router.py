@@ -356,22 +356,65 @@ def invoke_local_model(model_name: str, prompt: str, images: list = None, timeou
     ollama_host = _CONFIG["ollama"]["host"]
     generate_url = f"{ollama_host.rstrip('/')}/api/generate"
 
+    t0 = time.time()
     try:
         response = requests.post(generate_url, json=payload, timeout=timeout)
+        dur_ms = round((time.time() - t0) * 1000, 2)
         if response.status_code == 200:
             data = response.json()
+            resp_text = data.get("response", "").strip()
+            try:
+                from sovereignty_monitor import get_monitor
+                get_monitor().record_ai_call(
+                    model_name=clean_model,
+                    role="LOCAL_OLLAMA",
+                    endpoint=generate_url,
+                    status="SUCCESS",
+                    prompt_chars=len(prompt),
+                    response_chars=len(resp_text),
+                    latency_ms=dur_ms
+                )
+            except Exception:
+                pass
             return {
                 "success": True,
                 "model_used": clean_model,
-                "response": data.get("response", "").strip()
+                "response": resp_text
             }
         else:
+            try:
+                from sovereignty_monitor import get_monitor
+                get_monitor().record_ai_call(
+                    model_name=clean_model,
+                    role="LOCAL_OLLAMA",
+                    endpoint=generate_url,
+                    status=f"HTTP_{response.status_code}",
+                    prompt_chars=len(prompt),
+                    response_chars=0,
+                    latency_ms=dur_ms
+                )
+            except Exception:
+                pass
             return {
                 "success": False,
                 "model_used": clean_model,
                 "error": f"Ollama HTTP {response.status_code}: {response.text}"
             }
     except requests.exceptions.ConnectionError:
+        dur_ms = round((time.time() - t0) * 1000, 2)
+        try:
+            from sovereignty_monitor import get_monitor
+            get_monitor().record_ai_call(
+                model_name=clean_model,
+                role="LOCAL_OLLAMA",
+                endpoint=generate_url,
+                status="OFFLINE_FALLBACK",
+                prompt_chars=len(prompt),
+                response_chars=0,
+                latency_ms=dur_ms
+            )
+        except Exception:
+            pass
         return {
             "success": False,
             "model_used": clean_model,
