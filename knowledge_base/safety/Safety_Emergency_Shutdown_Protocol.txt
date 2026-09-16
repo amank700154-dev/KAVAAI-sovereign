@@ -1,0 +1,18 @@
+PLANT SAFETY DIRECTIVE: PSD-88
+TITLE: Machine 101 Emergency Power & Thermal Hazard Isolation
+CLASSIFICATION: Confidential Internal Safety Standard
+
+1. HAZARD IDENTIFICATION
+Thermal runaway in Machine 101 poses fire and component degradation risks if coolant pressure drops below 1.5 bar or temperatures sustain above 95°C for longer than 60 seconds.
+
+2. EMERGENCY SHUTDOWN PROCEDURE
+1. Trip the Master Emergency Stop (E-STOP) button on the main control panel.
+2. Confirm cooling fan housing is clear before opening casing.
+3. Check coolant lines for visible rupture, fluid misting, or joint leaks.
+4. Notify plant safety officer and log timestamped telemetry readings.
+
+3. RE-COMMISSIONING CHECKLIST
+- Coolant pressure verified between 2.0 bar and 3.5 bar.
+- Vibration levels confirmed below 0.30 mm/s.
+- Radiator cleaned with dry compressed air.
+- Sign-off on Maintenance Log Form ML-101.
