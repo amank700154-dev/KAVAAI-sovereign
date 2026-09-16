@@ -5,6 +5,9 @@ import base64
 import sys
 import json
 import os
+import re
+
+from sovereignty_monitor import sovereignty_monitor
 
 AI_PROVIDER = os.environ.get("AI_PROVIDER", "LOCAL_OLLAMA")
 
@@ -400,3 +403,25 @@ print(report)
 print("\n==========================================")
 print("Evidence-based investigation complete.")
 print("==========================================")
+
+try:
+    from backend.documents.deliverable_generator import DeliverableGenerator
+    from backend.sandbox.executor import ExecutePythonTool
+    deliverable_gen = DeliverableGenerator()
+    
+    # Generate CSV Deliverable
+    csv_res = deliverable_gen.generate_csv(
+        filename="Machine101_Report.csv",
+        data=[
+            ["Metric", "Value", "Unit"],
+            ["Temperature", telemetry.get("temperature", "N/A"), "Celsius"],
+            ["Pressure", telemetry.get("pressure", "N/A"), "bar"],
+            ["RPM", telemetry.get("rpm", "N/A"), "RPM"],
+            ["Decision", decision, ""],
+        ]
+    )
+    
+    print(f"\n[Deliverable Generated] {csv_res['filename']}")
+    
+except Exception as e:
+    print(f"\n[Deliverable Generation Skipped] {e}")
