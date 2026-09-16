@@ -1,0 +1,40 @@
+"""
+Configuration Package for KAVAAI Sovereign.
+"""
+from backend.config.settings import (
+    ROOT_DIR,
+    BACKEND_DIR,
+    DATA_DIR,
+    WORKSPACE_DIR,
+    OUTPUT_DIR,
+    KNOWLEDGE_BASE_DIR,
+    VECTOR_STORE_DIR,
+    SAMPLE_DIR,
+    OLLAMA_HOST,
+    OLLAMA_TIMEOUT_SECONDS,
+    MODEL_ROLES,
+    AIR_GAP_ENFORCE_LOCAL_ONLY,
+    ALLOW_EXTERNAL_WAN,
+    LOOPBACK_ADDRESS,
+    API_PORT,
+    API_HOST
+)
+
+__all__ = [
+    "ROOT_DIR",
+    "BACKEND_DIR",
+    "DATA_DIR",
+    "WORKSPACE_DIR",
+    "OUTPUT_DIR",
+    "KNOWLEDGE_BASE_DIR",
+    "VECTOR_STORE_DIR",
+    "SAMPLE_DIR",
+    "OLLAMA_HOST",
+    "OLLAMA_TIMEOUT_SECONDS",
+    "MODEL_ROLES",
+    "AIR_GAP_ENFORCE_LOCAL_ONLY",
+    "ALLOW_EXTERNAL_WAN",
+    "LOOPBACK_ADDRESS",
+    "API_PORT",
+    "API_HOST"
+]
