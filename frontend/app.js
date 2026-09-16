@@ -125,7 +125,14 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!res.ok) throw new Error("Telemetry request failed");
             let data = await res.json();
             
-            if (simTemp !== null) {
+            if (simTemp === 85) {
+                data.temperature = 85;
+                data.rpm = 1240;
+                data.pressure = 2.4;
+                data.coolant = 68;
+                data.vibration = 0.18;
+                data.fan = "ACTIVE";
+            } else if (simTemp !== null) {
                 data.temperature = simTemp;
             }
             currentTelemetry = data;
