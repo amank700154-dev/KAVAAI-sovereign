@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KAVAAI Sovereign - Industrial AI Workbench</title>
-    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts: Rajdhani, Inter, JetBrains Mono, Share Tech Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=40">
 </head>
 <body>
 
@@ -12,15 +16,19 @@
     <!-- TOP HEADER -->
     <header class="main-header">
         <div class="header-left">
-            <div class="brand-badge">SIH26117 AIR-GAPPED WORKBENCH</div>
+            <div class="brand-badge"><span class="brand-shield-icon">🛡️</span> SIH26117 AIR-GAPPED WORKBENCH</div>
             <h1>KAVAAI SOVEREIGN</h1>
             <div class="subtitle">INDUSTRIAL AI CONTROL CENTER &bull; ON-PREMISE MACHINE INVESTIGATION</div>
         </div>
         <div class="header-right">
+            <div class="header-clock-hud">
+                <span class="clock-label">SYS TIME</span>
+                <span class="clock-val" id="headerClock">--:--:-- UTC</span>
+            </div>
             <div class="machine-label">ASSET: MACHINE 101</div>
             <div class="system-status-indicator">
-                <span class="sys-stat" id="stat-airgap" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.08); color: var(--green);"><span class="pulse-dot green"></span> AIR-GAP: VERIFIED (0 WAN)</span>
-                <span class="sys-stat" id="stat-model-router" style="border-color: rgba(0, 217, 255, 0.4); background: rgba(0, 217, 255, 0.08); color: var(--cyan);"><span class="pulse-dot"></span> ROUTER: LOCAL QWEN2.5</span>
+                <span class="sys-stat" id="stat-airgap"><span class="pulse-dot green"></span> AIR-GAP: VERIFIED (0 WAN)</span>
+                <span class="sys-stat" id="stat-model-router"><span class="pulse-dot"></span> ROUTER: LOCAL QWEN2.5</span>
                 <span class="sys-stat" id="stat-system-online"><span class="pulse-dot green"></span> LOCAL LOOPBACK (127.0.0.1)</span>
             </div>
         </div>
@@ -205,11 +213,11 @@
                     </div>
                     <div class="telemetry-card">
                         <div class="tel-label">PRESSURE</div>
-                        <div class="tel-value"><span id="tel-pressure">--</span> <span class="unit">bar</span></div>
+                        <div class="tel-value" id="tel-pressure">-- bar</div>
                     </div>
                     <div class="telemetry-card">
                         <div class="tel-label">COOLANT</div>
-                        <div class="tel-value"><span id="tel-coolant">--</span>%</div>
+                        <div class="tel-value" id="tel-coolant">--%</div>
                     </div>
                     <div class="telemetry-card">
                         <div class="tel-label">VIBRATION</div>
@@ -665,7 +673,7 @@ RECOMMENDATION: Forward to engineering for formal Approval Note evaluation.
                             <option value="maintenance">MAINTENANCE</option>
                             <option value="safety">SAFETY</option>
                         </select>
-                        <select id="kbTopK" class="wb-select" style="max-width:110px;">
+                        <select id="kbTopK" class="wb-select" style="min-width:130px;">
                             <option value="3">Top 3 Chunks</option>
                             <option value="5">Top 5 Chunks</option>
                             <option value="1">Top 1 Chunk</option>
@@ -742,10 +750,23 @@ RECOMMENDATION: Forward to engineering for formal Approval Note evaluation.
         <div class="workbench-grid-2col">
             <!-- LEFT: PHYSICAL COMPONENT PHOTO VIEWER -->
             <div class="wb-panel">
-                <div class="panel-header">EQUIPMENT INSPECTION IMAGERY</div>
-                <div class="vision-img-frame">
-                    <img src="ChatGPT Image Sep 13, 2026, 01_44_35 PM.png" alt="Machine 101 Inspection" class="vision-preview-img" id="visionImagePreview" onerror="this.style.display='none'">
-                    <div class="vision-caption">Inspection Image: Machine 101 Radiator &amp; Fan Assembly (IR-2026-0914-A)</div>
+                <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>EQUIPMENT INSPECTION IMAGERY</span>
+                    <button class="btn-hud-toggle" id="btnToggleDefectReticle">🎯 TOGGLE DEFECT RETICLE</button>
+                </div>
+                <div class="vision-img-frame" id="visionViewport">
+                    <img src="machine101_inspection.png" alt="Machine 101 Inspection" class="vision-preview-img" id="visionImagePreview">
+                    <div class="vision-hud-overlay" id="visionHudOverlay">
+                        <div class="hud-crosshair center-crosshair"></div>
+                        <div class="defect-bounding-box" id="defectBoxFins">
+                            <span class="defect-box-label">⚠ DEFECT: 20-30% DUST COVERAGE (FIN RESTRICTION)</span>
+                            <div class="defect-box-coords">CONF: 94.2% • ROI [340, 180, 520, 390]</div>
+                        </div>
+                    </div>
+                    <div class="vision-caption">
+                        <span class="caption-tag">IR-2026-0914-A</span>
+                        <span>Machine 101 Radiator &amp; Fan Assembly &bull; High-Resolution Macro</span>
+                    </div>
                 </div>
             </div>
 
@@ -803,7 +824,17 @@ RECOMMENDATION: Forward to engineering for formal Approval Note evaluation.
                     <button class="chip-btn" id="codeTmplFan">Fan Efficiency Ratio</button>
                     <button class="chip-btn" id="codeTmplDissipation">Coolant Delta Check</button>
                 </div>
-                <textarea id="codelabEditor" class="code-editor" spellcheck="false"># AST-Validated Industrial Calculation Sandbox
+                <div class="code-editor-chrome">
+                    <div class="editor-header-bar">
+                        <div class="editor-tabs">
+                            <span class="editor-tab active"><span class="tab-lang-icon">🐍</span> investigation_calc.py</span>
+                        </div>
+                        <div class="editor-meta">
+                            <span class="meta-tag">Python 3.12 (AST Sandboxed)</span>
+                            <span class="shortcut-tag">Ctrl + Enter to Run</span>
+                        </div>
+                    </div>
+                    <textarea id="codelabEditor" class="code-editor" spellcheck="false"># AST-Validated Industrial Calculation Sandbox
 measured_temp = 84.2
 sop_warning = 80.0
 sop_critical = 95.0
@@ -817,6 +848,7 @@ print(f"Remaining margin to critical trip: {margin_to_critical} C")
 if measured_temp > sop_warning and measured_temp < sop_critical:
     print("STATUS: WARNING (Conditional Operation Allowed)")
 </textarea>
+                </div>
                 <button class="btn-action-primary" id="btnExecuteCode" style="margin-top:10px; width:100%;">⚡ EXECUTE SANDBOXED PYTHON</button>
             </div>
 
@@ -1028,6 +1060,6 @@ STATUS: WARNING (Conditional Operation Allowed)
     <div class="toast-container" id="toastContainer"></div>
 </div>
 
-<script src="app.js"></script>
+<script src="app.js?v=40"></script>
 </body>
 </html>

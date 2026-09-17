@@ -16,6 +16,19 @@ document.addEventListener("DOMContentLoaded", function () {
     setInterval(pollTelemetry, 3000);
     pollTelemetry();
 
+    // Live System Clock (UTC HUD)
+    function updateHeaderClock() {
+        const clockEl = document.getElementById("headerClock");
+        if (!clockEl) return;
+        const now = new Date();
+        const hrs = String(now.getUTCHours()).padStart(2, "0");
+        const mins = String(now.getUTCMinutes()).padStart(2, "0");
+        const secs = String(now.getUTCSeconds()).padStart(2, "0");
+        clockEl.textContent = `${hrs}:${mins}:${secs} UTC`;
+    }
+    setInterval(updateHeaderClock, 1000);
+    updateHeaderClock();
+
     // ----------------------------------------------------
     // GLOBAL FEEDBACK & INTERACTION HELPERS (MICRO-INTERACTIONS)
     // ----------------------------------------------------
@@ -2206,4 +2219,38 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
         });
     }
 
+    // ----------------------------------------------------
+    // KEYBOARD SHORTCUTS & VISION RETICLE HUD CONTROLS
+    // ----------------------------------------------------
+    const btnToggleDefect = document.getElementById("btnToggleDefectReticle");
+    if (btnToggleDefect) {
+        btnToggleDefect.addEventListener("click", function() {
+            const overlay = document.getElementById("visionHudOverlay");
+            if (overlay) {
+                const isHidden = overlay.classList.toggle("hud-hidden");
+                btnToggleDefect.classList.toggle("active", !isHidden);
+                showToast(isHidden ? "Defect reticle hidden" : "Defect reticle active (ROI [340, 180, 520, 390])", "info", 2000);
+            }
+        });
+    }
+
+    if (question) {
+        question.addEventListener("keydown", function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                e.preventDefault();
+                if (investigateBtn) investigateBtn.click();
+            }
+        });
+    }
+
+    if (codelabEditor && btnExecuteCode) {
+        codelabEditor.addEventListener("keydown", function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                e.preventDefault();
+                btnExecuteCode.click();
+            }
+        });
+    }
+
 });
+
