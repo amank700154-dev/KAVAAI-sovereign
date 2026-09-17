@@ -23,7 +23,7 @@ OUTPUT_DIR = os.path.join(ROOT_DIR, "output")
 
 from agent_orchestrator import orchestrator
 from deliverable_generator import deliverable_gen
-import backend
+import backend.main as backend
 
 
 class TestEndToEndIntegration(unittest.TestCase):
