@@ -147,7 +147,7 @@
                     <div class="dt-grid-floor"></div>
                     <div class="dt-machine-3d">
                         <div class="m-base"></div>
-                        <div class="m-core interactive-comp twin-comp" id="comp-main" data-comp="Main Unit" data-tel="status">
+                        <div class="m-core interactive-comp" id="comp-main" data-comp="Main Unit" data-tel="status">
                             <div class="m-panel-front">
                                 <div class="m-vent"></div>
                                 <div class="m-vent"></div>
@@ -155,14 +155,14 @@
                             </div>
                             <div class="m-panel-side"></div>
                         </div>
-                        <div class="m-sensor interactive-comp twin-comp" id="comp-temp" data-comp="Temperature Sensor" data-tel="temperature">
+                        <div class="m-sensor interactive-comp" id="comp-temp" data-comp="Temperature Sensor" data-tel="temperature">
                             <div class="sensor-dot"></div>
                         </div>
-                        <div class="m-fan-housing interactive-comp twin-comp" id="comp-fan" data-comp="Cooling Fan" data-tel="fan">
+                        <div class="m-fan-housing interactive-comp" id="comp-fan" data-comp="Cooling Fan" data-tel="fan">
                             <div class="m-fan-blade" id="dt-fan"></div>
                         </div>
-                        <div class="m-pipe pipe-left interactive-comp twin-comp" id="comp-coolant" data-comp="Coolant System" data-tel="coolant"></div>
-                        <div class="m-pipe pipe-right interactive-comp twin-comp" id="comp-pressure" data-comp="Pressure System" data-tel="pressure"></div>
+                        <div class="m-pipe pipe-left interactive-comp" id="comp-coolant" data-comp="Coolant System" data-tel="coolant"></div>
+                        <div class="m-pipe pipe-right interactive-comp" id="comp-pressure" data-comp="Pressure System" data-tel="pressure"></div>
                         <div class="dt-scanner-ring"></div>
                         <div class="status-light" id="dt-status-light"></div>
                         <div class="machine-scan-line"></div>
@@ -291,32 +291,9 @@
     <!-- ==================================================================== -->
     <div class="tab-pane" id="pane-agent">
         <section class="investigation-area">
-            <!-- LIVE AGENT EXECUTION STATUS BAR -->
-            <div class="agent-live-status-bar" id="agentExecutionStatusBar">
-                <div class="status-indicator-col">
-                    <span class="status-pulse-dot idle" id="agentStatusPulse"></span>
-                    <div class="status-text-wrap">
-                        <span class="status-eyebrow">AGENT WORKSPACE STATE</span>
-                        <div class="status-title-text" id="agentStatusText">IDLE &bull; WAITING FOR INSTRUCTION</div>
-                    </div>
-                </div>
-                <div class="status-meta-col">
-                    <div class="meta-unit">
-                        <span class="meta-label">AUTONOMOUS ORCHESTRATOR</span>
-                        <span class="meta-badge" id="agentDispatchBadge"><span class="pulse-dot green"></span> LOCAL SOVEREIGN ENGINE</span>
-                    </div>
-                    <div class="meta-unit">
-                        <span class="meta-label">LOOPBACK ENFORCEMENT</span>
-                        <span class="meta-badge-sec">127.0.0.1 (0 WAN)</span>
-                    </div>
-                </div>
-            </div>
-
             <div class="inv-header">
-                <div>
-                    <h2>AGENTIC ORCHESTRATION WORKSPACE</h2>
-                    <div class="inv-subtitle">Autonomous multi-source evidence reasoning, SOP cross-checking &amp; deliverable synthesis</div>
-                </div>
+                <h2>AGENTIC ORCHESTRATION WORKSPACE</h2>
+                <div class="inv-subtitle">Autonomous multi-source evidence reasoning, SOP cross-checking &amp; deliverable synthesis</div>
             </div>
 
             <div class="inv-layout-grid">
@@ -324,185 +301,100 @@
                 <div class="inv-left-col">
                     <div class="inv-console">
                         <div class="prompt-chips">
-                            <span class="chip-label">SUGGESTED TASKS:</span>
-                            <button class="chip-btn" data-prompt="Analyze this inspection report, identify important findings, retrieve the relevant local SOP/manual information, assess the findings using available evidence, and generate an approval note." title="Primary Killer Workflow: Ingest scanned report, cross-reference SOP-042, calculate thermal safety margins, and generate verified DOCX approval note.">
-                                <span class="chip-icon">📄</span> Analyze Scanned Report &amp; Prepare Approval Note
-                            </button>
-                            <button class="chip-btn" data-prompt="Write a Python program to analyze this CSV and calculate maintenance statistics." title="Secondary Workflow: Synthesize sandboxed Python AST code to calculate variance, mean, and compliance metrics on equipment CSV data.">
-                                <span class="chip-icon">💻</span> CSV Maintenance Program (Python AST)
-                            </button>
-                            <button class="chip-btn" data-prompt="Is Machine 101 overheating? Compare current temperature telemetry with SOP-042 threshold limits." title="Rapid RAG Investigation: Cross-check live temperature against SOP-042 threshold table in local vector DB.">
-                                <span class="chip-icon">🌡️</span> Overheating vs SOP-042 Limits
-                            </button>
+                            <span class="chip-label">QUICK PROMPTS:</span>
+                            <button class="chip-btn" data-prompt="Analyze this inspection report, identify important findings, retrieve the relevant local SOP/manual information, assess the findings using available evidence, and generate an approval note.">Killer Workflow (Approval Note)</button>
+                            <button class="chip-btn" data-prompt="Write a Python program to analyze this CSV and calculate maintenance statistics.">CSV Maintenance Code</button>
+                            <button class="chip-btn" data-prompt="Is Machine 101 overheating? Compare current temperature telemetry with SOP-042 threshold limits.">Overheating vs SOP-042</button>
                         </div>
                         
-                        <div class="query-input-wrap">
-                            <label class="query-label" for="question">AUTONOMOUS AGENT MISSION PROMPT</label>
-                            <textarea id="question" placeholder="Ask a question about Machine 101 or analyze an inspection report...&#10;Example: Analyze this inspection report, identify important findings, retrieve the relevant local SOP/manual information, assess the findings using available evidence, and generate an approval note."></textarea>
-                        </div>
+                        <textarea id="question" placeholder="Ask a question about Machine 101 or analyze an inspection report...&#10;Example: Analyze this inspection report, identify important findings, retrieve the relevant local SOP/manual information, assess the findings using available evidence, and generate an approval note."></textarea>
                         
-                        <div class="console-actions-bar">
-                            <button id="investigateBtn" class="btn-investigate">
-                                <span class="btn-investigate-icon">⚡</span>
-                                <span class="btn-text">RUN AGENT INVESTIGATION</span>
-                            </button>
-                            
-                            <!-- UPGRADED FILE UPLOAD DROP-ZONE -->
-                            <div class="upload-dropzone" id="uploadDropZone">
-                                <label class="btn-upload" for="reportUploadInput">
-                                    <input type="file" id="reportUploadInput" accept=".pdf,.png,.jpg,.jpeg,.txt,.docx,.csv" style="display:none;">
-                                    <span class="upload-icon">📁</span>
-                                    <span class="upload-text">DROP OR SELECT REPORT / CSV</span>
-                                </label>
-                                <span id="currentReportBadge" class="report-badge">
-                                    Active Doc: <strong>Scanned_Inspection_Report_Machine101.pdf</strong>
-                                </span>
-                            </div>
+                        <button id="investigateBtn">
+                            <span class="btn-text">RUN AGENT INVESTIGATION</span>
+                        </button>
+                        
+                        <div class="upload-bar" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:10px;">
+                            <label class="btn-upload" style="background:rgba(16,42,77,0.8); border:1px solid var(--border-cyan); padding:8px 14px; border-radius:4px; font-family:var(--font-mono); font-size:11px; cursor:pointer; color:var(--cyan); display:inline-flex; align-items:center; gap:6px;">
+                                <input type="file" id="reportUploadInput" accept=".pdf,.png,.jpg,.jpeg,.txt,.docx,.csv" style="display:none;">
+                                <span>📄 UPLOAD CONFIDENTIAL REPORT / CSV</span>
+                            </label>
+                            <span id="currentReportBadge" style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); background:rgba(255,255,255,0.04); padding:6px 12px; border-radius:4px; border:1px solid var(--border-color);">
+                                Active Doc: <strong>Scanned_Inspection_Report_Machine101.pdf</strong>
+                            </span>
                         </div>
 
-                        <div class="demo-buttons-bar">
-                            <button id="btn-primary-demo" class="btn-demo-primary">
-                                <span class="btn-demo-tag">PRIMARY WORKFLOW</span>
-                                <span class="btn-demo-title">⚡ ANALYZE SCANNED REPORT &amp; PREPARE APPROVAL NOTE</span>
-                            </button>
-                            <button id="btn-secondary-demo" class="btn-demo-secondary">
-                                <span class="btn-demo-tag">SECONDARY WORKFLOW</span>
-                                <span class="btn-demo-title">⚡ SYNTHESIZE PYTHON AST CODE &amp; ANALYZE CSV</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- CURRENT OPERATION PANEL (LIVE EXECUTION CARD) -->
-                    <div class="current-op-card" id="currentOpPanel">
-                        <div class="current-op-header">
-                            <div class="cop-title-row">
-                                <span class="cop-icon">⚙️</span>
-                                <span class="cop-label">CURRENT OPERATION</span>
-                            </div>
-                            <div class="cop-status" id="currOpStatus">
-                                <span class="cop-dot idle"></span> STANDBY
-                            </div>
-                        </div>
-                        <div class="current-op-body">
-                            <div class="cop-name-row">
-                                <span class="cop-tag">ACTIVE TOOL / STEP:</span>
-                                <span class="cop-name" id="currOpName">Awaiting User Execution</span>
-                            </div>
-                            <div class="cop-detail-row">
-                                <span class="cop-detail" id="currOpDetail">System in idle loopback state. Enter prompt or trigger primary demo to run multi-step sovereign agent.</span>
-                            </div>
-                            <div class="cop-footer-row" id="currOpFooter">
-                                <span class="cop-latency" id="currOpDuration">Elapsed: 0.0s</span>
-                                <span class="cop-security-badge">AST &amp; AIR-GAP GUARD ENFORCED</span>
-                            </div>
-                        </div>
+                        <button id="btn-primary-demo" style="margin-top:10px; width:100%; height:40px; background:linear-gradient(135deg, rgba(0, 217, 255, 0.22), rgba(16, 185, 129, 0.22)); border:1px solid var(--cyan); color:#ffffff; font-family:var(--font-heading); font-size:13px; font-weight:700; letter-spacing:1px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                            ⚡ PRIMARY DEMO: ANALYZE SCANNED REPORT &amp; PREPARE APPROVAL NOTE
+                        </button>
+                        <button id="btn-secondary-demo" style="margin-top:8px; width:100%; height:38px; background:linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(59, 130, 246, 0.22)); border:1px solid #a855f7; color:#ffffff; font-family:var(--font-heading); font-size:12px; font-weight:700; letter-spacing:1px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                            ⚡ SECONDARY DEMO: WRITE PYTHON PROGRAM &amp; ANALYZE CSV STATISTICS
+                        </button>
                     </div>
 
                     <!-- REAL AGENT EXECUTION PLAN CHECKLIST -->
                     <div class="agent-live-plan-card">
                         <div class="plan-card-header">
-                            <div class="plan-title-wrap">
-                                <span class="plan-icon">📋</span>
-                                <span class="plan-title">REAL AGENT EXECUTION PLAN</span>
-                            </div>
+                            <span class="plan-title">REAL AGENT EXECUTION PLAN</span>
                             <span class="plan-status-badge" id="planOverallStatus">STANDBY</span>
                         </div>
                         <div class="plan-steps-list" id="planStepsContainer">
                             <div class="plan-step-row" id="pstep-1">
                                 <span class="step-indicator">○</span>
-                                <span class="step-num">Step 01</span>
+                                <span class="step-num">Step 1</span>
                                 <span class="step-desc">Ingest &amp; parse confidential document (Scanned Inspection Report)</span>
                                 <span class="step-tool-badge">READ_FILE</span>
-                                <span class="step-duration" id="pstep-dur-1">--</span>
                             </div>
                             <div class="plan-step-row" id="pstep-2">
                                 <span class="step-indicator">○</span>
-                                <span class="step-num">Step 02</span>
+                                <span class="step-num">Step 2</span>
                                 <span class="step-desc">Perform local OCR &amp; analyze physical component images</span>
                                 <span class="step-tool-badge">OCR / VISION</span>
-                                <span class="step-duration" id="pstep-dur-2">--</span>
                             </div>
                             <div class="plan-step-row" id="pstep-3">
                                 <span class="step-indicator">○</span>
-                                <span class="step-num">Step 03</span>
+                                <span class="step-num">Step 3</span>
                                 <span class="step-desc">Query organizational knowledge base for SOP thresholds &amp; limits</span>
                                 <span class="step-tool-badge">SEARCH_KB</span>
-                                <span class="step-duration" id="pstep-dur-3">--</span>
                             </div>
                             <div class="plan-step-row" id="pstep-4">
                                 <span class="step-indicator">○</span>
-                                <span class="step-num">Step 04</span>
+                                <span class="step-num">Step 4</span>
                                 <span class="step-desc">Synthesize evidence &amp; execute AST safe mathematical verification</span>
                                 <span class="step-tool-badge">EXEC_PYTHON</span>
-                                <span class="step-duration" id="pstep-dur-4">--</span>
                             </div>
                             <div class="plan-step-row" id="pstep-5">
                                 <span class="step-indicator">○</span>
-                                <span class="step-num">Step 05</span>
+                                <span class="step-num">Step 5</span>
                                 <span class="step-desc">Generate official Approval Note DOCX &amp; verify structural schema</span>
                                 <span class="step-tool-badge">GENERATE_DOCX</span>
-                                <span class="step-duration" id="pstep-dur-5">--</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- FULL 8-NODE INDUSTRIAL PIPELINE VISUALIZATION -->
-                    <div class="pipeline-section-wrap">
-                        <div class="pipeline-title-bar">
-                            <span class="pip-label">AUTONOMOUS PIPELINE TRACE</span>
-                            <span class="pip-sub">END-TO-END VERIFIED EVIDENCE FLOW</span>
+                    <!-- PIPELINE VISUAL NODES (PRESERVED) -->
+                    <div class="pipeline-container">
+                        <div class="pipe-node" id="node-agent">
+                            <div class="node-circle">01</div>
+                            <div class="node-label">AGENT</div>
+                            <div class="node-status">WAITING</div>
                         </div>
-                        <div class="pipeline-container">
-                            <div class="pipe-node" id="node-agent">
-                                <div class="node-circle">01</div>
-                                <div class="node-label">AGENT</div>
-                                <div class="node-status">WAITING</div>
-                            </div>
-                            <div class="pipe-connector" id="conn-1"></div>
-                            <div class="pipe-node" id="node-doc">
-                                <div class="node-circle">02</div>
-                                <div class="node-label">DOCUMENT</div>
-                                <div class="node-status">WAITING</div>
-                            </div>
-                            <div class="pipe-connector" id="conn-2"></div>
-                            <div class="pipe-node" id="node-ocr">
-                                <div class="node-circle">03</div>
-                                <div class="node-label">OCR</div>
-                                <div class="node-status">WAITING</div>
-                            </div>
-                            <div class="pipe-connector" id="conn-3"></div>
-                            <div class="pipe-node" id="node-kb">
-                                <div class="node-circle">04</div>
-                                <div class="node-label">KNOWLEDGE</div>
-                                <div class="node-status">WAITING</div>
-                            </div>
-                            <!-- Retain compatibility node aliases for manual/vision/fusion -->
-                            <div style="display:none;" id="node-manual"></div>
-                            <div class="pipe-connector" id="conn-4"></div>
-                            <div class="pipe-node" id="node-vision">
-                                <div class="node-circle">05</div>
-                                <div class="node-label">VISION</div>
-                                <div class="node-status">WAITING</div>
-                            </div>
-                            <div class="pipe-connector" id="conn-5"></div>
-                            <div class="pipe-node" id="node-reason">
-                                <div class="node-circle">06</div>
-                                <div class="node-label">REASONING</div>
-                                <div class="node-status">WAITING</div>
-                            </div>
-                            <div style="display:none;" id="node-fusion"></div>
-                            <div class="pipe-connector" id="conn-6"></div>
-                            <div class="pipe-node" id="node-verify">
-                                <div class="node-circle">07</div>
-                                <div class="node-label">VERIFY</div>
-                                <div class="node-status">WAITING</div>
-                            </div>
-                            <div class="pipe-connector" id="conn-7"></div>
-                            <div class="pipe-node" id="node-deliv">
-                                <div class="node-circle">08</div>
-                                <div class="node-label">DELIVERABLE</div>
-                                <div class="node-status">WAITING</div>
-                            </div>
+                        <div class="pipe-connector" id="conn-1"></div>
+                        <div class="pipe-node" id="node-manual">
+                            <div class="node-circle">02</div>
+                            <div class="node-label">MANUAL</div>
+                            <div class="node-status">WAITING</div>
+                        </div>
+                        <div class="pipe-connector" id="conn-2"></div>
+                        <div class="pipe-node" id="node-vision">
+                            <div class="node-circle">03</div>
+                            <div class="node-label">VISION</div>
+                            <div class="node-status">WAITING</div>
+                        </div>
+                        <div class="pipe-connector" id="conn-3"></div>
+                        <div class="pipe-node" id="node-fusion">
+                            <div class="node-circle">04</div>
+                            <div class="node-label">FUSION</div>
+                            <div class="node-status">WAITING</div>
                         </div>
                     </div>
                 </div>
@@ -511,10 +403,7 @@
                 <div class="inv-right-col">
                     <!-- MODEL SELECTED CARD -->
                     <div class="exec-info-card" id="cardModelSelected">
-                        <div class="exec-card-title">
-                            <span>MODEL ROUTER SELECTION</span>
-                            <span class="router-chip-ok">ACTIVE</span>
-                        </div>
+                        <div class="exec-card-title">MODEL SELECTED</div>
                         <div class="exec-card-grid">
                             <div class="exec-item">
                                 <span class="exec-label">TASK TYPE:</span>
@@ -529,38 +418,29 @@
                                 <span class="exec-val text-green" id="execSelectedModel">qwen2.5:7b</span>
                             </div>
                             <div class="exec-item">
-                                <span class="exec-label">EXECUTION MODE:</span>
+                                <span class="exec-label">EXECUTION:</span>
                                 <span class="exec-val text-green" id="execExecutionMode">LOCAL AIR-GAPPED</span>
-                            </div>
-                            <div class="exec-item full-width" style="grid-column: span 2; border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
-                                <span class="exec-label">ROUTING REASON:</span>
-                                <span class="exec-val text-cyan" id="execRoutingReason">Multimodal investigation requires document reasoning, local SOP search &amp; safe code evaluation</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- TOOLS USED CARD -->
                     <div class="exec-info-card" id="cardToolsUsed">
-                        <div class="exec-card-title">
-                            <span>TOOLS EXECUTION TRACE</span>
-                            <span class="trace-counter" id="toolsCountBadge">6 TOOLS READY</span>
-                        </div>
+                        <div class="exec-card-title">TOOLS USED</div>
                         <div class="tools-used-list" id="toolsUsedList">
-                            <div class="tool-tag" data-tool="READ_FILE"><span class="tool-status-dot green">✓</span> READ_FILE</div>
-                            <div class="tool-tag" data-tool="SEARCH_KNOWLEDGE_BASE"><span class="tool-status-dot green">✓</span> SEARCH_KNOWLEDGE_BASE</div>
-                            <div class="tool-tag" data-tool="OCR_DOCUMENT"><span class="tool-status-dot green">✓</span> OCR_DOCUMENT</div>
-                            <div class="tool-tag" data-tool="ANALYZE_IMAGE"><span class="tool-status-dot green">✓</span> ANALYZE_IMAGE</div>
-                            <div class="tool-tag" data-tool="GENERATE_APPROVAL_NOTE"><span class="tool-status-dot green">✓</span> GENERATE_APPROVAL_NOTE</div>
-                            <div class="tool-tag" data-tool="VERIFY_FILE"><span class="tool-status-dot green">✓</span> VERIFY_FILE</div>
+                            <div class="tool-tag">READ_FILE</div>
+                            <div class="tool-tag">SEARCH_KNOWLEDGE_BASE</div>
+                            <div class="tool-tag">OCR_DOCUMENT</div>
+                            <div class="tool-tag">ANALYZE_IMAGE</div>
+                            <div class="tool-tag">GENERATE_APPROVAL_NOTE</div>
+                            <div class="tool-tag">VERIFY_FILE</div>
                         </div>
                     </div>
 
                     <!-- INVESTIGATION HISTORY -->
-                    <div class="history-panel-wrap">
-                        <div class="panel-header">INVESTIGATION TIMELINE &amp; HISTORY</div>
-                        <div class="history-list" id="historyList">
-                            <div class="history-empty">No previous investigations</div>
-                        </div>
+                    <div class="panel-header">INVESTIGATION HISTORY</div>
+                    <div class="history-list" id="historyList">
+                        <div class="history-empty">No previous investigations</div>
                     </div>
                 </div>
             </div>
@@ -1056,8 +936,6 @@ STATUS: WARNING (Conditional Operation Allowed)
         </section>
     </div>
 
-    <!-- TOAST NOTIFICATION CONTAINER -->
-    <div class="toast-container" id="toastContainer"></div>
 </div>
 
 <script src="app.js?v=40"></script>

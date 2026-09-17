@@ -1,3 +1,9 @@
+const API_BASE_URL = window.SIH_API_BASE_URL || (
+    (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") 
+    ? "http://127.0.0.1:8000" 
+    : ""
+);
+
 document.addEventListener("DOMContentLoaded", function () {
     const question = document.getElementById("question");
     const investigateBtn = document.getElementById("investigateBtn");
@@ -9,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let lastHealthState = "NORMAL";
     let currentIncidentReportData = null;
     let investigationHistory = [];
-    let currentUploadedReportPath = null;
+    let typewriterTimer = null;
 
     // Initialize
     document.getElementById("activityLog").innerHTML = `<div class="activity-item"><div class="act-time">Just now</div><div class="act-desc">System initialized</div></div>`;
@@ -28,993 +34,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     setInterval(updateHeaderClock, 1000);
     updateHeaderClock();
-
-    // ----------------------------------------------------
-    // GLOBAL FEEDBACK & INTERACTION HELPERS (MICRO-INTERACTIONS)
-    // ----------------------------------------------------
-    function showToast(message, type = "info", duration = 3500) {
-        const container = document.getElementById("toastContainer");
-        if (!container) return;
-        const toast = document.createElement("div");
-        toast.className = `toast-item ${type}`;
-        
-        let icon = "ℹ️";
-        if (type === "success") icon = "✓";
-        else if (type === "warn") icon = "⚠️";
-        else if (type === "error") icon = "✕";
-        
-        toast.innerHTML = `
-            <span class="toast-icon">${icon}</span>
-            <div class="toast-body">
-                <div class="toast-title">${type.toUpperCase()}</div>
-                <div class="toast-msg">${escapeHTML(message)}</div>
-            </div>
-        `;
-        container.appendChild(toast);
-        setTimeout(() => {
-            toast.style.opacity = "0";
-            toast.style.transform = "translateX(20px)";
-            setTimeout(() => toast.remove(), 300);
-        }, duration);
-    }
-
-    function setExecutionState(state, detail = "") {
-        const statusText = document.getElementById("agentStatusText");
-        const statusPulse = document.getElementById("agentStatusPulse");
-        const planBadge = document.getElementById("planOverallStatus");
-        
-        if (statusText) statusText.textContent = detail ? `${state} • ${detail}` : state;
-        
-        if (statusPulse) {
-            statusPulse.className = "status-pulse-dot";
-            if (state.includes("IDLE")) statusPulse.classList.add("idle");
-            else if (state.includes("COMPLETED")) statusPulse.classList.add("completed");
-            else if (state.includes("FAILED") || state.includes("ERROR")) statusPulse.classList.add("error");
-            else statusPulse.classList.add("active");
-        }
-
-        if (planBadge) {
-            if (state.includes("IDLE")) {
-                planBadge.textContent = "STANDBY";
-                planBadge.className = "plan-status-badge";
-            } else if (state.includes("COMPLETED")) {
-                planBadge.textContent = "COMPLETED ✓";
-                planBadge.className = "plan-status-badge text-green";
-            } else if (state.includes("FAILED")) {
-                planBadge.textContent = "FAILED ✕";
-                planBadge.className = "plan-status-badge text-red";
-            } else {
-                planBadge.textContent = "EXECUTING...";
-                planBadge.className = "plan-status-badge text-cyan";
-            }
-        }
-    }
-
-    function updateCurrentOp(name, detail, status = "RUNNING", duration = "") {
-        const currOpName = document.getElementById("currOpName");
-        const currOpDetail = document.getElementById("currOpDetail");
-        const currOpStatus = document.getElementById("currOpStatus");
-        const currOpDuration = document.getElementById("currOpDuration");
-
-        if (currOpName) currOpName.textContent = name;
-        if (currOpDetail) currOpDetail.textContent = detail;
-        if (currOpDuration && duration) currOpDuration.textContent = duration;
-
-        if (currOpStatus) {
-            if (status === "RUNNING") {
-                currOpStatus.className = "cop-status running";
-                currOpStatus.innerHTML = `<span class="cop-dot running"></span> RUNNING`;
-            } else if (status === "COMPLETED") {
-                currOpStatus.className = "cop-status completed";
-                currOpStatus.innerHTML = `<span class="cop-dot completed"></span> ✓ COMPLETED`;
-            } else {
-                currOpStatus.className = "cop-status";
-                currOpStatus.innerHTML = `<span class="cop-dot idle"></span> STANDBY`;
-            }
-        }
-    }
-
-    function highlightTelemetryCard(key) {
-        document.querySelectorAll(".telemetry-card").forEach(c => c.classList.remove("tel-highlight"));
-        const idMap = {
-            temperature: "tel-temp",
-            rpm: "tel-rpm",
-            pressure: "tel-pressure",
-            coolant: "tel-coolant",
-            vibration: "tel-vibration",
-            fan: "tel-fan",
-            status: "tel-vibration"
-        };
-        const targetId = idMap[key] || (key.startsWith("tel-") ? key : null);
-        if (targetId) {
-            const el = document.getElementById(targetId);
-            if (el) {
-                const card = el.closest(".telemetry-card");
-                if (card) {
-                    card.classList.add("tel-highlight");
-                    setTimeout(() => card.classList.remove("tel-highlight"), 2500);
-                }
-            }
-        }
-    }
-
-    function updatePipelineNodes(activeId, completedIds = [], skippedIds = []) {
-        const allNodeIds = ["node-agent", "node-doc", "node-ocr", "node-kb", "node-vision", "node-reason", "node-verify", "node-deliv"];
-        
-        allNodeIds.forEach((id) => {
-            const node = document.getElementById(id);
-            if (!node) return;
-            const st = node.querySelector(".node-status");
-            node.classList.remove("active", "running", "completed", "skipped");
-            
-            if (id === activeId) {
-                node.classList.add("active", "running");
-                if (st) st.textContent = "RUNNING";
-            } else if (completedIds.includes(id)) {
-                node.classList.add("active", "completed");
-                if (st) st.textContent = "COMPLETED";
-            } else if (skippedIds.includes(id)) {
-                node.classList.add("skipped");
-                if (st) st.textContent = "NOT USED";
-            } else {
-                if (st) st.textContent = "WAITING";
-            }
-        });
-
-        // Update connectors
-        for (let c = 1; c <= 7; c++) {
-            const conn = document.getElementById(`conn-${c}`);
-            if (conn) {
-                const prevNodeId = allNodeIds[c - 1];
-                if (completedIds.includes(prevNodeId)) {
-                    conn.className = "pipe-connector completed";
-                } else if (prevNodeId === activeId) {
-                    conn.className = "pipe-connector active";
-                } else {
-                    conn.className = "pipe-connector";
-                }
-            }
-        }
-    }
-
-    // ----------------------------------------------------
-    // DOCUMENT UPLOAD & DRAG-AND-DROP CONTROLS
-    // ----------------------------------------------------
-    async function handleDocumentUpload(file) {
-        if (!file) return;
-        const currentReportBadge = document.getElementById("currentReportBadge");
-        const formData = new FormData();
-        formData.append("file", file);
-        
-        try {
-            if (currentReportBadge) currentReportBadge.innerHTML = `Uploading <strong>${escapeHTML(file.name)}</strong>...`;
-            showToast(`Uploading confidential file: ${file.name}`, "info");
-            updateCurrentOp("READ_FILE", `Uploading & indexing confidential document: ${file.name}`, "RUNNING");
-            
-            const upRes = await fetch("http://127.0.0.1:8000/api/upload", {
-                method: "POST",
-                body: formData
-            });
-            
-            if (upRes.ok) {
-                const upData = await upRes.json();
-                currentUploadedReportPath = upData.file_path;
-                if (currentReportBadge) {
-                    currentReportBadge.innerHTML = `Active Doc: <strong>${escapeHTML(upData.filename)}</strong> <span class="text-green">(Indexed)</span>`;
-                }
-                addActivityLog(`Uploaded inspection report: ${upData.filename}`);
-                showToast(`✓ Document indexed: ${upData.filename}`, "success");
-                updateCurrentOp("READ_FILE", `Indexed: ${upData.filename}`, "COMPLETED");
-                loadDocumentsCatalog();
-            } else {
-                if (currentReportBadge) currentReportBadge.innerHTML = `<span class="text-red">Upload failed</span>`;
-                showToast(`Upload failed for ${file.name}`, "error");
-                updateCurrentOp("READ_FILE", `Upload failed`, "STANDBY");
-            }
-        } catch(err) {
-            if (currentReportBadge) currentReportBadge.innerHTML = `<span class="text-red">Upload error: ${escapeHTML(err.message)}</span>`;
-            showToast(`Upload error: ${err.message}`, "error");
-        }
-    }
-
-    const reportUploadInput = document.getElementById("reportUploadInput");
-    if (reportUploadInput) {
-        reportUploadInput.addEventListener("change", function (e) {
-            if (e.target.files && e.target.files[0]) {
-                handleDocumentUpload(e.target.files[0]);
-            }
-        });
-    }
-
-    const uploadDropZone = document.getElementById("uploadDropZone");
-    if (uploadDropZone) {
-        uploadDropZone.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            uploadDropZone.classList.add("dragover");
-        });
-        uploadDropZone.addEventListener("dragleave", () => {
-            uploadDropZone.classList.remove("dragover");
-        });
-        uploadDropZone.addEventListener("drop", (e) => {
-            e.preventDefault();
-            uploadDropZone.classList.remove("dragover");
-            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                handleDocumentUpload(e.dataTransfer.files[0]);
-            }
-        });
-    }
-
-    const btnPrimaryDemo = document.getElementById("btn-primary-demo");
-    if (btnPrimaryDemo) {
-        btnPrimaryDemo.addEventListener("click", function () {
-            if (btnPrimaryDemo.disabled) return;
-            btnPrimaryDemo.classList.add("btn-processing");
-            btnPrimaryDemo.disabled = true;
-            showToast("Running Primary Demo: Scanned Report Analysis & Approval Note...", "info");
-            
-            if (question) {
-                question.value = "Analyze this inspection report, identify important findings, retrieve the relevant local SOP/manual information, assess the findings using available evidence, and generate an approval note.";
-            }
-            if (investigateBtn) {
-                investigateBtn.click();
-            }
-        });
-    }
-
-    const btnSecondaryDemo = document.getElementById("btn-secondary-demo");
-    if (btnSecondaryDemo) {
-        btnSecondaryDemo.addEventListener("click", function () {
-            if (btnSecondaryDemo.disabled) return;
-            btnSecondaryDemo.classList.add("btn-processing");
-            btnSecondaryDemo.disabled = true;
-            showToast("Running Secondary Demo: Python AST Code Synthesis on CSV...", "info");
-            
-            if (question) {
-                question.value = "Write a Python program to analyze this CSV and calculate maintenance statistics.";
-            }
-            if (investigateBtn) {
-                investigateBtn.click();
-            }
-        });
-    }
-
-    async function pollModelRouter() {
-        try {
-            const res = await fetch("http://127.0.0.1:8000/api/models");
-            if (res.ok) {
-                const mData = await res.json();
-                const badge = document.getElementById("stat-model-router");
-                if (badge) {
-                    const rModel = mData.registry ? mData.registry.REASONING_MODEL : "qwen2.5:7b";
-                    if (mData.ollama_online) {
-                        badge.innerHTML = `<span class="pulse-dot green"></span> ROUTER: ${escapeHTML(rModel)} (ONLINE)`;
-                        badge.style.color = "var(--green)";
-                        badge.style.borderColor = "rgba(16, 185, 129, 0.4)";
-                    } else {
-                        badge.innerHTML = `<span class="pulse-dot"></span> ROUTER: SOVEREIGN LOCAL`;
-                        badge.style.color = "var(--cyan)";
-                        badge.style.borderColor = "rgba(0, 217, 255, 0.4)";
-                    }
-                }
-            }
-        } catch(e) {}
-    }
-    pollModelRouter();
-
-    // ----------------------------------------------------
-    // PRIMARY WORKBENCH TAB ROUTING
-    // ----------------------------------------------------
-    function switchTab(tabId) {
-        document.querySelectorAll(".nav-tab").forEach(tab => {
-            if (tab.getAttribute("data-tab") === tabId) {
-                tab.classList.add("active");
-            } else {
-                tab.classList.remove("active");
-            }
-        });
-
-        document.querySelectorAll(".tab-pane").forEach(pane => {
-            if (pane.id === `pane-${tabId}`) {
-                pane.classList.add("active");
-            } else {
-                pane.classList.remove("active");
-            }
-        });
-
-        if (tabId === "overview") {
-            pollSystemStatus();
-        } else if (tabId === "documents") {
-            loadDocumentsCatalog();
-        } else if (tabId === "deliverables") {
-            loadDeliverables();
-        } else if (tabId === "security") {
-            pollSovereignty();
-            pollAuditTrail();
-        }
-    }
-
-    document.querySelectorAll(".nav-tab").forEach(tab => {
-        tab.addEventListener("click", function() {
-            const tId = this.getAttribute("data-tab");
-            if (tId) switchTab(tId);
-        });
-    });
-
-    // ----------------------------------------------------
-    // SYSTEM STATUS POLLING (OVERVIEW TAB)
-    // ----------------------------------------------------
-    async function pollSystemStatus() {
-        try {
-            const res = await fetch("http://127.0.0.1:8000/api/system/status");
-            if (!res.ok) return;
-            const d = await res.json();
-            
-            const ovAiStatus = document.getElementById("ov-ai-status");
-            const ovAiSub = document.getElementById("ov-ai-sub");
-            if (ovAiStatus) {
-                ovAiStatus.textContent = d.ollama_online ? "OLLAMA ACTIVE" : "SOVEREIGN LOCAL";
-                ovAiStatus.className = d.ollama_online ? "ribbon-val text-green" : "ribbon-val text-cyan";
-            }
-            if (ovAiSub) {
-                ovAiSub.textContent = d.ollama_online ? "Local Inference Daemon Online" : "Local Sovereign Fallback Ready";
-            }
-
-            const ovActiveModel = document.getElementById("ov-active-model");
-            if (ovActiveModel && d.roles) {
-                ovActiveModel.textContent = d.roles.REASONING_MODEL || "qwen2.5:7b";
-            }
-
-            const ovGpuStatus = document.getElementById("ov-gpu-status");
-            const ovComputeSub = document.getElementById("ov-compute-sub");
-            if (ovGpuStatus && d.gpu) {
-                if (d.gpu.available) {
-                    ovGpuStatus.textContent = "GPU ACCELERATED";
-                    ovGpuStatus.className = "ribbon-val text-green";
-                    if (ovComputeSub) {
-                        ovComputeSub.textContent = `${d.gpu.device} (${d.cpu_count} CPU Cores)`;
-                    }
-                } else {
-                    ovGpuStatus.textContent = "CPU DIRECT";
-                    ovGpuStatus.className = "ribbon-val text-cyan";
-                    if (ovComputeSub) {
-                        ovComputeSub.textContent = `${d.platform} (${d.cpu_count} Cores, ${d.ram_total_gb}GB RAM)`;
-                    }
-                }
-            }
-
-            const ovSovStatus = document.getElementById("ov-sov-status");
-            if (ovSovStatus) {
-                ovSovStatus.textContent = d.sovereignty_tier || "APP GUARD ENFORCED";
-            }
-        } catch(e) {}
-
-        try {
-            const rRes = await fetch("http://127.0.0.1:8000/api/documents");
-            if (rRes.ok) {
-                const rData = await rRes.json();
-                const ovRag = document.getElementById("ov-rag-status");
-                if (ovRag) {
-                    ovRag.textContent = `${rData.indexed_chunks_count || 22} CHUNKS INDEXED`;
-                }
-            }
-        } catch(e) {}
-    }
-    setInterval(pollSystemStatus, 6000);
-    pollSystemStatus();
-
-    // ----------------------------------------------------
-    // PROMPT CHIPS (AGENT WORKSPACE)
-    // ----------------------------------------------------
-    document.querySelectorAll(".chip-btn[data-prompt]").forEach(btn => {
-        btn.addEventListener("click", function() {
-            const prompt = this.getAttribute("data-prompt");
-            if (question && prompt) {
-                question.value = prompt;
-                question.focus();
-            }
-        });
-    });
-
-    // ----------------------------------------------------
-    // DOCUMENTS TAB HANDLERS
-    // ----------------------------------------------------
-    async function loadDocumentsCatalog() {
-        const tbody = document.getElementById("docsTableBody");
-        if (!tbody) return;
-        try {
-            const res = await fetch("http://127.0.0.1:8000/api/documents/files");
-            if (!res.ok) return;
-            const data = await res.json();
-            const files = data.files || [];
-
-            const ovKb = document.getElementById("ov-kb-files");
-            if (ovKb) ovKb.textContent = `${files.length} CONFIDENTIAL DOCS`;
-
-            if (files.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-secondary);">No documents found in knowledge_base/</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = files.map(f => {
-                const sizeKb = (f.size_bytes / 1024).toFixed(1);
-                return `
-                    <tr>
-                        <td style="color:var(--cyan); font-weight:600;">${escapeHTML(f.filename)}</td>
-                        <td><span class="tool-tag">${escapeHTML(f.category)}</span></td>
-                        <td><strong>${escapeHTML(f.extension)}</strong></td>
-                        <td>${sizeKb} KB</td>
-                        <td>
-                            <button class="btn-small btn-inspect-doc" data-filepath="${escapeHTML(f.file_path)}" data-filename="${escapeHTML(f.filename)}" data-cat="${escapeHTML(f.category)}">
-                                👁️ PREVIEW
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join("");
-
-            document.querySelectorAll(".btn-inspect-doc").forEach(b => {
-                b.addEventListener("click", async function() {
-                    const fp = this.getAttribute("data-filepath");
-                    const fn = this.getAttribute("data-filename");
-                    const cat = this.getAttribute("data-cat");
-                    const nameEl = document.getElementById("inspectDocName");
-                    const metaEl = document.getElementById("inspectDocMeta");
-                    const contentEl = document.getElementById("inspectDocContent");
-                    if (nameEl) nameEl.textContent = fn;
-                    if (metaEl) metaEl.textContent = `Category: ${cat} • Path: ${fp}`;
-                    if (contentEl) contentEl.textContent = "Processing and reading document content...";
-
-                    try {
-                        const pRes = await fetch("http://127.0.0.1:8000/api/documents/process", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ file_path: fp })
-                        });
-                        if (pRes.ok) {
-                            const pData = await pRes.json();
-                            let allText = "";
-                            (pData.pages || []).forEach(p => {
-                                if (p.digital_text) allText += p.digital_text + "\n";
-                                if (p.ocr_text) allText += "\n[OCR Extracted]:\n" + p.ocr_text + "\n";
-                            });
-                            if (contentEl) contentEl.textContent = allText || "[Document parsed - zero raw text]";
-                            if (metaEl) metaEl.textContent = `Category: ${cat} • Pages: ${pData.total_pages} • Status: ${pData.status}`;
-                        } else {
-                            if (contentEl) contentEl.textContent = "Error parsing document.";
-                        }
-                    } catch(err) {
-                        if (contentEl) contentEl.textContent = "Failed to inspect: " + err.message;
-                    }
-                });
-            });
-
-        } catch(e) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-secondary);">Error loading documents.</td></tr>`;
-        }
-    }
-
-    const btnRefreshDocs = document.getElementById("btnRefreshDocs");
-    if (btnRefreshDocs) {
-        btnRefreshDocs.addEventListener("click", loadDocumentsCatalog);
-    }
-
-    // ----------------------------------------------------
-    // KNOWLEDGE BASE SEARCH & SYNC
-    // ----------------------------------------------------
-    async function searchKnowledgeBase() {
-        const qInput = document.getElementById("kbSearchQuery");
-        const catSelect = document.getElementById("kbCategoryFilter");
-        const topKSelect = document.getElementById("kbTopK");
-        const resList = document.getElementById("kbResultsList");
-
-        const query = qInput ? qInput.value.trim() : "";
-        if (!query) return;
-
-        showToast(`Searching local ChromaDB: "${query}"`, "info");
-        if (resList) resList.innerHTML = `<div style="text-align:center; padding:20px; color:var(--cyan);">Performing air-gapped vector search in ChromaDB...</div>`;
-
-        try {
-            const body = {
-                query: query,
-                top_k: parseInt(topKSelect ? topKSelect.value : 3),
-                category: catSelect ? catSelect.value || null : null
-            };
-            const res = await fetch("http://127.0.0.1:8000/api/knowledge/search", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-            if (res.ok) {
-                const data = await res.json();
-                const evidence = data.evidence || [];
-                if (evidence.length === 0) {
-                    if (resList) resList.innerHTML = `<div style="padding:16px; color:var(--text-secondary);">No matching chunks found in local ChromaDB.</div>`;
-                    showToast("No matching chunks found in local ChromaDB", "warn");
-                    return;
-                }
-
-                showToast(`✓ Retrieved ${evidence.length} evidence chunk(s) from local ChromaDB`, "success");
-
-                if (resList) {
-                    resList.innerHTML = evidence.map(e => `
-                        <div class="knowledge-evidence-card">
-                            <div class="ke-header">
-                                <div class="ke-source">
-                                    <span class="ke-label">SOURCE:</span>
-                                    <span class="ke-val">${escapeHTML(e.source || "Document")}</span>
-                                </div>
-                                <div class="ke-meta">
-                                    <span class="ke-page">Page ${e.page || 1}</span>
-                                    <span class="ke-match">${escapeHTML(e.similarity_percent || "Match")}</span>
-                                </div>
-                            </div>
-                            <div class="ke-body">
-                                <div class="ke-evidence-label">EVIDENCE EXCERPT:</div>
-                                <div class="ke-evidence-text">${escapeHTML(e.relevant_evidence || "")}</div>
-                            </div>
-                        </div>
-                    `).join("");
-                }
-            } else {
-                if (resList) resList.innerHTML = `<div style="color:var(--red); padding:16px;">Search query failed.</div>`;
-                showToast("ChromaDB search query failed", "error");
-            }
-        } catch(err) {
-            if (resList) resList.innerHTML = `<div style="color:var(--red); padding:16px;">Error: ${escapeHTML(err.message)}</div>`;
-            showToast("Search error: " + err.message, "error");
-        }
-    }
-
-    const btnRunKBSearch = document.getElementById("btnRunKBSearch");
-    if (btnRunKBSearch) {
-        btnRunKBSearch.addEventListener("click", searchKnowledgeBase);
-    }
-    const kbSearchQuery = document.getElementById("kbSearchQuery");
-    if (kbSearchQuery) {
-        kbSearchQuery.addEventListener("keydown", function(e) {
-            if (e.key === "Enter") searchKnowledgeBase();
-        });
-    }
-
-    const btnSyncKB = document.getElementById("btnSyncKB");
-    if (btnSyncKB) {
-        btnSyncKB.addEventListener("click", async function() {
-            if (btnSyncKB.disabled) return;
-            btnSyncKB.disabled = true;
-            btnSyncKB.textContent = "SYNCING...";
-            showToast("Syncing and re-indexing organizational knowledge directory...", "info");
-            try {
-                const res = await fetch("http://127.0.0.1:8000/api/knowledge/sync", { method: "POST" });
-                const d = await res.json();
-                addActivityLog(`Knowledge base synced: ${d.chunks_added || 0} chunks added`);
-                showToast(`✓ Knowledge base synced: ${d.files_processed || 0} files processed`, "success");
-                loadDocumentsCatalog();
-                pollSystemStatus();
-            } catch(e) {
-                showToast("Knowledge sync error: " + e.message, "error");
-            } finally {
-                btnSyncKB.disabled = false;
-                btnSyncKB.textContent = "⚡ SYNC & RE-INDEX KNOWLEDGE DIRECTORY";
-            }
-        });
-    }
-
-    // ----------------------------------------------------
-    // VISION ANALYSIS HANDLER
-    // ----------------------------------------------------
-    const btnRunVisionAnalysis = document.getElementById("btnRunVisionAnalysis");
-    if (btnRunVisionAnalysis) {
-        btnRunVisionAnalysis.addEventListener("click", async function() {
-            const promptInput = document.getElementById("visionPromptInput");
-            const outCard = document.getElementById("visionOutputCard");
-            if (!promptInput || !outCard) return;
-
-            const prompt = promptInput.value.trim();
-            btnRunVisionAnalysis.disabled = true;
-            btnRunVisionAnalysis.textContent = "INSPECTING...";
-            showToast("Running multimodal vision model (qwen2.5-vl)...", "info");
-            outCard.innerHTML = `<div style="color:var(--cyan); padding:12px;">Running local multimodal vision inspection...</div>`;
-
-            try {
-                const res = await fetch("http://127.0.0.1:8000/api/tools/execute", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        tool: "ANALYZE_IMAGE",
-                        args: {
-                            image_path: "ChatGPT Image Sep 13, 2026, 01_44_35 PM.png",
-                            prompt: prompt
-                        }
-                    })
-                });
-                const data = await res.json();
-                if (data.status === "SUCCESS") {
-                    showToast("✓ Vision inspection complete: Findings correlated with telemetry", "success");
-                    outCard.innerHTML = `
-                        <div class="v-finding-item">
-                            <span class="v-label">VISUAL OBSERVATION:</span>
-                            <span class="v-val text-green">${escapeHTML(data.observation || "Inspection complete.")}</span>
-                        </div>
-                        <div class="v-finding-item">
-                            <span class="v-label">DEFECT ASSESSMENT:</span>
-                            <span class="v-val text-orange">Radiator intake louvers show 20-30% lint &amp; dust accumulation. Fan structure intact.</span>
-                        </div>
-                        <div class="v-finding-item">
-                            <span class="v-label">FUSED TELEMETRY CONCLUSION:</span>
-                            <span class="v-val text-cyan">Operating temperature (84.2°C) is attributable to airflow impedance rather than mechanical motor failure.</span>
-                        </div>
-                    `;
-                } else {
-                    outCard.innerHTML = `<div style="color:var(--red); padding:12px;">Vision analysis failed: ${escapeHTML(data.error || "Unknown error")}</div>`;
-                    showToast("Vision inspection error", "error");
-                }
-                pollSovereignty();
-                pollAuditTrail();
-            } catch(err) {
-                outCard.innerHTML = `<div style="color:var(--red); padding:12px;">Vision call error: ${escapeHTML(err.message)}</div>`;
-                showToast("Vision call error: " + err.message, "error");
-            } finally {
-                btnRunVisionAnalysis.disabled = false;
-                btnRunVisionAnalysis.textContent = "👁️ RUN LOCAL VISION ANALYSIS";
-            }
-        });
-    }
-
-    // ----------------------------------------------------
-    // CODE LAB HANDLERS
-    // ----------------------------------------------------
-    const codelabEditor = document.getElementById("codelabEditor");
-    const codelabTerminal = document.getElementById("codelabTerminal");
-    const btnExecuteCode = document.getElementById("btnExecuteCode");
-
-    const codeTmplThermal = document.getElementById("codeTmplThermal");
-    if (codeTmplThermal) {
-        codeTmplThermal.addEventListener("click", () => {
-            if (codelabEditor) codelabEditor.value = `# Calculate Thermal Variance & Delta Margins
-measured_temp = 84.2
-sop_warning = 80.0
-sop_critical = 95.0
-
-variance = round(measured_temp - sop_warning, 2)
-margin_to_critical = round(sop_critical - measured_temp, 2)
-
-print(f"Variance above normal: +{variance} C")
-print(f"Margin to emergency trip: {margin_to_critical} C")
-status = "CONDITIONAL_APPROVAL" if measured_temp < sop_critical else "SHUTDOWN"
-print(f"Operational Determination: {status}")
-`;
-            showToast("Loaded Thermal Variance Template into Code Lab", "info");
-        });
-    }
-
-    const codeTmplFan = document.getElementById("codeTmplFan");
-    if (codeTmplFan) {
-        codeTmplFan.addEventListener("click", () => {
-            if (codelabEditor) codelabEditor.value = `# Ventilation Fan Efficiency Check
-fan_rpm = 1240
-sop_min_rpm = 1200
-sop_max_rpm = 1400
-
-efficiency_pct = round((fan_rpm / 1300) * 100, 1)
-is_compliant = sop_min_rpm <= fan_rpm <= sop_max_rpm
-
-print(f"Fan Speed: {fan_rpm} RPM")
-print(f"Fan Efficiency: {efficiency_pct}%")
-print(f"SOP-042 Boundary Compliance: {is_compliant}")
-`;
-            showToast("Loaded Fan Efficiency Template into Code Lab", "info");
-        });
-    }
-
-    const codeTmplDissipation = document.getElementById("codeTmplDissipation");
-    if (codeTmplDissipation) {
-        codeTmplDissipation.addEventListener("click", () => {
-            if (codelabEditor) codelabEditor.value = `# Coolant Level & Thermal Dissipation Margin
-coolant_level_pct = 68.0
-min_safe_level = 60.0
-margin_above_min = coolant_level_pct - min_safe_level
-
-print(f"Coolant Reservoir Level: {coolant_level_pct}%")
-print(f"Margin above minimum safe: +{margin_above_min}%")
-print("Verdict: Fluid volume sufficient for continued 48h operation.")
-`;
-            showToast("Loaded Coolant Dissipation Template into Code Lab", "info");
-        });
-    }
-
-    if (btnExecuteCode) {
-        btnExecuteCode.addEventListener("click", async function() {
-            if (!codelabEditor || !codelabTerminal) return;
-            const code = codelabEditor.value;
-            btnExecuteCode.disabled = true;
-            btnExecuteCode.textContent = "VALIDATING AST & EXECUTING...";
-            showToast("Validating AST constraints & executing sandboxed Python...", "info");
-            codelabTerminal.textContent = "Validating AST sandbox constraints and executing...\n";
-
-            try {
-                const res = await fetch("http://127.0.0.1:8000/api/tools/execute", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        tool: "EXECUTE_PYTHON",
-                        args: { code: code }
-                    })
-                });
-                const data = await res.json();
-                if (data.status === "SUCCESS") {
-                    codelabTerminal.textContent = `[AST Validation PASSED]\n${data.observation || "Code executed successfully."}\n`;
-                    if (data.data && data.data.result !== undefined) {
-                        codelabTerminal.textContent += `Result: ${JSON.stringify(data.data.result)}\n`;
-                    }
-                    codelabTerminal.style.color = "#4ade80";
-                    showToast("✓ AST validation PASSED: Code executed in sandbox", "success");
-                } else {
-                    codelabTerminal.textContent = `[AST Security / Sandbox ERROR]\n${data.error || data.observation || "Failed"}\n`;
-                    codelabTerminal.style.color = "#f87171";
-                    showToast("AST security violation or execution error", "error");
-                }
-                pollSovereignty();
-                pollAuditTrail();
-            } catch(err) {
-                codelabTerminal.textContent = `[Sandbox Exception]: ${err.message}`;
-                codelabTerminal.style.color = "#f87171";
-                showToast("Sandbox exception: " + err.message, "error");
-            } finally {
-                btnExecuteCode.disabled = false;
-                btnExecuteCode.textContent = "⚡ EXECUTE SANDBOXED PYTHON";
-            }
-        });
-    }
-
-    // ----------------------------------------------------
-    // DELIVERABLES TAB HANDLERS
-    // ----------------------------------------------------
-    let currentDeliverableFilter = "ALL";
-
-    async function loadDeliverables(filterFormat = currentDeliverableFilter) {
-        currentDeliverableFilter = filterFormat;
-        const tbody = document.getElementById("deliverablesTableBody");
-        if (!tbody) return;
-
-        try {
-            const res = await fetch("http://127.0.0.1:8000/api/deliverables");
-            if (!res.ok) return;
-            const data = await res.json();
-            let files = data.deliverables || [];
-
-            if (filterFormat !== "ALL") {
-                files = files.filter(f => f.type === filterFormat.toUpperCase());
-            }
-
-            if (files.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-secondary);">No deliverables found for format: ${escapeHTML(filterFormat)}</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = files.map(f => {
-                const sizeKb = (f.size_bytes / 1024).toFixed(1);
-                const dateStr = f.modified_at ? f.modified_at.split("T")[0] + " " + f.modified_at.split("T")[1]?.slice(0, 5) : "--";
-                return `
-                    <tr>
-                        <td style="color:var(--cyan); font-weight:600;">${escapeHTML(f.filename)}</td>
-                        <td><span class="tool-tag">${escapeHTML(f.type)}</span></td>
-                        <td>${sizeKb} KB</td>
-                        <td style="color:var(--text-secondary); font-size:11px;">${dateStr}</td>
-                        <td><span class="badge-status-ok">✓ VERIFIED AIR-GAP</span></td>
-                        <td>
-                            <a href="http://127.0.0.1:8000/deliverables/${encodeURIComponent(f.filename)}" class="btn-small" download style="text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
-                                📥 DOWNLOAD
-                            </a>
-                        </td>
-                    </tr>
-                `;
-            }).join("");
-        } catch(e) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-secondary);">Error loading deliverables.</td></tr>`;
-        }
-    }
-
-    document.querySelectorAll(".deliv-filter-btn").forEach(btn => {
-        btn.addEventListener("click", function() {
-            document.querySelectorAll(".deliv-filter-btn").forEach(b => b.classList.remove("active"));
-            this.classList.add("active");
-            const fmt = this.getAttribute("data-fmt") || "ALL";
-            loadDeliverables(fmt);
-        });
-    });
-
-    const btnRefreshDeliverables = document.getElementById("btnRefreshDeliverables");
-    if (btnRefreshDeliverables) {
-        btnRefreshDeliverables.addEventListener("click", () => {
-            loadDeliverables();
-            showToast("Deliverables repository refreshed", "info");
-        });
-    }
-
-    // ----------------------------------------------------
-    // SOVEREIGNTY & NETWORK AUDIT CONTROLS
-    // ----------------------------------------------------
-    let currentAuditFilter = "ALL";
-
-    async function pollSovereignty() {
-        try {
-            const res = await fetch("http://127.0.0.1:8000/sovereignty");
-            if (!res.ok) return;
-            const data = await res.json();
-
-            // 1. Warning banner if external calls > 0
-            const banner = document.getElementById("sovWarningBanner");
-            if (banner) {
-                if (data.external_ai_calls > 0) {
-                    banner.classList.remove("hidden");
-                } else {
-                    banner.classList.add("hidden");
-                }
-            }
-
-            // 2. Card 1: Sovereignty Status
-            const valSovStatus = document.getElementById("val-sov-status");
-            const subSovStatus = document.getElementById("sub-sov-status");
-            const dotSovStatus = document.getElementById("dot-sov-status");
-            if (valSovStatus) {
-                valSovStatus.textContent = data.sovereignty_status || "VERIFIED LOCAL";
-                if (data.status_color === "red") {
-                    valSovStatus.className = "sov-card-value text-red";
-                    if (dotSovStatus) dotSovStatus.className = "sov-indicator-dot red";
-                } else {
-                    valSovStatus.className = "sov-card-value text-green";
-                    if (dotSovStatus) dotSovStatus.className = "sov-indicator-dot green";
-                }
-            }
-            if (subSovStatus && data.host_network) {
-                subSovStatus.textContent = data.host_network.summary || "Application Guard Enforced";
-            }
-
-            // 3. Card 2: Local AI Calls
-            const valLocalAi = document.getElementById("val-local-ai");
-            if (valLocalAi) valLocalAi.textContent = data.local_model_calls ?? 0;
-
-            // 4. Card 3: External Calls
-            const valExternalCalls = document.getElementById("val-external-calls");
-            if (valExternalCalls) {
-                const ext = data.external_ai_calls ?? 0;
-                valExternalCalls.textContent = ext;
-                valExternalCalls.className = ext > 0 ? "sov-card-value text-red" : "sov-card-value text-green";
-            }
-
-            // 5. Card 4: Blocked Calls
-            const valBlockedCalls = document.getElementById("val-blocked-calls");
-            if (valBlockedCalls) {
-                valBlockedCalls.textContent = data.blocked_external_requests ?? 0;
-            }
-
-            // 6. Card 5: Cloud Providers
-            const valCloudProviders = document.getElementById("val-cloud-providers");
-            if (valCloudProviders) {
-                valCloudProviders.textContent = data.cloud_providers_count ?? 0;
-            }
-
-            // 7. Card 6: Network Status
-            const valNetworkStatus = document.getElementById("val-network-status");
-            const subNetworkStatus = document.getElementById("sub-network-status");
-            if (valNetworkStatus) {
-                valNetworkStatus.textContent = "127.0.0.1 LOOPBACK";
-            }
-            if (subNetworkStatus && data.host_network) {
-                subNetworkStatus.textContent = data.host_network.badge || "Physical WAN Disclosed";
-            }
-
-        } catch (err) {
-            // Server offline or initializing
-        }
-    }
-
-    async function pollAuditTrail() {
-        try {
-            const url = currentAuditFilter === "ALL" 
-                ? "http://127.0.0.1:8000/api/sovereignty/audit?limit=25" 
-                : `http://127.0.0.1:8000/api/sovereignty/audit?limit=25&category=${encodeURIComponent(currentAuditFilter)}`;
-            
-            const res = await fetch(url);
-            if (!res.ok) return;
-            const data = await res.json();
-            const events = data.events || [];
-
-            const countBadge = document.getElementById("auditEventCountBadge");
-            if (countBadge) countBadge.textContent = `${events.length} EVENTS`;
-
-            const tbody = document.getElementById("auditTableBody");
-            if (!tbody) return;
-
-            if (events.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-secondary); padding:16px;">No audit events recorded for filter: ${escapeHTML(currentAuditFilter)}</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = events.map(e => {
-                let badgeClass = "badge-class-local";
-                if (e.classification === "BLOCKED") badgeClass = "badge-class-blocked";
-                else if (e.classification === "EXTERNAL") badgeClass = "badge-class-external";
-
-                let statusColor = "badge-status-ok";
-                const stUpper = String(e.status || "").toUpperCase();
-                if (stUpper.includes("BLOCK") || stUpper.includes("FAIL") || stUpper.includes("ERROR") || stUpper.includes("ALERT")) {
-                    statusColor = e.classification === "BLOCKED" ? "badge-status-warn" : "badge-status-err";
-                }
-
-                const timeStr = e.time_human || (e.timestamp ? e.timestamp.split("T")[1]?.slice(0, 8) : "--:--");
-                const opStr = escapeHTML(e.operation || "");
-                const epStr = escapeHTML(e.endpoint || "");
-                const catStr = escapeHTML(e.category || "");
-
-                return `
-                    <tr>
-                        <td style="color:var(--text-secondary);">${timeStr}</td>
-                        <td style="color:var(--cyan); font-weight:600;">${catStr}</td>
-                        <td>${opStr}</td>
-                        <td style="color:#94a3b8; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${epStr}">${epStr}</td>
-                        <td><span class="${badgeClass}">${e.classification}</span></td>
-                        <td><span class="${statusColor}">${escapeHTML(e.status)}</span></td>
-                    </tr>
-                `;
-            }).join("");
-        } catch(e) {}
-    }
-
-    // Filter buttons click handler
-    document.querySelectorAll(".audit-filter-btn").forEach(btn => {
-        btn.addEventListener("click", function() {
-            document.querySelectorAll(".audit-filter-btn").forEach(b => b.classList.remove("active"));
-            this.classList.add("active");
-            currentAuditFilter = this.getAttribute("data-filter") || "ALL";
-            pollAuditTrail();
-        });
-    });
-
-    // Test Outbound WAN Guard Button
-    const btnTestGuard = document.getElementById("btn-test-guard");
-    const guardFeedback = document.getElementById("guardTestFeedback");
-    if (btnTestGuard) {
-        btnTestGuard.addEventListener("click", async function() {
-            if (btnTestGuard.disabled) return;
-            btnTestGuard.disabled = true;
-            if (guardFeedback) guardFeedback.innerHTML = `<span style="color:var(--cyan);">Simulating WAN egress to api.openai.com...</span>`;
-            
-            try {
-                const res = await fetch("http://127.0.0.1:8000/api/sovereignty/test-guard", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ target_url: "https://api.openai.com/v1/models" })
-                });
-                const data = await res.json();
-                if (data.status === "SUCCESS_BLOCKED") {
-                    if (guardFeedback) {
-                        guardFeedback.innerHTML = `<span style="color:#fb923c; font-weight:bold;">🛡️ INTERCEPTED &amp; BLOCKED!</span><br><span style="color:var(--text-secondary); font-size:10px;">${escapeHTML(data.message)}</span>`;
-                    }
-                    addActivityLog(`Security Guard: Intercepted unauthorized WAN request to api.openai.com`);
-                    showToast("🛡️ SECURITY GUARD: Blocked outbound WAN egress to api.openai.com", "warn");
-                } else {
-                    if (guardFeedback) {
-                        guardFeedback.innerHTML = `<span style="color:#f87171;">Status: ${escapeHTML(data.status)}</span>`;
-                    }
-                    showToast("Security test returned: " + data.status, "info");
-                }
-                pollSovereignty();
-                pollAuditTrail();
-            } catch(err) {
-                if (guardFeedback) guardFeedback.innerHTML = `<span style="color:#f87171;">Test failed: ${escapeHTML(err.message)}</span>`;
-                showToast("Security guard test failed: " + err.message, "error");
-            } finally {
-                setTimeout(() => { btnTestGuard.disabled = false; }, 1000);
-            }
-        });
-    }
-
-    // Interval timers for sovereignty & audit trail
-    setInterval(pollSovereignty, 3000);
-    setInterval(pollAuditTrail, 3000);
-    pollSovereignty();
-    pollAuditTrail();
 
     // ----------------------------------------------------
     // SIMULATION & DEMO CONTROLS
@@ -1078,6 +97,8 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
             const aiResult = document.getElementById("aiResult");
             if(aiResult) aiResult.classList.add("hidden");
             
+            if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+            
             const reportContainer = document.getElementById("incidentReportContainer");
             if (reportContainer) reportContainer.classList.add("hidden");
             currentIncidentReportData = null;
@@ -1088,26 +109,23 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
             lastHealthState = "NORMAL";
             if (question) question.value = '';
             
-            setExecutionState("IDLE", "Waiting for instruction");
-            updateCurrentOp("Awaiting User Query", "System in idle loopback state. Enter prompt or trigger demo.", "STANDBY", "Elapsed: 0.0s");
-            updatePipelineNodes("", [], []);
+            document.querySelectorAll('.pipe-node').forEach(n => {
+                n.classList.remove('active', 'running', 'skipped');
+                const st = n.querySelector('.node-status');
+                if(st) st.textContent = 'WAITING';
+            });
+            document.querySelectorAll('.pipe-connector').forEach(l => l.classList.remove('active'));
             
             // clear selected twin components
-            document.querySelectorAll(".twin-comp, .interactive-comp").forEach(c => c.classList.remove("selected"));
+            document.querySelectorAll(".twin-comp").forEach(c => c.classList.remove("selected"));
             const askBtn = document.getElementById("ins-ask-btn");
             if(askBtn) askBtn.style.display = "none";
-            const insEmpty = document.getElementById("inspection-empty");
-            const insData = document.getElementById("inspection-data");
-            if (insEmpty) insEmpty.classList.remove("hidden");
-            if (insData) insData.classList.add("hidden");
             const insName = document.getElementById("ins-comp-name");
-            if(insName) insName.textContent = "--";
+            if(insName) insName.textContent = "SELECT A MACHINE COMPONENT";
             const insStatus = document.getElementById("ins-comp-status");
             if(insStatus) insStatus.textContent = "--";
             const insValue = document.getElementById("ins-comp-value");
             if(insValue) insValue.textContent = "--";
-
-            showToast("Demo state reset to live telemetry", "info");
         });
     }
 
@@ -1116,11 +134,18 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
     // ----------------------------------------------------
     async function pollTelemetry() {
         try {
-            const res = await fetch("http://127.0.0.1:8000/telemetry");
+            const res = await fetch(`${API_BASE_URL}/telemetry`);
             if (!res.ok) throw new Error("Telemetry request failed");
             let data = await res.json();
             
-            if (simTemp !== null) {
+            if (simTemp === 85) {
+                data.temperature = 85;
+                data.rpm = 1240;
+                data.pressure = 2.4;
+                data.coolant = 68;
+                data.vibration = 0.18;
+                data.fan = "ACTIVE";
+            } else if (simTemp !== null) {
                 data.temperature = simTemp;
             }
             currentTelemetry = data;
@@ -1133,6 +158,21 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
             }
         } catch (error) {
             console.error("Telemetry error:", error);
+            updateElement("tel-temp", "ERR");
+            updateElement("tel-rpm", "ERR");
+            updateElement("tel-pressure", "ERR");
+            updateElement("tel-coolant", "ERR");
+            updateElement("tel-vibration", "ERR");
+            updateElement("tel-fan", "ERR");
+            
+            const circle = document.getElementById("health-progress");
+            if (circle) circle.classList.add("text-muted");
+            
+            const healthText = document.getElementById("health-status-text");
+            if (healthText) {
+                healthText.textContent = "DISCONNECTED";
+                healthText.className = "health-status text-muted";
+            }
         }
     }
 
@@ -1142,39 +182,17 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
     }
 
     function updateTelemetry(data) {
-        function setValWithPulse(id, newHtml) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (el.innerHTML !== newHtml) {
-                el.innerHTML = newHtml;
-                el.classList.add("val-updated");
-                setTimeout(() => el.classList.remove("val-updated"), 600);
-            }
-        }
-        setValWithPulse("tel-temp", data.temperature + "&deg;C");
-        setValWithPulse("tel-rpm", String(data.rpm));
-        setValWithPulse("tel-pressure", `<span id="tel-pressure-num">${data.pressure}</span> <span class="unit">bar</span>`);
-        setValWithPulse("tel-coolant", `<span id="tel-coolant-num">${data.coolant}</span>%`);
-        setValWithPulse("tel-vibration", String(data.vibration));
-        setValWithPulse("tel-fan", String(data.fan));
+        updateElement("tel-temp", data.temperature + "&deg;C");
+        updateElement("tel-rpm", data.rpm);
+        updateElement("tel-pressure", data.pressure);
+        updateElement("tel-coolant", data.coolant);
+        updateElement("tel-vibration", data.vibration);
+        updateElement("tel-fan", data.fan);
         
-        // Visual warning distinction on temperature card
-        const tempCard = document.getElementById("tel-temp")?.closest(".telemetry-card");
-        if (tempCard) {
-            if (data.temperature > 95) {
-                tempCard.style.borderColor = "var(--red)";
-                tempCard.style.background = "rgba(239, 68, 68, 0.08)";
-            } else if (data.temperature > 80) {
-                tempCard.style.borderColor = "var(--amber)";
-                tempCard.style.background = "rgba(245, 158, 11, 0.08)";
-            } else {
-                tempCard.style.borderColor = "";
-                tempCard.style.background = "";
-            }
-        }
+        updateDigitalTwin(data);
         
         // Update inspection panel if something is selected
-        const selectedComp = document.querySelector(".twin-comp.selected, .interactive-comp.selected");
+        const selectedComp = document.querySelector(".twin-comp.selected");
         if (selectedComp) {
             updateInspectionPanel(selectedComp.id, data);
         }
@@ -1271,10 +289,73 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
         }
     }
 
+    function updateDigitalTwin(data) {
+        // Temperature glow
+        const mCore = document.getElementById("comp-main");
+        if (mCore) {
+            if (data.temperature > 95) {
+                mCore.style.boxShadow = "inset 0 0 40px rgba(239, 68, 68, 0.4)";
+                mCore.style.borderColor = "var(--red)";
+            } else if (data.temperature > 80) {
+                mCore.style.boxShadow = "inset 0 0 30px rgba(245, 158, 11, 0.4)";
+                mCore.style.borderColor = "var(--amber)";
+            } else {
+                mCore.style.boxShadow = "inset 0 0 20px rgba(0, 217, 255, 0.2)";
+                mCore.style.borderColor = "var(--blue)";
+            }
+        }
+        
+        // RPM affects Fan Speed
+        const dtFan = document.getElementById("dt-fan");
+        if (dtFan) {
+            if (data.rpm > 0) {
+                const duration = Math.max(0.1, 1240 / data.rpm);
+                dtFan.style.animationDuration = duration + "s";
+                dtFan.style.animationPlayState = "running";
+            } else {
+                dtFan.style.animationPlayState = "paused";
+            }
+        }
+
+        // Pressure visual intensity
+        const mPipeRight = document.querySelector(".pipe-right");
+        if (mPipeRight) {
+            if (data.pressure > 3.0) {
+                mPipeRight.style.background = "var(--red)";
+                mPipeRight.style.boxShadow = "0 0 10px var(--red)";
+            } else if (data.pressure > 2.5) {
+                mPipeRight.style.background = "var(--amber)";
+                mPipeRight.style.boxShadow = "0 0 10px var(--amber)";
+            } else {
+                mPipeRight.style.background = "var(--blue)";
+                mPipeRight.style.boxShadow = "none";
+            }
+        }
+        
+        // Coolant level visualization
+        const mPipeLeft = document.querySelector(".pipe-left");
+        if (mPipeLeft) {
+            const perc = Math.min(100, Math.max(0, data.coolant));
+            mPipeLeft.style.background = `linear-gradient(to top, var(--cyan) ${perc}%, var(--bg-main) ${perc}%)`;
+        }
+
+        // Vibration
+        if (mCore) {
+            const vib = data.vibration;
+            if (vib > 0.1) {
+                mCore.style.animation = `machine-vib ${Math.max(0.05, 0.5 / vib)}s linear infinite`;
+                mCore.style.setProperty('--vib-x', `${vib * 2}px`);
+                mCore.style.setProperty('--vib-y', `${vib * 2}px`);
+            } else {
+                mCore.style.animation = "none";
+            }
+        }
+    }
+
     // ----------------------------------------------------
-    // DIGITAL TWIN & INTERACTIVE 3D INSPECTION
+    // DIGITAL TWIN
     // ----------------------------------------------------
-    const comps = document.querySelectorAll(".twin-comp, .interactive-comp");
+    const comps = document.querySelectorAll(".twin-comp");
     comps.forEach(c => {
         c.addEventListener("click", () => {
             comps.forEach(other => other.classList.remove("selected"));
@@ -1286,57 +367,45 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
     });
 
     function updateInspectionPanel(id, data) {
-        const insEmpty = document.getElementById("inspection-empty");
-        const insData = document.getElementById("inspection-data");
         const insName = document.getElementById("ins-comp-name");
         const insStatus = document.getElementById("ins-comp-status");
         const insValue = document.getElementById("ins-comp-value");
         const askBtn = document.getElementById("ins-ask-btn");
-        
-        if (insEmpty) insEmpty.classList.add("hidden");
-        if (insData) insData.classList.remove("hidden");
         if (!insName || !insStatus || !insValue || !askBtn) return;
         
         askBtn.style.display = "block";
         insStatus.className = "ins-val"; // reset classes
         
-        if (id === "comp-cooling-fan" || id === "comp-fan") {
+        if (id === "comp-cooling-fan") {
             insName.textContent = "COOLING FAN";
-            insStatus.textContent = data.fan || "NORMAL";
+            insStatus.textContent = data.fan;
             insStatus.classList.add("text-green");
-            insValue.textContent = (data.rpm || 1240) + " RPM";
-            askBtn.onclick = () => autoFill("Is the cooling fan operating correctly? Check measured RPM vs SOP limits.");
-            highlightTelemetryCard("fan");
-            highlightTelemetryCard("rpm");
-        } else if (id === "comp-temp-sensor" || id === "comp-temp") {
+            insValue.textContent = data.rpm + " RPM";
+            askBtn.onclick = () => autoFill("Is the cooling fan operating correctly?");
+        } else if (id === "comp-temp-sensor") {
             insName.textContent = "TEMPERATURE SENSOR";
-            const isAlert = data.temperature > 80;
-            insStatus.textContent = isAlert ? "ALERT (>80°C)" : "NORMAL";
-            insStatus.classList.add(isAlert ? "text-amber" : "text-green");
+            insStatus.textContent = (data.temperature > 80) ? "ALERT" : "NORMAL";
+            insStatus.classList.add((data.temperature > 80) ? "text-amber" : "text-green");
             insValue.textContent = data.temperature + " °C";
-            askBtn.onclick = () => autoFill("What is causing the high temperature reading? Compare with SOP-042 threshold limits.");
-            highlightTelemetryCard("temperature");
-        } else if (id === "comp-coolant-sys" || id === "comp-coolant") {
+            askBtn.onclick = () => autoFill("What is causing the high temperature reading?");
+        } else if (id === "comp-coolant-sys") {
             insName.textContent = "COOLANT SYSTEM";
-            insStatus.textContent = "NOMINAL";
+            insStatus.textContent = "NORMAL";
             insStatus.classList.add("text-green");
-            insValue.textContent = (data.coolant || 68) + " %";
-            askBtn.onclick = () => autoFill("Is the coolant level sufficient for continued safe operation?");
-            highlightTelemetryCard("coolant");
-        } else if (id === "comp-pressure-sys" || id === "comp-pressure") {
+            insValue.textContent = data.coolant + " %";
+            askBtn.onclick = () => autoFill("Is the coolant level sufficient?");
+        } else if (id === "comp-pressure-sys") {
             insName.textContent = "PRESSURE SYSTEM";
-            insStatus.textContent = "NOMINAL";
+            insStatus.textContent = "NORMAL";
             insStatus.classList.add("text-green");
-            insValue.textContent = (data.pressure || 2.4) + " bar";
+            insValue.textContent = data.pressure + " bar";
             askBtn.onclick = () => autoFill("Is the pressure system operating normally?");
-            highlightTelemetryCard("pressure");
-        } else if (id === "comp-main-unit" || id === "comp-main") {
-            insName.textContent = "MAIN UNIT CORE";
+        } else if (id === "comp-main-unit") {
+            insName.textContent = "MAIN UNIT";
             insStatus.textContent = "ACTIVE";
             insStatus.classList.add("text-cyan");
-            insValue.textContent = "VIB " + (data.vibration || "0.02g");
-            askBtn.onclick = () => autoFill("What is the overall condition and operational risk of Machine 101?");
-            highlightTelemetryCard("vibration");
+            insValue.textContent = "VIB " + data.vibration;
+            askBtn.onclick = () => autoFill("What is the overall condition of Machine 101?");
         }
     }
 
@@ -1377,216 +446,146 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
     }
 
     // ----------------------------------------------------
-    // INVESTIGATION PIPELINE & LIVE AGENT EXECUTION
+    // INVESTIGATION PIPELINE
     // ----------------------------------------------------
     if (investigateBtn) {
         investigateBtn.addEventListener("click", async function () {
             const text = question.value.trim();
             if (!text) {
-                showToast("Please enter a question or select a suggested task.", "warn");
+                alert("Please enter a question");
                 return;
             }
 
-            const startTime = performance.now();
-            let tickerInterval = null;
-
-            addActivityLog("Agent investigation initiated");
-            addTimelineEvent("AI INVESTIGATION", "Autonomous mission dispatched", "tl-state-investigation");
+            addActivityLog("Investigation started");
+            addTimelineEvent("AI INVESTIGATION", "Investigation started", "tl-state-investigation");
 
             const aiResult = document.getElementById("aiResult");
-            if (aiResult) aiResult.classList.add("hidden");
+            if(aiResult) aiResult.classList.add("hidden");
             
             const repCont = document.getElementById("incidentReportContainer");
-            if (repCont) repCont.classList.add("hidden");
+            if(repCont) repCont.classList.add("hidden");
+            
+            if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
 
-            // Enter active execution states
+            document.querySelectorAll('.pipe-node').forEach(n => {
+                n.classList.remove('active', 'running', 'skipped');
+                const st = n.querySelector('.node-status');
+                if(st) st.textContent = 'WAITING';
+            });
+            document.querySelectorAll('.pipe-connector').forEach(l => l.classList.remove('active'));
+
             investigateBtn.disabled = true;
-            investigateBtn.classList.add("btn-processing");
             const btnText = investigateBtn.querySelector('.btn-text');
-            if (btnText) btnText.textContent = 'AGENT EXECUTING...';
-
-            setExecutionState("UNDERSTANDING REQUEST", "Parsing mission prompt & intent");
-            updateCurrentOp("READ_FILE", "Ingesting active document & physical telemetry", "RUNNING", "Elapsed: 0.0s");
-            updatePipelineNodes("node-agent", [], []);
-
-            // Start live elapsed ticker
-            tickerInterval = setInterval(() => {
-                const elapsedSec = ((performance.now() - startTime) / 1000).toFixed(1);
-                const currOpDuration = document.getElementById("currOpDuration");
-                if (currOpDuration) currOpDuration.textContent = `Elapsed: ${elapsedSec}s`;
-            }, 100);
-
-            // Stagger visual node transitions to reflect live pipeline progress
-            const timeouts = [
-                setTimeout(() => {
-                    setExecutionState("ANALYZING DOCUMENT", "Parsing document & local OCR extraction");
-                    updateCurrentOp("OCR_DOCUMENT", "Extracting high-resolution text & inspection points", "RUNNING");
-                    updatePipelineNodes("node-doc", ["node-agent"]);
-                }, 400),
-                setTimeout(() => {
-                    setExecutionState("EXTRACTING METRICS", "OCR transcription complete & validating figures");
-                    updateCurrentOp("READ_FILE", "Correlating sensor values with inspection findings", "RUNNING");
-                    updatePipelineNodes("node-ocr", ["node-agent", "node-doc"]);
-                }, 900),
-                setTimeout(() => {
-                    setExecutionState("SEARCHING KNOWLEDGE", "Querying ChromaDB for SOP-042 threshold limits");
-                    updateCurrentOp("SEARCH_KNOWLEDGE_BASE", "Vector query: SOP-042 thermal warning boundaries", "RUNNING");
-                    updatePipelineNodes("node-kb", ["node-agent", "node-doc", "node-ocr"]);
-                }, 1600),
-                setTimeout(() => {
-                    setExecutionState("MULTIMODAL REASONING", "Fusing telemetry, document evidence & vision");
-                    updateCurrentOp("ANALYZE_IMAGE", "Analyzing radiator intake grill and fan assembly", "RUNNING");
-                    updatePipelineNodes("node-vision", ["node-agent", "node-doc", "node-ocr", "node-kb"]);
-                }, 2400),
-                setTimeout(() => {
-                    setExecutionState("VERIFYING RESULTS", "AST-validating calculations & drafting deliverable");
-                    updateCurrentOp("EXECUTE_PYTHON", "AST safe calculation of variance & safety margins", "RUNNING");
-                    updatePipelineNodes("node-reason", ["node-agent", "node-doc", "node-ocr", "node-kb", "node-vision"]);
-                }, 3200)
+            if(btnText) btnText.textContent = 'PROCESSING...';
+            
+            const pipelineSteps = [
+                { id: 'node-agent', status: 'ANALYZING', time: 0 },
+                { id: 'node-manual', status: 'SEARCHING', time: 1000 },
+                { id: 'node-vision', status: 'ANALYZING', time: 2000 },
+                { id: 'node-fusion', status: 'SYNTHESIZING', time: 3000 }
             ];
 
-            switchTab("agent");
-
-            // Reset plan checklist rows to active progression
-            for (let i = 1; i <= 5; i++) {
-                const st = document.getElementById(`pstep-${i}`);
-                const dur = document.getElementById(`pstep-dur-${i}`);
-                if (st) {
-                    st.className = i === 1 ? "plan-step-row active" : "plan-step-row";
-                    const ind = st.querySelector(".step-indicator");
-                    if (ind) ind.textContent = i === 1 ? "⟳" : "○";
-                }
-                if (dur) dur.textContent = "--";
-            }
+            let timeouts = [];
+            pipelineSteps.forEach((step, index) => {
+                timeouts.push(setTimeout(() => {
+                    const node = document.getElementById(step.id);
+                    if(node) {
+                        node.classList.add('active', 'running');
+                        const st = node.querySelector('.node-status');
+                        if(st) st.textContent = step.status;
+                    }
+                    if (index > 0) {
+                        const conn = document.getElementById('conn-' + index);
+                        if (conn) conn.classList.add('active');
+                    }
+                }, step.time));
+            });
 
             try {
-                const response = await fetch("http://127.0.0.1:8000/investigate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                        question: text,
-                        telemetry: currentTelemetry,
-                        report_path: currentUploadedReportPath
-                    })
-                });
+                let data;
+                try {
+                    const response = await fetch(`${API_BASE_URL}/investigate`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ 
+                            question: text,
+                            telemetry: currentTelemetry 
+                        })
+                    });
+                    
+                    try {
+                        data = await response.json();
+                    } catch (e) {
+                        throw new Error("Unable to parse JSON from investigation server.");
+                    }
 
-                if (!response.ok) {
-                    throw new Error("Backend returned HTTP " + response.status);
+                    if (!response.ok) {
+                        throw new Error(data.answer || "Backend returned HTTP " + response.status);
+                    }
+                } catch (fetchError) {
+                    if (!data) {
+                        throw new Error("Unable to connect to the investigation server.");
+                    }
+                    throw fetchError;
                 }
 
-                const data = await response.json();
                 timeouts.forEach(clearTimeout);
-                if (tickerInterval) clearInterval(tickerInterval);
 
-                const totalSec = ((performance.now() - startTime) / 1000).toFixed(1);
+                document.querySelectorAll('.pipe-node').forEach(n => n.classList.remove('running', 'active', 'skipped'));
+                document.querySelectorAll('.pipe-connector').forEach(l => l.classList.remove('active'));
+
                 const dec = data.decision || "UNKNOWN";
+                const mStatus = data.manual_status || "NOT_USED";
+                const vStatus = data.image_status || "NOT_USED";
 
-                // Determine active/completed pipeline nodes based on actual results
-                const completedNodes = ["node-agent", "node-doc", "node-ocr"];
-                const skippedNodes = [];
-
-                if (dec === 'MANUAL_SEARCH' || dec === 'BOTH') {
-                    completedNodes.push("node-kb");
-                } else {
-                    skippedNodes.push("node-kb");
+                const nodeAgent = document.getElementById('node-agent');
+                if(nodeAgent) {
+                    nodeAgent.classList.add('active');
+                    nodeAgent.querySelector('.node-status').textContent = 'COMPLETED';
                 }
+                const conn1 = document.getElementById('conn-1');
+                if(conn1) conn1.classList.add('active');
 
-                if (dec === 'IMAGE_ANALYSIS' || dec === 'BOTH') {
-                    completedNodes.push("node-vision");
-                } else {
-                    skippedNodes.push("node-vision");
-                }
-
-                completedNodes.push("node-reason");
-                completedNodes.push("node-verify");
-                completedNodes.push("node-deliv");
-
-                updatePipelineNodes("node-deliv", completedNodes, skippedNodes);
-
-                // Update execution state
-                setExecutionState("COMPLETED", `Mission finished in ${totalSec}s with verified deliverable`);
-                updateCurrentOp("GENERATE_APPROVAL_NOTE", `Deliverable compiled & structural schema verified`, "COMPLETED", `Completed in ${totalSec}s`);
-
-                // Update real agent plan steps checklist with durations
-                const planStepsContainer = document.getElementById("planStepsContainer");
-                if (planStepsContainer && data.plan && Array.isArray(data.plan) && data.plan.length > 0) {
-                    const stepDurations = ["0.9s", "1.6s", "1.2s", "0.5s", "1.1s", "0.7s"];
-                    planStepsContainer.innerHTML = data.plan.map((p, idx) => `
-                        <div class="plan-step-row completed">
-                            <span class="step-indicator">✓</span>
-                            <span class="step-num">Step 0${p.step || idx+1}</span>
-                            <span class="step-desc">${escapeHTML(p.action)}</span>
-                            <span class="step-tool-badge">${escapeHTML(p.tool)}</span>
-                            <span class="step-duration">${stepDurations[idx % stepDurations.length]}</span>
-                        </div>
-                    `).join("");
-                }
-
-                // Update Model Selected Card
-                const execTaskType = document.getElementById("execTaskType");
-                const execTargetRole = document.getElementById("execTargetRole");
-                const execSelectedModel = document.getElementById("execSelectedModel");
-                const execExecutionMode = document.getElementById("execExecutionMode");
-                const execRoutingReason = document.getElementById("execRoutingReason");
-
-                if (execTaskType) execTaskType.textContent = data.task_type || "MULTIMODAL_INVESTIGATION";
-                if (execTargetRole) execTargetRole.textContent = data.target_role || "REASONING_MODEL";
-                if (execSelectedModel) execSelectedModel.textContent = data.selected_model || "qwen2.5:7b";
-                if (execExecutionMode) execExecutionMode.textContent = data.execution || "LOCAL AIR-GAPPED";
-
-                if (execRoutingReason) {
-                    if (data.decision === "BOTH") {
-                        execRoutingReason.textContent = "Requires multimodal vision, SOP threshold search & air-gapped deliverable synthesis";
-                    } else if (data.decision === "MANUAL_SEARCH") {
-                        execRoutingReason.textContent = "Requires local vector retrieval for standard operating limits and variance checks";
-                    } else if (data.decision === "IMAGE_ANALYSIS") {
-                        execRoutingReason.textContent = "Requires local vision model inspection of equipment photos and surface conditions";
+                const nodeManual = document.getElementById('node-manual');
+                const conn2 = document.getElementById('conn-2');
+                if(nodeManual) {
+                    nodeManual.querySelector('.node-status').textContent = mStatus;
+                    if (mStatus === 'COMPLETED' || mStatus === 'ERROR') {
+                        nodeManual.classList.add('active');
+                        if (conn2) conn2.classList.add('active');
                     } else {
-                        execRoutingReason.textContent = "Autonomous agent synthesis with mathematical verification";
+                        nodeManual.classList.add('skipped');
                     }
                 }
 
-                // Update Tools Used Card dynamically with status badges
-                const toolsUsedList = document.getElementById("toolsUsedList");
-                const toolsCountBadge = document.getElementById("toolsCountBadge");
-                if (toolsUsedList) {
-                    let tools = [];
-                    if (data.plan && Array.isArray(data.plan) && data.plan.length > 0) {
-                        tools = Array.from(new Set(data.plan.map(p => p.tool).filter(Boolean)));
+                const nodeVision = document.getElementById('node-vision');
+                const conn3 = document.getElementById('conn-3');
+                if(nodeVision) {
+                    nodeVision.querySelector('.node-status').textContent = vStatus;
+                    if (vStatus === 'COMPLETED' || vStatus === 'ERROR') {
+                        nodeVision.classList.add('active');
+                        if (conn3) conn3.classList.add('active');
+                    } else {
+                        nodeVision.classList.add('skipped');
                     }
-                    if (tools.length === 0) {
-                        tools = ["READ_FILE", "OCR_DOCUMENT", "SEARCH_KNOWLEDGE_BASE", "ANALYZE_IMAGE", "GENERATE_APPROVAL_NOTE", "VERIFY_FILE"];
-                    }
-                    if (toolsCountBadge) toolsCountBadge.textContent = `${tools.length} TOOLS EXECUTED`;
-                    toolsUsedList.innerHTML = tools.map(t => `
-                        <div class="tool-tag" data-tool="${escapeHTML(t)}">
-                            <span class="tool-status-dot green">✓</span> ${escapeHTML(t)}
-                        </div>
-                    `).join("");
                 }
 
-                addActivityLog(`Investigation completed in ${totalSec}s`);
-                addTimelineEvent("AI INVESTIGATION", `Investigation completed (${totalSec}s)`, "tl-state-investigation");
+                const nodeFusion = document.getElementById('node-fusion');
+                if(nodeFusion) {
+                    nodeFusion.classList.add('active');
+                    nodeFusion.querySelector('.node-status').textContent = 'COMPLETED';
+                }
+
+                addActivityLog("Investigation completed");
+                addTimelineEvent("AI INVESTIGATION", "Investigation completed", "tl-state-investigation");
                 
-                showToast("✓ Investigation completed: Verified deliverable generated", "success");
-
                 addHistory(text, data);
                 renderAiResult(text, data, currentTelemetry);
-                pollSovereignty();
-                pollAuditTrail();
-                loadDeliverables();
 
             } catch (error) {
                 timeouts.forEach(clearTimeout);
-                if (tickerInterval) clearInterval(tickerInterval);
-
-                setExecutionState("FAILED", error.message);
-                updateCurrentOp("SYSTEM_ERROR", error.message, "STANDBY", "Failed");
-                updatePipelineNodes("node-agent", [], ["node-doc", "node-ocr", "node-kb", "node-vision", "node-reason", "node-verify", "node-deliv"]);
-
-                addActivityLog("Investigation failed: " + error.message);
+                addActivityLog("Investigation failed");
                 addTimelineEvent("AI INVESTIGATION", "Investigation failed", "tl-state-critical");
-                showToast("Investigation failed: " + error.message, "error");
                 
                 if (aiResult) {
                     aiResult.innerHTML = `
@@ -1594,7 +593,6 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
                             <h3 class="text-red">SYSTEM ERROR</h3>
                         </div>
                         <div class="markdown-body text-red">
-                            Failed to connect to the backend API.<br>
                             ${escapeHTML(error.message)}
                         </div>
                     `;
@@ -1603,20 +601,7 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
                 
             } finally {
                 investigateBtn.disabled = false;
-                investigateBtn.classList.remove("btn-processing");
-                if (btnText) btnText.textContent = 'RUN AGENT INVESTIGATION';
-
-                const btnPrimaryDemo = document.getElementById("btn-primary-demo");
-                if (btnPrimaryDemo) {
-                    btnPrimaryDemo.disabled = false;
-                    btnPrimaryDemo.classList.remove("btn-processing");
-                }
-
-                const btnSecondaryDemo = document.getElementById("btn-secondary-demo");
-                if (btnSecondaryDemo) {
-                    btnSecondaryDemo.disabled = false;
-                    btnSecondaryDemo.classList.remove("btn-processing");
-                }
+                if(btnText) btnText.textContent = 'RUN INVESTIGATION';
             }
         });
     }
@@ -1647,8 +632,7 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
     }
 
     function addHistory(questionText, data) {
-        const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: "numeric", minute: "numeric" });
-        investigationHistory.push({ q: questionText, d: data, time: time });
+        investigationHistory.push({ q: questionText, d: data });
         renderHistory();
     }
 
@@ -1660,30 +644,14 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
             historyList.innerHTML = '<div class="history-empty">No previous investigations</div>';
             return;
         }
-        [...investigationHistory].reverse().forEach((item) => {
+        [...investigationHistory].reverse().forEach((item, index) => {
             const div = document.createElement('div');
             div.className = 'history-item';
-            const title = escapeHTML(item.q.length > 55 ? item.q.substring(0, 55) + '...' : item.q);
-            const toolsCount = (item.d.plan && item.d.plan.length) || (item.d.tools_used && item.d.tools_used.length) || 6;
-            const sourcesCount = (item.d.knowledge_evidence && item.d.knowledge_evidence.length) || 2;
-            const delivCount = (item.d.deliverables && item.d.deliverables.length) || (item.d.approval_note ? 1 : 0);
-            
-            div.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                    <span style="font-family:var(--font-mono); font-size:10px; color:var(--text-secondary);">${item.time || "Recent"} &bull; Machine 101</span>
-                    <span style="color:var(--green); font-size:10px; font-weight:bold; font-family:var(--font-mono);">✓ COMPLETED</span>
-                </div>
-                <div style="font-size:12px; font-weight:600; color:var(--text-primary); margin-bottom:4px; line-height:1.3;">${title}</div>
-                <div style="font-family:var(--font-mono); font-size:10px; color:var(--cyan); display:flex; gap:10px; flex-wrap:wrap;">
-                    <span>Tools: <strong>${toolsCount}</strong></span>
-                    <span>Sources: <strong>${sourcesCount}</strong></span>
-                    <span>Deliverables: <strong>${delivCount}</strong></span>
-                </div>
-            `;
+            const title = escapeHTML(item.q.length > 40 ? item.q.substring(0, 40) + '...' : item.q);
+            div.innerHTML = `<div class="history-q">${title}</div><div class="history-a">Agent: ${item.d.decision}</div>`;
             div.onclick = () => {
                 const telToPass = item.d.telemetry || currentTelemetry; 
                 renderAiResult(item.q, item.d, telToPass, true);
-                showToast("Restored investigation view from history", "info");
             };
             historyList.appendChild(div);
         });
@@ -1693,349 +661,82 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
         const aiResult = document.getElementById("aiResult");
         if (!aiResult) return;
         
-        let manualHtml = `<div class="ee-card empty"><div class="ee-card-title">MANUAL EVIDENCE</div><div class="ee-card-status">NOT USED</div></div>`;
-        if (data.decision === "MANUAL_SEARCH" || data.decision === "BOTH") {
-            manualHtml = `<div class="ee-card"><div class="ee-card-title">MANUAL EVIDENCE</div><div class="ee-card-status text-green">RETRIEVED</div><div class="ee-card-desc">Machine manual queried via ChromaDB vector search.</div></div>`;
+        let manualHtml = `<div class="ee-card empty"><div class="ee-card-header"><span class="ee-label">MANUAL EVIDENCE</span><span class="ee-status">NOT USED</span></div></div>`;
+        const mStatus = data.manual_status || "NOT USED";
+        let mContext = data.manual_context ? data.manual_context : "No manual evidence retrieved.";
+        if (mContext.length > 200) mContext = mContext.substring(0, 200) + "...";
+        
+        if (mStatus === "COMPLETED") {
+            manualHtml = `<div class="ee-card active">
+                <div class="ee-card-header">
+                    <span class="ee-label">MANUAL EVIDENCE</span>
+                    <span class="ee-status active">COMPLETED</span>
+                </div>
+                <div class="ee-content">
+                    <div style="font-size:10px; color:var(--text-secondary); margin-bottom:5px;">SOURCE: Machine Manual<br>RETRIEVAL: ChromaDB</div>
+                    <div style="font-style:italic; padding-left:5px; border-left:2px solid var(--border-color);">${escapeHTML(mContext)}</div>
+                </div>
+            </div>`;
+        } else if (mStatus === "ERROR") {
+            manualHtml = `<div class="ee-card">
+                <div class="ee-card-header">
+                    <span class="ee-label">MANUAL EVIDENCE</span>
+                    <span class="ee-status text-red">ERROR</span>
+                </div>
+                <div class="ee-content">Failed to retrieve manual evidence.</div>
+            </div>`;
+        } else if (mStatus === "UNAVAILABLE") {
+            manualHtml = `<div class="ee-card">
+                <div class="ee-card-header">
+                    <span class="ee-label">MANUAL EVIDENCE</span>
+                    <span class="ee-status text-amber">UNAVAILABLE</span>
+                </div>
+                <div class="ee-content">Manual evidence could not be retrieved.</div>
+            </div>`;
         }
 
-        let visionHtml = `<div class="ee-card empty"><div class="ee-card-title">VISION EVIDENCE</div><div class="ee-card-status">NOT USED</div></div>`;
-        if (data.decision === "IMAGE_ANALYSIS" || data.decision === "BOTH") {
-            visionHtml = `<div class="ee-card"><div class="ee-card-title">VISION EVIDENCE</div><div class="ee-card-status text-green">ANALYZED</div><div class="ee-card-desc">Image processed by Qwen2.5-VL vision model.</div></div>`;
+        let visionHtml = `<div class="ee-card empty"><div class="ee-card-header"><span class="ee-label">VISION EVIDENCE</span><span class="ee-status">NOT USED</span></div></div>`;
+        const vStatus = data.image_status || "NOT USED";
+        let vContext = data.vision_evidence ? data.vision_evidence : "No vision evidence retrieved.";
+        if (vContext.length > 200) vContext = vContext.substring(0, 200) + "...";
+        
+        if (vStatus === "COMPLETED") {
+            visionHtml = `<div class="ee-card active">
+                <div class="ee-card-header">
+                    <span class="ee-label">VISION EVIDENCE</span>
+                    <span class="ee-status active">COMPLETED</span>
+                </div>
+                <div class="ee-content">
+                    <div style="margin-bottom:8px;"><img src="../ChatGPT Image Sep 13, 2026, 01_44_35 PM.png" style="max-width:100%; height:auto; max-height:80px; border:1px solid var(--border-cyan); border-radius:4px;" onerror="this.style.display='none'"></div>
+                    <div style="font-size:10px; color:var(--text-secondary); margin-bottom:5px;">SOURCE: Camera 1<br>MODEL: Qwen2.5-VL</div>
+                    <div style="font-style:italic; padding-left:5px; border-left:2px solid var(--border-color);">${escapeHTML(vContext)}</div>
+                </div>
+            </div>`;
+        } else if (vStatus === "ERROR") {
+            visionHtml = `<div class="ee-card">
+                <div class="ee-card-header">
+                    <span class="ee-label">VISION EVIDENCE</span>
+                    <span class="ee-status text-red">ERROR</span>
+                </div>
+                <div class="ee-content">Failed to analyze image evidence.</div>
+            </div>`;
         }
 
-        let telHtml = `<div class="ee-card"><div class="ee-card-title">MACHINE TELEMETRY</div><div class="ee-card-status text-cyan">INCLUDED</div><div class="ee-card-desc">Real-time state passed to reasoning engine.</div></div>`;
-
-        const taskType = data.task_type || "DOCUMENT_ANALYSIS";
-        const selectedModel = data.selected_model || "qwen2.5:7b (Local)";
-        const targetRole = data.target_role || "REASONING_MODEL";
-        const execution = data.execution || "LOCAL";
-        const fallbackApplied = data.model_routing && data.model_routing.fallback_applied;
-        const fallbackReason = data.model_routing && data.model_routing.fallback_reason;
-
-        let routerHtml = `
-            <div class="router-banner">
-                <div class="router-item">
-                    <span class="router-label">TASK CLASSIFICATION</span>
-                    <span class="router-val">${escapeHTML(taskType)}</span>
-                </div>
-                <div class="router-item">
-                    <span class="router-label">MODEL ROLE & SELECTION</span>
-                    <span class="router-val highlight">${escapeHTML(selectedModel)}</span>
-                    <span style="font-size:10px; color:var(--text-secondary); font-family:var(--font-mono);">Role: ${escapeHTML(targetRole)}</span>
-                </div>
-                <div class="router-item">
-                    <span class="router-label">EXECUTION TOPOLOGY</span>
-                    <span class="router-val badge">AIR-GAPPED ${escapeHTML(execution)}</span>
-                </div>
-                ${fallbackApplied && fallbackReason ? `<div class="router-fallback-note">⚠️ ${escapeHTML(fallbackReason)}</div>` : ''}
+        let telHtml = `<div class="ee-card active">
+            <div class="ee-card-header">
+                <span class="ee-label">MACHINE TELEMETRY</span>
+                <span class="ee-status text-cyan">INCLUDED</span>
             </div>
-        `;
-
-        let planHtml = '';
-        if (data.plan && Array.isArray(data.plan) && data.plan.length > 0) {
-            let itemsHtml = data.plan.map(step => {
-                return `
-                    <div class="plan-item">
-                        <span class="plan-step-num">${step.step}</span>
-                        <div class="plan-step-content">
-                            <div class="plan-step-action">${escapeHTML(step.action)}</div>
-                            <div class="plan-step-meta">
-                                <span>Tool: <span class="plan-step-tool">${escapeHTML(step.tool)}</span></span>
-                                <span>Status: <span class="plan-step-status">COMPLETED</span></span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            planHtml = `
-                <div class="plan-container">
-                    <div class="plan-header-row">
-                        <span class="plan-header-title">MULTI-STEP AGENT EXECUTION PLAN</span>
-                        <span style="font-size:11px; font-family:var(--font-mono); color:var(--text-secondary);">${data.plan.length} STEPS EXECUTED</span>
-                    </div>
-                    <div class="plan-list">
-                        ${itemsHtml}
-                    </div>
-                </div>
-            `;
-        }
-
-        let verifyHtml = '';
-        if (data.verification && data.verification.checks && data.verification.checks.length > 0) {
-            let checksHtml = data.verification.checks.map(c => `
-                <div class="verify-item">
-                    <span class="verify-icon">✓</span>
-                    <span><strong>${escapeHTML(c.check || c.rule)}</strong>: ${escapeHTML(c.result || 'Verified')}</span>
-                </div>
-            `).join('');
-
-            verifyHtml = `
-                <div class="verify-box">
-                    <div class="verify-title">
-                        <span>🛡️ SOVEREIGN INTEGRITY AUDIT TRAIL (AIR-GAP VERIFIED)</span>
-                    </div>
-                    ${checksHtml}
-                </div>
-            `;
-        }
-
-        // -------------------------------------------------------------
-        // APPROVAL NOTE PREVIEW (FOR PRIMARY DEMO)
-        // -------------------------------------------------------------
-        let approvalNoteHtml = '';
-        if (data.approval_note) {
-            const an = data.approval_note;
-            const statusClass = an.approval_status === 'APPROVED' ? 'text-green' : (an.approval_status === 'REJECTED' ? 'text-red' : 'text-amber');
-            
-            let findingsRows = (an.key_findings || []).map(f => `
-                <tr>
-                    <td style="padding:6px 10px; border:1px solid rgba(255,255,255,0.1); font-weight:bold;">${escapeHTML(f.parameter)}</td>
-                    <td style="padding:6px 10px; border:1px solid rgba(255,255,255,0.1); font-family:var(--font-mono);">${escapeHTML(f.measured_value)}</td>
-                    <td style="padding:6px 10px; border:1px solid rgba(255,255,255,0.1); font-family:var(--font-mono);">${escapeHTML(f.baseline)}</td>
-                    <td style="padding:6px 10px; border:1px solid rgba(255,255,255,0.1);">${escapeHTML(f.delta)}</td>
-                    <td style="padding:6px 10px; border:1px solid rgba(255,255,255,0.1); font-weight:bold;" class="${f.compliance_state && f.compliance_state.includes('WARNING') ? 'text-amber' : 'text-green'}">${escapeHTML(f.compliance_state)}</td>
-                </tr>
-            `).join('');
-
-            let evidenceItems = (an.evidence || []).map(ev => `
-                <li style="margin-bottom:6px;">
-                    <strong>${escapeHTML(ev.source)}</strong> (${escapeHTML(ev.modality)}): 
-                    <span>${escapeHTML(ev.fact)}</span> 
-                    <span style="font-family:var(--font-mono); color:var(--cyan); font-size:11px;">${escapeHTML(ev.citation)}</span>
-                </li>
-            `).join('');
-
-            let sopItems = (an.sop_references || []).map(sop => `
-                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:8px 12px; border-radius:4px; margin-bottom:8px;">
-                    <div style="font-weight:bold; color:var(--cyan); font-size:12px;">${escapeHTML(sop.document_id)}: ${escapeHTML(sop.title)}</div>
-                    <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">Section: ${escapeHTML(sop.section)}</div>
-                    <div style="font-size:11px; font-style:italic; margin-top:3px;">"${escapeHTML(sop.clause)}"</div>
-                </div>
-            `).join('');
-
-            let actionItems = (an.recommended_actions || []).map((act, idx) => `
-                <div style="margin-bottom:6px; font-size:12px;">
-                    <span style="color:var(--cyan); font-weight:bold;">${idx + 1}.</span> ${escapeHTML(act)}
-                </div>
-            `).join('');
-
-            let limitsItems = (an.assumptions_limitations || []).map(l => `
-                <li style="margin-bottom:4px; font-size:11px; color:var(--text-secondary);">${escapeHTML(l)}</li>
-            `).join('');
-
-            approvalNoteHtml = `
-                <div class="approval-note-box" style="background:rgba(16, 42, 77, 0.45); border:1px solid var(--cyan); border-radius:8px; padding:20px; margin-bottom:24px; box-shadow:0 0 20px rgba(0,217,255,0.1);">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; border-bottom:1px solid rgba(0,217,255,0.3); padding-bottom:12px; margin-bottom:16px;">
-                        <div>
-                            <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyan); letter-spacing:1px;">OFFICIAL ENGINEERING DELIVERABLE</div>
-                            <h3 style="color:#ffffff; margin:4px 0 2px 0; font-size:17px;">${escapeHTML(an.title)}</h3>
-                            <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary);">Ref: ${escapeHTML(an.document_ref)}</div>
-                        </div>
-                        <div style="text-align:right;">
-                            <span class="${statusClass}" style="border:1px solid currentColor; padding:5px 12px; border-radius:4px; font-family:var(--font-mono); font-weight:bold; font-size:12px; background:rgba(0,0,0,0.3);">
-                                ${escapeHTML(an.approval_status)}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom:16px;">
-                        <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyan); text-transform:uppercase; margin-bottom:4px;">Executive Summary</div>
-                        <div style="background:rgba(0,0,0,0.3); padding:10px 14px; border-left:3px solid var(--cyan); border-radius:3px; font-size:12px; line-height:1.5;">
-                            ${escapeHTML(an.summary)}
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom:16px;">
-                        <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;">Key Findings vs SOP Baseline</div>
-                        <div style="overflow-x:auto;">
-                            <table style="width:100%; border-collapse:collapse; font-size:11px;">
-                                <thead>
-                                    <tr style="background:rgba(16,42,77,0.8); color:var(--cyan); text-align:left;">
-                                        <th style="padding:6px 10px; border:1px solid rgba(255,255,255,0.1);">Inspection Point</th>
-                                        <th style="padding:6px 10px; border:1px solid rgba(255,255,255,0.1);">Measured</th>
-                                        <th style="padding:6px 10px; border:1px solid rgba(255,255,255,0.1);">SOP Baseline</th>
-                                        <th style="padding:6px 10px; border:1px solid rgba(255,255,255,0.1);">Variance</th>
-                                        <th style="padding:6px 10px; border:1px solid rgba(255,255,255,0.1);">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${findingsRows}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom:16px;">
-                        <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;">Traceable Evidence Matrix (Zero Hallucinations)</div>
-                        <ul style="padding-left:18px; font-size:12px;">
-                            ${evidenceItems}
-                        </ul>
-                    </div>
-
-                    <div style="margin-bottom:16px;">
-                        <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;">Relevant SOP / Maintenance Standards</div>
-                        ${sopItems}
-                    </div>
-
-                    <div style="margin-bottom:16px;">
-                        <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;">Recommended Operational Actions</div>
-                        <div style="background:rgba(0,0,0,0.25); padding:10px 14px; border-radius:4px;">
-                            ${actionItems}
-                        </div>
-                    </div>
-
-                    <div>
-                        <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;">Assumptions &amp; Boundary Conditions</div>
-                        <ul style="padding-left:18px;">
-                            ${limitsItems}
-                        </ul>
-                    </div>
-                </div>
-            `;
-        }
-
-        let codeExecutionHtml = '';
-        if (data.code_execution) {
-            const ce = data.code_execution;
-            codeExecutionHtml = `
-                <div class="code-execution-box" style="background:rgba(16, 26, 46, 0.7); border:1px solid #a855f7; border-radius:8px; padding:20px; margin-bottom:24px; box-shadow:0 0 20px rgba(168,85,247,0.15);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(168,85,247,0.3); padding-bottom:12px; margin-bottom:16px;">
-                        <div>
-                            <div style="font-family:var(--font-mono); font-size:11px; color:#c084fc; letter-spacing:1px;">AST-VALIDATED AIR-GAPPED CODE EXECUTION</div>
-                            <h3 style="color:#ffffff; margin:4px 0 2px 0; font-size:17px;">Maintenance Statistics Python Script</h3>
-                        </div>
-                        <span class="badge-status-ok" style="background:rgba(168,85,247,0.2); border-color:#a855f7; color:#c084fc;">
-                            ⚡ SANDBOX VERIFIED (${ce.execution_time_ms || 0} ms)
-                        </span>
-                    </div>
-
-                    <div style="margin-bottom:14px;">
-                        <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;">Synthesized Python Program</div>
-                        <pre style="background:rgba(0,0,0,0.6); padding:12px 16px; border-radius:4px; font-family:var(--font-mono); font-size:11px; color:#e2e8f0; overflow-x:auto; max-height:260px; line-height:1.4; border:1px solid rgba(255,255,255,0.08);"><code>${escapeHTML(ce.code)}</code></pre>
-                    </div>
-
-                    <div>
-                        <div style="font-family:var(--font-mono); font-size:11px; color:#4ade80; text-transform:uppercase; margin-bottom:6px;">Sandbox Execution Terminal (stdout)</div>
-                        <pre style="background:rgba(0,0,0,0.75); padding:12px 16px; border-radius:4px; font-family:var(--font-mono); font-size:11px; color:#4ade80; overflow-x:auto; max-height:220px; line-height:1.4; border:1px solid rgba(74,222,128,0.2);"><code>${escapeHTML(ce.stdout || 'Program executed cleanly with zero errors.')}</code></pre>
-                    </div>
-                </div>
-            `;
-        }
-
-        // -------------------------------------------------------------
-        // DELIVERABLE DOWNLOAD BUTTONS (DOCX, XLSX, PPTX, TXT, CSV, PY)
-        // -------------------------------------------------------------
-        let deliverablesHtml = '';
-        if (data.deliverables && Array.isArray(data.deliverables) && data.deliverables.length > 0) {
-            let btns = data.deliverables.map(d => {
-                const iconMap = {
-                    'DOCX': '📄',
-                    'XLSX': '📊',
-                    'PPTX': '📑',
-                    'TXT': '📝',
-                    'CSV': '📈',
-                    'PY': '💻'
-                };
-                const icon = iconMap[d.type] || '📁';
-                const sizeKb = Math.round((d.size_bytes || 0) / 1024 * 10) / 10;
-                const verifiedTag = d.verified ? '<span style="color:var(--green); font-size:10px;">✓ Verified</span>' : '';
-                return `
-                    <a href="http://127.0.0.1:8000/deliverables/${encodeURIComponent(d.filename)}" class="btn-deliverable" download style="display:inline-flex; flex-direction:column; align-items:flex-start; min-width:180px;">
-                        <div style="display:flex; align-items:center; gap:6px; width:100%;">
-                            <span style="font-size:15px;">${icon}</span>
-                            <span style="font-weight:bold;">DOWNLOAD ${escapeHTML(d.type)}</span>
-                        </div>
-                        <div style="font-size:10px; color:var(--text-secondary); margin-top:3px; word-break:break-all;">
-                            ${escapeHTML(d.filename)} (${sizeKb} KB)
-                        </div>
-                        <div style="margin-top:2px;">
-                            ${verifiedTag}
-                        </div>
-                    </a>
-                `;
-            }).join('');
-
-            deliverablesHtml = `
-                <div class="deliverables-box" style="margin-top:24px; border:1px solid var(--cyan); background:rgba(0, 217, 255, 0.05); padding:16px 20px; border-radius:6px;">
-                    <div class="deliverables-title" style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>📦 GENERATED SOVEREIGN DELIVERABLES (${data.deliverables.length} PHYSICAL FILES)</span>
-                        <span style="font-size:10px; color:var(--green); font-family:var(--font-mono);">100% LOCAL AIR-GAPPED VERIFICATION</span>
-                    </div>
-                    <div class="deliverables-grid" style="display:flex; flex-wrap:wrap; gap:12px; margin-top:10px;">
-                        ${btns}
-                    </div>
-                </div>
-            `;
-        }
-
-        let knowledgeEvidenceHtml = '';
-        if (data.knowledge_evidence && Array.isArray(data.knowledge_evidence) && data.knowledge_evidence.length > 0) {
-            let cards = data.knowledge_evidence.map(item => `
-                <div class="knowledge-evidence-card">
-                    <div class="ke-header">
-                        <div class="ke-source">
-                            <span class="ke-label">Source:</span>
-                            <span class="ke-val">${escapeHTML(item.source)}</span>
-                        </div>
-                        <div class="ke-meta">
-                            <span class="ke-page">Page: <strong>${item.page}</strong></span>
-                            <span class="ke-match">${escapeHTML(item.similarity_percent || 'Verified')}</span>
-                        </div>
-                    </div>
-                    <div class="ke-body">
-                        <span class="ke-evidence-label">Relevant evidence:</span>
-                        <div class="ke-evidence-text">${escapeHTML(item.relevant_evidence)}</div>
-                    </div>
-                </div>
-            `).join('');
-
-            knowledgeEvidenceHtml = `
-                <div class="ee-title" style="margin-top:20px;">ORGANIZATIONAL KNOWLEDGE EVIDENCE</div>
-                <div class="knowledge-evidence-grid">
-                    ${cards}
-                </div>
-            `;
-        }
-
-        const evidenceCount = (data.knowledge_evidence ? data.knowledge_evidence.length : 0) + 
-                              (data.decision && data.decision.includes('IMAGE') ? 1 : 0) + 1;
-        const toolsCount = (data.plan && data.plan.length) ? data.plan.length : 6;
-        const delivCount = (data.deliverables && data.deliverables.length) ? data.deliverables.length : (data.approval_note ? 1 : 0);
+            <div class="ee-content">Real-time state passed to reasoning engine.</div>
+        </div>`;
 
         aiResult.innerHTML = `
-            <div class="result-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
-                <div>
-                    <div style="font-family:var(--font-mono); font-size:11px; color:var(--green); letter-spacing:1.5px;">✓ AIR-GAP VERIFIED EXECUTION OUTCOME</div>
-                    <h3 style="margin-top:2px;">SOVEREIGN INVESTIGATION COMPLETE</h3>
-                </div>
+            <div class="result-header">
+                <h3>AI INVESTIGATION RESULT</h3>
                 <div class="result-status">
-                    <span class="status-dot green"></span> EXECUTED ON-PREMISE (0 WAN)
+                    <span class="status-dot green"></span> COMPLETED
                 </div>
             </div>
-
-            <!-- STRUCTURED OUTCOME METRICS -->
-            <div class="exec-metrics-strip" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:24px;">
-                <div class="metric-chip" style="background:rgba(16,42,77,0.45); border:1px solid var(--border-color); padding:10px 14px; border-radius:4px;">
-                    <div style="font-size:10px; font-family:var(--font-mono); color:var(--text-secondary);">EVIDENCE SOURCES</div>
-                    <div style="font-size:16px; font-weight:bold; color:var(--cyan);">${evidenceCount} Captured</div>
-                </div>
-                <div class="metric-chip" style="background:rgba(16,42,77,0.45); border:1px solid var(--border-color); padding:10px 14px; border-radius:4px;">
-                    <div style="font-size:10px; font-family:var(--font-mono); color:var(--text-secondary);">LOCAL MODEL</div>
-                    <div style="font-size:15px; font-weight:bold; color:var(--green); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHTML(selectedModel)}</div>
-                </div>
-                <div class="metric-chip" style="background:rgba(16,42,77,0.45); border:1px solid var(--border-color); padding:10px 14px; border-radius:4px;">
-                    <div style="font-size:10px; font-family:var(--font-mono); color:var(--text-secondary);">TOOLS EXECUTED</div>
-                    <div style="font-size:16px; font-weight:bold; color:var(--cyan);">${toolsCount} Steps Verified</div>
-                </div>
-                <div class="metric-chip" style="background:rgba(16,42,77,0.45); border:1px solid var(--border-color); padding:10px 14px; border-radius:4px;">
-                    <div style="font-size:10px; font-family:var(--font-mono); color:var(--text-secondary);">GENERATED DELIVERABLES</div>
-                    <div style="font-size:16px; font-weight:bold; color:var(--green);">${delivCount} Verified Files</div>
-                </div>
-            </div>
-
-            ${routerHtml}
-            ${planHtml}
 
             <div class="ee-title">EVIDENCE EXPLORER</div>
             <div class="ee-grid">
@@ -2044,21 +745,11 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
                 ${telHtml}
             </div>
 
-            ${knowledgeEvidenceHtml}
-
-            ${approvalNoteHtml}
-            ${codeExecutionHtml}
-
-            <div class="assessment-title">AI ASSESSMENT &amp; ROOT CAUSE FINDINGS</div>
-            <div class="markdown-body">
-                ${formatAnswer(data.answer || "No assessment generated.")}
-            </div>
-
-            ${verifyHtml}
-            ${deliverablesHtml}
+            <div class="assessment-title">AI ASSESSMENT</div>
+            <div class="markdown-body" id="ai-assessment-body"></div>
             
-            <div style="margin-top: 30px; display: flex; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                <button id="btn-generate-report" class="btn-small">GENERATE INCIDENT REPORT (TXT)</button>
+            <div id="report-btn-container" style="display: none; margin-top: 30px; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <button id="btn-generate-report" class="btn-small">GENERATE INCIDENT REPORT</button>
             </div>
         `;
         
@@ -2072,6 +763,59 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
             genRepBtn.addEventListener('click', () => {
                 generateIncidentReport(data, tel, text);
             });
+        }
+
+        const rawHtml = formatAnswer(data.answer || "No assessment generated.");
+        const mb = document.getElementById("ai-assessment-body");
+        const rbc = document.getElementById("report-btn-container");
+        const statusIndicator = aiResult.querySelector('.result-status');
+
+        if (fromHistory || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            mb.innerHTML = rawHtml;
+            rbc.style.display = "flex";
+        } else {
+            statusIndicator.innerHTML = `<span class="status-dot amber"></span> GENERATING ASSESSMENT...`;
+            if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+            
+            const hiddenDiv = document.createElement("div");
+            hiddenDiv.innerHTML = rawHtml;
+            const nodesToReveal = [];
+            
+            function walk(node, parent) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.textContent;
+                    for (let i = 0; i < text.length; i++) {
+                        nodesToReveal.push({ parent: parent, char: text[i] });
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    const clone = node.cloneNode(false);
+                    parent.appendChild(clone);
+                    for (let i = 0; i < node.childNodes.length; i++) {
+                        walk(node.childNodes[i], clone);
+                    }
+                }
+            }
+            
+            mb.innerHTML = "";
+            walk(hiddenDiv, mb);
+            
+            let currentIndex = 0;
+            typewriterTimer = setInterval(() => {
+                for (let step = 0; step < 2; step++) {
+                    if (currentIndex < nodesToReveal.length) {
+                        const item = nodesToReveal[currentIndex];
+                        item.parent.appendChild(document.createTextNode(item.char));
+                        currentIndex++;
+                    }
+                }
+                
+                if (currentIndex >= nodesToReveal.length) {
+                    clearInterval(typewriterTimer);
+                    typewriterTimer = null;
+                    rbc.style.display = "flex";
+                    statusIndicator.innerHTML = `<span class="status-dot green"></span> COMPLETED`;
+                }
+            }, 20);
         }
     }
 
@@ -2168,7 +912,9 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
             evidenceUsed: evidenceUsed,
             telemetry: tel || {},
             rootCauseAssessment: rootCauseAssessment,
-            recommendedAction: recommendedAction
+            recommendedAction: recommendedAction,
+            manualContext: data.manual_context,
+            visionEvidence: data.vision_evidence
         };
 
         const container = document.getElementById("incidentReportContainer");
@@ -2187,31 +933,115 @@ print("Verdict: Fluid volume sufficient for continued 48h operation.")
         exportBtn.addEventListener("click", () => {
             if (!currentIncidentReportData) return;
             
-            let textContent = `INCIDENT REPORT\n`;
-            textContent += `====================================\n`;
-            textContent += `Machine: ${currentIncidentReportData.machine}\n`;
-            textContent += `Status: ${currentIncidentReportData.status}\n`;
-            textContent += `Data Mode: ${currentIncidentReportData.dataMode}\n`;
-            textContent += `Timestamp: ${currentIncidentReportData.timestamp}\n\n`;
-            textContent += `Detected Condition: ${currentIncidentReportData.condition}\n\n`;
-            textContent += `--- TELEMETRY SNAPSHOT ---\n`;
-            textContent += `Temperature: ${currentIncidentReportData.telemetry.temperature}°C\n`;
-            textContent += `RPM: ${currentIncidentReportData.telemetry.rpm}\n`;
-            textContent += `Pressure: ${currentIncidentReportData.telemetry.pressure} bar\n`;
-            textContent += `Coolant: ${currentIncidentReportData.telemetry.coolant}%\n`;
-            textContent += `Vibration: ${currentIncidentReportData.telemetry.vibration}\n`;
-            textContent += `Fan: ${currentIncidentReportData.telemetry.fan}\n\n`;
-            textContent += `--- INVESTIGATION ---\n`;
-            textContent += `Decision: ${currentIncidentReportData.decision}\n`;
-            textContent += `Evidence Used: ${currentIncidentReportData.evidenceUsed}\n\n`;
-            textContent += `Root Cause Assessment:\n${currentIncidentReportData.rootCauseAssessment}\n\n`;
-            textContent += `Recommended Action:\n${currentIncidentReportData.recommendedAction}\n`;
+            const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Incident Report - Machine 101</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.6; padding: 40px; max-width: 800px; margin: 0 auto; background: #f8f9fa; }
+        .report-header { border-bottom: 3px solid #2a52be; padding-bottom: 20px; margin-bottom: 30px; }
+        h1 { font-size: 24px; color: #1a1a1a; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .subtitle { font-size: 14px; color: #666; letter-spacing: 2px; }
+        .badge { display: inline-block; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; letter-spacing: 1px; }
+        .badge-live { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+        .badge-demo { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+        .badge-critical { background: #fee2e2; color: #991b1b; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-normal { background: #d1fae5; color: #065f46; }
+        @media (max-width: 1200px) {
+            .monitoring-grid { grid-template-columns: 1fr; }
+            .center-panel { min-height: 400px; }
+            .inv-console { flex-direction: column; }
+            button { width: 100%; height: 50px; }
+            .evidence-overview { grid-template-columns: 1fr; }
+            .maintenance-grid { grid-template-columns: 1fr; }
+            .inv-layout-grid { grid-template-columns: 1fr; }
+        }
 
-            const blob = new Blob([textContent], { type: "text/plain" });
+        @media (max-width: 768px) {
+            .ee-grid { grid-template-columns: 1fr; }
+            .pipeline-container { flex-direction: column; align-items: stretch; gap: 10px; }
+            .pipe-node { flex-direction: row; justify-content: flex-start; padding: 5px 20px; }
+            .pipe-node .node-label { flex: 1; text-align: left; padding-left: 15px; }
+            .pipe-connector { width: 2px; height: 30px; margin: 0 0 0 35px; flex: none; }
+        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .box { background: #fff; padding: 15px; border: 1px solid #e5e7eb; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .box-title { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .box-val { font-size: 15px; font-weight: bold; color: #111827; }
+        .section { background: #fff; padding: 25px; border: 1px solid #e5e7eb; border-radius: 4px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .section-title { font-size: 14px; color: #2a52be; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; margin-top: 0; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e5e7eb; font-size: 13px; }
+        th { color: #6b7280; font-weight: normal; }
+        td { font-weight: bold; color: #111827; }
+        .pre-wrap { white-space: pre-wrap; font-size: 13px; color: #374151; background: #f9fafb; padding: 15px; border: 1px solid #e5e7eb; border-radius: 4px; border-left: 4px solid #2a52be; overflow-wrap: break-word;}
+    </style>
+</head>
+<body>
+    <div class="report-header">
+        <h1>MACHINE 101 <span style="float:right;">INDUSTRIAL INCIDENT REPORT</span></h1>
+        <div class="subtitle">Generated At: ${currentIncidentReportData.timestamp}</div>
+    </div>
+    
+    <div class="grid">
+        <div class="box">
+            <div class="box-title">Data Source</div>
+            <div class="box-val"><span class="badge ${currentIncidentReportData.dataMode.includes('LIVE') ? 'badge-live' : 'badge-demo'}">${currentIncidentReportData.dataMode}</span></div>
+        </div>
+        <div class="box">
+            <div class="box-title">Incident Status</div>
+            <div class="box-val"><span class="badge ${currentIncidentReportData.status === 'CRITICAL' ? 'badge-critical' : (currentIncidentReportData.status === 'WARNING' ? 'badge-warning' : 'badge-normal')}">${currentIncidentReportData.status}</span></div>
+        </div>
+        <div class="box" style="grid-column: span 2;">
+            <div class="box-title">Detected Condition</div>
+            <div class="box-val">${currentIncidentReportData.condition}</div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2 class="section-title">MACHINE TELEMETRY SNAPSHOT</h2>
+        <table>
+            <tr><th>Temperature</th><td>${currentIncidentReportData.telemetry.temperature}°C</td><th>Coolant</th><td>${currentIncidentReportData.telemetry.coolant}%</td></tr>
+            <tr><th>RPM</th><td>${currentIncidentReportData.telemetry.rpm}</td><th>Vibration</th><td>${currentIncidentReportData.telemetry.vibration}</td></tr>
+            <tr><th>Pressure</th><td>${currentIncidentReportData.telemetry.pressure} bar</td><th>Fan State</th><td>${currentIncidentReportData.telemetry.fan}</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">INVESTIGATION OVERVIEW</h2>
+        <div style="margin-bottom: 10px;"><span class="box-title">AGENT DECISION:</span> <strong>${currentIncidentReportData.decision}</strong></div>
+        <div style="margin-bottom: 10px;"><span class="box-title">EVIDENCE SOURCES:</span> <strong>${currentIncidentReportData.evidenceUsed}</strong></div>
+        
+        <h3 style="font-size: 13px; color: #6b7280; text-transform: uppercase; margin-top: 20px;">Manual Evidence</h3>
+        <div class="pre-wrap" style="border-left-color: #10b981;">${currentIncidentReportData.manualContext ? escapeHTML(currentIncidentReportData.manualContext) : 'Not available from current investigation.'}</div>
+        
+        <h3 style="font-size: 13px; color: #6b7280; text-transform: uppercase; margin-top: 20px;">Vision Evidence</h3>
+        <div class="pre-wrap" style="border-left-color: #8b5cf6;">${currentIncidentReportData.visionEvidence ? escapeHTML(currentIncidentReportData.visionEvidence) : 'Not available from current investigation.'}</div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">AI ASSESSMENT</h2>
+        <div class="pre-wrap">${escapeHTML(currentIncidentReportData.rootCauseAssessment)}</div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">RECOMMENDED ACTION</h2>
+        <div class="pre-wrap" style="background: #eff6ff; border-color: #bfdbfe; border-left-color: #3b82f6;">${escapeHTML(currentIncidentReportData.recommendedAction)}</div>
+    </div>
+    
+    <div style="text-align: center; color: #9ca3af; font-size: 12px; margin-top: 40px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+        End of Report
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([htmlContent], { type: "text/html" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `Incident_Report_Machine_101_${Date.now()}.txt`;
+            a.download = `Incident_Report_Machine_101_${Date.now()}.html`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
