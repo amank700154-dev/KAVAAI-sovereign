@@ -4,4 +4,6 @@ KAVAAI Sovereign Backend Package
 Sovereign On-Premise Agentic AI Workbench for Confidential Industrial Work.
 """
 
-__all__ = []
+from backend.main import app
+
+__all__ = ["app"]
