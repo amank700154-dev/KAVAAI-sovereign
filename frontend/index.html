@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=56">
+    <link rel="stylesheet" href="style.css?v=58">
 </head>
 <body>
 
@@ -27,74 +27,65 @@
     <!-- ==================================================================== -->
     <!-- GLOBAL COMMAND CENTER HEADER                                          -->
     <!-- ==================================================================== -->
-    <header class="main-header crystal-sweep">
+    <header class="main-header industrial-station-header">
         <div class="header-left">
-            <div class="brand-emblem">
-                <svg viewBox="0 0 40 40" fill="none">
-                    <polygon points="20,2 38,11 38,29 20,38 2,29 2,11" stroke="#D4AF37" stroke-width="1.8" fill="rgba(212,175,55,0.1)"/>
-                    <path d="M20 8L30 28H24L22 23H18L16 28H10L20 8Z" fill="#F5D76E"/>
-                    <line x1="18" y1="21" x2="22" y2="21" stroke="#030405" stroke-width="1.5"/>
+            <div class="brand-emblem-k">
+                <svg width="34" height="34" viewBox="0 0 40 40">
+                    <polygon points="6,6 14,6 14,18 24,6 34,6 22,20 35,34 25,34 14,21 14,34 6,34" fill="#FF8A1F" />
                 </svg>
             </div>
-            <div class="brand-text-col">
-                <div class="brand-badge">
-                    SIH26117 | AIR-GAPPED INDUSTRIAL WORKBENCH
+            <div class="brand-title-wrap">
+                <div class="brand-name-row">
+                    <span class="brand-name-main">KAVAAI</span>
+                    <span class="brand-name-sub">SOVEREIGN</span>
                 </div>
-                <h1>KAVAAI <span class="brand-gold">SOVEREIGN</span></h1>
-                <div class="subtitle">PRIVATE INTELLIGENCE &bull; LOCAL EXECUTION &bull; CONTROLLED OUTPUT</div>
+            </div>
+            <div class="header-v-divider"></div>
+            <div class="header-subtitles">
+                <div class="header-main-title">AIR-GAPPED INDUSTRIAL WORKBENCH</div>
+                <div class="header-tagline">PRIVATE INTELLIGENCE &bull; LOCAL EXECUTION &bull; CONTROLLED OUTPUT</div>
             </div>
         </div>
 
         <div class="header-center-hud">
-            <div class="hud-clock-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 12 16 14"/>
-                </svg>
+            <div class="hud-hardware-clock">
+                <div class="hud-clock-ring">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF8A1F" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <div class="clock-text-col">
+                    <span class="clock-label">SYSTEM TIME</span>
+                    <span class="clock-val" id="headerClock">18:58:44 UTC</span>
+                    <span class="clock-date" id="headerDate">FRI, 18 SEP 2026</span>
+                </div>
             </div>
-            <div class="clock-text-wrap">
-                <span class="clock-label">SYSTEM TIME</span>
-                <span class="clock-val" id="headerClock">18:26:25 UTC</span>
-                <span class="clock-date" id="headerDate">WED, 27 NOV 2024</span>
+
+            <div class="asset-hardware-capsule">
+                <img src="machine101_inspection.png" class="asset-mini-thumb" alt="ICU-101-A">
+                <div class="asset-info-col">
+                    <span class="asset-title">ASSET: MACHINE 101 (ICU-101-A)</span>
+                    <span class="asset-sub">INDUSTRIAL COOLING UNIT</span>
+                </div>
             </div>
         </div>
 
         <div class="header-right">
-            <div class="asset-pill">
-                <div class="asset-pill-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <rect x="3" y="5" width="18" height="14" rx="2"/>
-                        <circle cx="9" cy="12" r="3"/>
-                        <path d="M15 9h3M15 12h3M15 15h3"/>
-                    </svg>
-                </div>
-                <div class="asset-info">
-                    <div class="asset-title">ASSET: MACHINE 101 (ICU-101-A)</div>
-                    <div class="asset-sub">INDUSTRIAL COOLING UNIT</div>
-                </div>
+            <div class="hardware-status-module">
+                <span class="hsm-label">LOCAL AI</span>
+                <span class="hsm-val"><span class="hsm-dot orange"></span> ONLINE</span>
             </div>
-
-            <div class="header-status-capsules">
-                <div class="status-capsule" id="stat-system-online">
-                    <span class="capsule-label">LOCAL AI</span>
-                    <span class="capsule-value"><span class="pulse-dot"></span> ONLINE</span>
-                </div>
-                <div class="status-capsule" id="stat-model-router">
-                    <span class="capsule-label">MODEL</span>
-                    <span class="capsule-value blue" id="topRouterModel">QWEN2.5:7B</span>
-                </div>
-                <div class="status-capsule" id="stat-airgap">
-                    <span class="capsule-label">AIR-GAP</span>
-                    <span class="capsule-value"><span class="pulse-dot"></span> VERIFIED</span>
-                </div>
-                <div class="status-capsule" id="stat-loopback">
-                    <span class="capsule-label">LOOPBACK</span>
-                    <span class="capsule-value"><span class="pulse-dot"></span> 127.0.0.1</span>
-                </div>
+            <div class="hardware-status-module router-module">
+                <span class="hsm-label">ROUTER: QWEN2.5:7B</span>
+                <span class="hsm-badge-verified">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1683FF" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                    VERIFIED
+                </span>
             </div>
-
-            <div class="header-quick-actions">
-                <div class="user-badge-circle" title="Confidential Operator">KS</div>
+            <div class="operator-profile-wrap">
+                <div class="operator-avatar">KS</div>
+                <span class="operator-label">Operator</span>
             </div>
         </div>
     </header>
@@ -104,7 +95,7 @@
     <!-- ==================================================================== -->
     <nav class="workbench-nav" id="workbenchNav">
         <div class="nav-tabs-scroll">
-            <button class="nav-tab active" data-tab="overview">
+            <button class="nav-tab active nav-tab-overview" data-tab="overview">
                 <span class="nav-tab-icon">
                     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </span>
@@ -153,11 +144,15 @@
                 <span class="nav-tab-text">Security Monitor</span>
             </button>
         </div>
-        <div class="nav-util-icons">
-            <button class="quick-btn" title="System Notifications" id="btn-notifications">
+        <div class="nav-right-tools">
+            <div class="nav-search-bar">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Search..." aria-label="Search Console">
+            </div>
+            <button class="nav-tool-btn" title="System Notifications" id="btn-notifications">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             </button>
-            <button class="quick-btn" title="Workbench Settings" id="btn-settings">
+            <button class="nav-tool-btn" title="Workbench Settings" id="btn-settings">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
         </div>
@@ -167,58 +162,58 @@
     <!-- TAB 1: OVERVIEW & COMMAND CENTER                                     -->
     <!-- ==================================================================== -->
     <div class="tab-pane active" id="pane-overview">
-        <!-- TOP SYSTEM METRIC RIBBON (6 MODULES) -->
+        <!-- TOP SYSTEM METRIC RIBBON (6 MODULES MATCHING REFERENCE) -->
         <div class="sys-summary-ribbon">
-            <div class="ribbon-card crystal-sweep">
-                <div class="ribbon-icon-wrap">
-                    <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            <div class="ribbon-card ribbon-card-engine">
+                <div class="ribbon-icon-wrap icon-blue">
+                    <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                 </div>
                 <div class="ribbon-text-col">
                     <div class="ribbon-label">AI ENGINE</div>
                     <div class="ribbon-val" id="ov-ai-status">OLLAMA</div>
                     <div class="ribbon-sub" id="ov-ai-sub">Local Inference Ready</div>
                 </div>
-                <div class="ribbon-status-dot"></div>
+                <div class="ribbon-status-dot blue-dot"></div>
             </div>
 
-            <div class="ribbon-card crystal-sweep">
-                <div class="ribbon-icon-wrap">
-                    <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/></svg>
+            <div class="ribbon-card ribbon-card-model">
+                <div class="ribbon-icon-wrap icon-orange">
+                    <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                 </div>
                 <div class="ribbon-text-col">
                     <div class="ribbon-label">ACTIVE MODEL</div>
-                    <div class="ribbon-val text-blue" id="ov-active-model">qwen2.5:7b</div>
-                    <div class="ribbon-sub">Coding: qwen2.5 | Vision: qwen2.5vl</div>
+                    <div class="ribbon-val text-orange" id="ov-active-model">qwen2.5:7b</div>
+                    <div class="ribbon-sub">Vision &bull; Coding &bull; qwen2.5vl</div>
                 </div>
-                <div class="ribbon-status-dot"></div>
+                <div class="ribbon-status-dot orange-dot"></div>
             </div>
 
-            <div class="ribbon-card crystal-sweep">
-                <div class="ribbon-icon-wrap">
+            <div class="ribbon-card ribbon-card-rag">
+                <div class="ribbon-icon-wrap icon-cyan">
                     <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
                 </div>
                 <div class="ribbon-text-col">
-                    <div class="ribbon-label">RAG / CHROMADB</div>
-                    <div class="ribbon-val text-green" id="ov-rag-status">22 CHUNKS INDEXED</div>
-                    <div class="ribbon-sub">all-MiniLM-L6-v2 Embeddings</div>
+                    <div class="ribbon-label">RAG / CHUNKS</div>
+                    <div class="ribbon-val text-cyan" id="ov-rag-status">22 CHUNKS INDEXED</div>
+                    <div class="ribbon-sub">ai-MiniLM-L6-v2</div>
                 </div>
-                <div class="ribbon-status-dot"></div>
+                <div class="ribbon-status-dot blue-dot"></div>
             </div>
 
-            <div class="ribbon-card crystal-sweep">
-                <div class="ribbon-icon-wrap">
-                    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><circle cx="8" cy="10" r="3"/><line x1="14" y1="7" x2="19" y2="7"/><line x1="14" y1="10" x2="19" y2="10"/><line x1="14" y1="13" x2="19" y2="13"/><polyline points="5 21 8 17 16 17 19 21"/></svg>
+            <div class="ribbon-card ribbon-card-gpu">
+                <div class="ribbon-icon-wrap icon-blue">
+                    <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/></svg>
                 </div>
                 <div class="ribbon-text-col">
-                    <div class="ribbon-label">GPU ACCELERATED</div>
-                    <div class="ribbon-val text-green" id="ov-gpu-status">NVIDIA RTX 3050</div>
-                    <div class="ribbon-sub" id="ov-compute-sub">12 GB &bull; 12 CPU Cores</div>
+                    <div class="ribbon-label">GPU STATUS</div>
+                    <div class="ribbon-val text-blue" id="ov-gpu-status">GPU ACCELERATED</div>
+                    <div class="ribbon-sub" id="ov-compute-sub">NVIDIA RTX 3050 6GB</div>
                 </div>
-                <div class="ribbon-status-dot"></div>
+                <div class="ribbon-status-dot blue-dot"></div>
             </div>
 
-            <div class="ribbon-card crystal-sweep">
-                <div class="ribbon-icon-wrap">
+            <div class="ribbon-card ribbon-card-kb">
+                <div class="ribbon-icon-wrap icon-blue">
                     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 </div>
                 <div class="ribbon-text-col">
@@ -226,23 +221,23 @@
                     <div class="ribbon-val" id="ov-kb-files">4 DOCUMENTS</div>
                     <div class="ribbon-sub">SOPs, Manuals, Inspection Reports</div>
                 </div>
-                <div class="ribbon-status-dot"></div>
+                <div class="ribbon-status-dot blue-dot"></div>
             </div>
 
-            <div class="ribbon-card crystal-sweep">
-                <div class="ribbon-icon-wrap">
+            <div class="ribbon-card ribbon-card-sec">
+                <div class="ribbon-icon-wrap icon-orange">
                     <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 </div>
                 <div class="ribbon-text-col">
-                    <div class="ribbon-label">SOVEREIGNTY STATUS</div>
-                    <div class="ribbon-val text-green" id="ov-sov-status">APP GUARD ENFORCED</div>
+                    <div class="ribbon-label">SECURITY</div>
+                    <div class="ribbon-val text-cyan" id="ov-sov-status">APP GUARD ENFORCED</div>
                     <div class="ribbon-sub">0 WAN Calls &bull; Loopback Only</div>
                 </div>
-                <div class="ribbon-status-dot"></div>
+                <div class="ribbon-status-dot orange-dot"></div>
             </div>
         </div>
 
-        <!-- 3-COLUMN COMMAND CENTER GRID -->
+        <!-- 3-COLUMN COMMAND CENTER GRID (20% - 58% - 22%) -->
         <section class="monitoring-grid">
             <!-- LEFT: MACHINE HEALTH & SYSTEM STATUS -->
             <div class="monitoring-panel left-panel">
@@ -251,22 +246,24 @@
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                         MACHINE HEALTH
                     </span>
-                    <span class="pulse-dot"></span>
+                    <span class="pulse-dot orange-pulse"></span>
                 </div>
 
                 <div class="health-container">
-                    <div class="health-circle">
+                    <!-- Concentric dial with tick marks and permanent orange stroke as in reference -->
+                    <div class="health-circle health-circle-gauge">
+                        <div class="gauge-ticks-ring"></div>
                         <svg viewBox="0 0 100 100">
-                            <circle class="bg-circle" cx="50" cy="50" r="45"></circle>
-                            <circle class="progress-circle" id="health-progress" cx="50" cy="50" r="45"></circle>
+                            <circle class="bg-circle" cx="50" cy="50" r="42"></circle>
+                            <circle class="progress-circle health-progress-orange" id="health-progress" cx="50" cy="50" r="42"></circle>
                         </svg>
                         <div class="health-value">
-                            <div><span id="health-score-val">100</span>%</div>
+                            <div class="health-num-wrap"><span id="health-score-val">100</span>%</div>
                             <span class="health-score-sub">HEALTH SCORE</span>
                         </div>
                     </div>
-                    <div class="health-status-pill" id="health-status-pill">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <div class="health-status-pill health-pill-normal" id="health-status-pill">
+                        <svg class="health-ecg-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF8A1F" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                         <span id="health-status-text">NORMAL</span>
                     </div>
                 </div>
@@ -278,10 +275,10 @@
                     </span>
                 </div>
                 <ul class="system-status-list">
-                    <li><span class="status-bullet blue"></span> On-Premise Engine Active</li>
-                    <li><span class="status-bullet blue"></span> Local AI Ready</li>
-                    <li><span class="status-bullet green"></span> Telemetry Connected</li>
-                    <li><span class="status-bullet green"></span> All Systems Operational</li>
+                    <li><span class="status-bullet-pill orange-pill">&check;</span> <span class="status-bullet-text">On-Premise Engine Active</span></li>
+                    <li><span class="status-bullet-pill orange-pill">&check;</span> <span class="status-bullet-text">Local AI Ready</span></li>
+                    <li><span class="status-bullet-pill blue-pill">&check;</span> <span class="status-bullet-text">Telemetry Connected</span></li>
+                    <li><span class="status-bullet-pill blue-pill">&check;</span> <span class="status-bullet-text">All Systems Operational</span></li>
                 </ul>
 
                 <div class="panel-header mt-20">
@@ -292,7 +289,7 @@
                 </div>
                 <div class="alerts-panel" id="alertsPanel">
                     <div class="alert-card-item">
-                        <div class="alert-icon-check">&check;</div>
+                        <div class="alert-icon-check-box">&check;</div>
                         <div class="alert-content-col">
                             <div class="alert-title">No active alerts</div>
                             <div class="alert-desc">Machine operating within expected parameters.</div>
@@ -301,129 +298,157 @@
                 </div>
             </div>
 
-            <!-- CENTER: DIGITAL TWIN HERO MACHINE -->
+            <!-- CENTER: DIGITAL TWIN HERO MACHINE (58% DOMINANCE) -->
             <div class="monitoring-panel center-panel">
-                <div class="panel-header">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue-bright)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        <div>
-                            <div>DIGITAL TWIN &mdash; MACHINE 101</div>
-                            <div style="font-size:9.5px; font-weight:400; color:var(--text-secondary); font-family:var(--font-mono); text-transform:none; margin-top:2px;">
-                                INDUSTRIAL COOLING UNIT &bull; ICU-101-A &bull; CONFIDENTIAL ASSET
-                            </div>
+                <div class="panel-header dt-card-header">
+                    <div class="dt-header-title-group">
+                        <div class="dt-header-main-title">DIGITAL TWIN &mdash; MACHINE 101</div>
+                        <div class="dt-header-subtitle">
+                            INDUSTRIAL COOLING UNIT &bull; ICU-101-A &bull; CONFIDENTIAL ASSET
                         </div>
                     </div>
                     <div class="dt-header-actions">
-                        <button class="view-toggle-btn" id="btn-scan-machine" title="Trigger Holographic Scan">✜ SCAN MACHINE</button>
-                        <button class="view-toggle-btn active" id="btn-view-3d">3D VIEW</button>
-                        <button class="view-toggle-btn" id="btn-view-schematic">SCHEMATIC</button>
+                        <button class="dt-view-btn" id="btn-scan-machine" title="Trigger Scan">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+                            Scan Machine
+                        </button>
+                        <button class="dt-view-btn dt-btn-orange-active" id="btn-view-3d">
+                            3D View
+                        </button>
+                        <button class="dt-view-btn" id="btn-view-schematic">
+                            Schematic
+                        </button>
+                        <button class="dt-view-btn dt-btn-icon-only" title="Full View">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                        </button>
                     </div>
                 </div>
 
                 <div class="dt-scene">
                     <div class="dt-scanner-beam" id="dtScannerBeam"></div>
-                    <div class="dt-isometric-grid"></div>
+                    <div class="dt-grid-backdrop"></div>
                     <div class="dt-pedestal-platform"></div>
 
-                    <!-- SVG Golden Leader Lines Connecting Hotspots to Callouts -->
-                    <svg class="dt-leader-lines-svg" viewBox="0 0 600 400" preserveAspectRatio="none">
-                        <!-- Line to Temp Callout -->
-                        <line x1="180" y1="130" x2="210" y2="155" />
-                        <circle cx="210" cy="155" r="3" />
-                        <!-- Line to Coolant Callout -->
-                        <line x1="300" y1="55" x2="330" y2="105" />
-                        <circle cx="330" cy="105" r="3" />
-                        <!-- Line to Pressure Callout -->
-                        <line x1="430" y1="140" x2="400" y2="170" />
-                        <circle cx="400" cy="170" r="3" />
-                        <!-- Line to Fan Callout -->
-                        <line x1="430" y1="280" x2="360" y2="235" />
-                        <circle cx="360" cy="235" r="3" />
-                        <!-- Line to Main Unit Callout -->
-                        <line x1="170" y1="270" x2="235" y2="245" />
-                        <circle cx="235" cy="245" r="3" />
+                    <!-- Fine SVG Leader Lines Connecting Hotspots to HUD Callouts -->
+                    <svg class="dt-leader-lines-svg" viewBox="0 0 800 480" preserveAspectRatio="none">
+                        <!-- Line to Temp Callout (Top Left) -->
+                        <path d="M 170 95 L 260 145" fill="none" stroke="#FF8A1F" stroke-width="1.2" stroke-dasharray="2,2" opacity="0.65" />
+                        <circle cx="260" cy="145" r="3.5" fill="#FF8A1F" />
+                        <!-- Line to Coolant Callout (Top Right) -->
+                        <path d="M 620 95 L 490 140" fill="none" stroke="#1683FF" stroke-width="1.2" stroke-dasharray="2,2" opacity="0.65" />
+                        <circle cx="490" cy="140" r="3.5" fill="#1683FF" />
+                        <!-- Line to Pressure Callout (Center Right) -->
+                        <path d="M 640 220 L 530 250" fill="none" stroke="#FF8A1F" stroke-width="1.2" stroke-dasharray="2,2" opacity="0.65" />
+                        <circle cx="530" cy="250" r="3.5" fill="#FF8A1F" />
+                        <!-- Line to Fan Callout (Bottom Right) -->
+                        <path d="M 630 360 L 500 320" fill="none" stroke="#1683FF" stroke-width="1.2" stroke-dasharray="2,2" opacity="0.65" />
+                        <circle cx="500" cy="320" r="3.5" fill="#1683FF" />
+                        <!-- Line to Vibration Callout (Bottom Left) -->
+                        <path d="M 160 360 L 290 310" fill="none" stroke="#FF8A1F" stroke-width="1.2" stroke-dasharray="2,2" opacity="0.65" />
+                        <circle cx="290" cy="310" r="3.5" fill="#FF8A1F" />
                     </svg>
 
                     <!-- Machinery Viewport with interactive image -->
                     <div class="dt-machinery-wrapper">
                         <img src="machine101_inspection.png" class="dt-machinery-img" alt="Digital Twin Machine 101">
 
-                        <!-- Interactive Component Hotspots (Preserving exact IDs) -->
-                        <div class="twin-comp interactive-comp" id="comp-temp" data-comp="Temperature Sensor" data-tel="temperature" title="Temperature Sensor Probe"></div>
-                        <div class="twin-comp interactive-comp" id="comp-coolant" data-comp="Coolant System" data-tel="coolant" title="Coolant Circulation Loop"></div>
-                        <div class="twin-comp interactive-comp" id="comp-pressure" data-comp="Pressure System" data-tel="pressure" title="Pressure Safety System"></div>
-                        <div class="twin-comp interactive-comp" id="comp-fan" data-comp="Cooling Fan" data-tel="fan" title="Active Cooling Fan Assembly"></div>
-                        <div class="twin-comp interactive-comp" id="comp-main" data-comp="Main Unit" data-tel="status" title="Main Compressor & Motor Chassis"></div>
+                        <!-- Interactive Component Hotspots with orange pulsing rings -->
+                        <div class="twin-comp interactive-comp hotspot-orange" id="comp-temp" data-comp="Temperature Sensor" data-tel="temperature" title="Temperature Sensor Probe">
+                            <span class="hotspot-core"></span>
+                            <span class="hotspot-ping"></span>
+                        </div>
+                        <div class="twin-comp interactive-comp hotspot-blue" id="comp-coolant" data-comp="Coolant System" data-tel="coolant" title="Coolant Circulation Loop">
+                            <span class="hotspot-core"></span>
+                            <span class="hotspot-ping"></span>
+                        </div>
+                        <div class="twin-comp interactive-comp hotspot-orange" id="comp-pressure" data-comp="Pressure System" data-tel="pressure" title="Pressure Safety System">
+                            <span class="hotspot-core"></span>
+                            <span class="hotspot-ping"></span>
+                        </div>
+                        <div class="twin-comp interactive-comp hotspot-blue" id="comp-fan" data-comp="Cooling Fan" data-tel="fan" title="Active Cooling Fan Assembly">
+                            <span class="hotspot-core"></span>
+                            <span class="hotspot-ping"></span>
+                        </div>
+                        <div class="twin-comp interactive-comp hotspot-orange" id="comp-main" data-comp="Main Unit" data-tel="status" title="Main Compressor & Motor Chassis">
+                            <span class="hotspot-core"></span>
+                            <span class="hotspot-ping"></span>
+                        </div>
                     </div>
 
-                    <!-- 5 Technical HUD Callout Cards matching reference image -->
-                    <div class="dt-hud-callout callout-temp interactive-comp" data-comp="Temperature Sensor" data-tel="temperature">
-                        <div class="callout-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+                    <!-- 5 Technical HUD Callouts matching Reference Screenshot -->
+                    <!-- 1. Temperature Sensor (Top Left) -->
+                    <div class="ref-callout callout-ref-temp interactive-comp" data-comp="Temperature Sensor" data-tel="temperature">
+                        <div class="ref-callout-icon orange-glow-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FF8A1F" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
                         </div>
-                        <div class="callout-text-col">
-                            <span class="callout-title">TEMPERATURE SENSOR</span>
-                            <div class="callout-value-row">
-                                <span class="callout-val" id="hud-temp-val">72&deg;C</span>
-                                <span class="callout-status" id="hud-temp-stat">NORMAL</span>
+                        <div class="ref-callout-body">
+                            <div class="ref-callout-title">TEMPERATURE SENSOR</div>
+                            <div class="ref-callout-row">
+                                <span class="ref-callout-val" id="hud-temp-val">72&deg;C</span>
+                                <span class="ref-callout-badge badge-orange" id="hud-temp-stat">Normal</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="dt-hud-callout callout-coolant interactive-comp" data-comp="Coolant System" data-tel="coolant">
-                        <div class="callout-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                    <!-- 2. Coolant System (Top Right) -->
+                    <div class="ref-callout callout-ref-coolant interactive-comp" data-comp="Coolant System" data-tel="coolant">
+                        <div class="ref-callout-icon blue-glow-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1683FF" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
                         </div>
-                        <div class="callout-text-col">
-                            <span class="callout-title">COOLANT SYSTEM</span>
-                            <div class="callout-value-row">
-                                <span class="callout-val" id="hud-coolant-val">68%</span>
-                                <span class="callout-status" id="hud-coolant-stat">NORMAL</span>
+                        <div class="ref-callout-body">
+                            <div class="ref-callout-title">COOLANT SYSTEM</div>
+                            <div class="ref-callout-row">
+                                <span class="ref-callout-val" id="hud-coolant-val">68%</span>
+                                <span class="ref-callout-badge badge-blue" id="hud-coolant-stat">Normal</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="dt-hud-callout callout-pressure interactive-comp" data-comp="Pressure System" data-tel="pressure">
-                        <div class="callout-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    <!-- 3. Pressure System (Center Right) -->
+                    <div class="ref-callout callout-ref-pressure interactive-comp" data-comp="Pressure System" data-tel="pressure">
+                        <div class="ref-callout-icon orange-glow-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FF8A1F" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                         </div>
-                        <div class="callout-text-col">
-                            <span class="callout-title">PRESSURE SYSTEM</span>
-                            <div class="callout-value-row">
-                                <span class="callout-val" id="hud-pressure-val">2.4 bar</span>
-                                <span class="callout-status" id="hud-pressure-stat">NORMAL</span>
+                        <div class="ref-callout-body">
+                            <div class="ref-callout-title">PRESSURE SYSTEM</div>
+                            <div class="ref-callout-row">
+                                <span class="ref-callout-val" id="hud-pressure-val">2.4 bar</span>
+                                <span class="ref-callout-badge badge-orange" id="hud-pressure-stat">Normal</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="dt-hud-callout callout-fan interactive-comp" data-comp="Cooling Fan" data-tel="fan">
-                        <div class="callout-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83m13.79-4l-5.74 9.94"/></svg>
+                    <!-- 4. Cooling Fan (Bottom Right) -->
+                    <div class="ref-callout callout-ref-fan interactive-comp" data-comp="Cooling Fan" data-tel="fan">
+                        <div class="ref-callout-icon blue-glow-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1683FF" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83m13.79-4l-5.74 9.94"/></svg>
                         </div>
-                        <div class="callout-text-col">
-                            <span class="callout-title">COOLING FAN</span>
-                            <div class="callout-value-row">
-                                <span class="callout-val" id="hud-fan-val">1240 RPM</span>
-                                <span class="callout-status" id="hud-fan-stat">ACTIVE</span>
+                        <div class="ref-callout-body">
+                            <div class="ref-callout-title">COOLING FAN</div>
+                            <div class="ref-callout-row">
+                                <span class="ref-callout-val" id="hud-fan-val">1240 RPM</span>
+                                <span class="ref-callout-badge badge-blue" id="hud-fan-stat">Active</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="dt-hud-callout callout-main interactive-comp" data-comp="Main Unit" data-tel="status">
-                        <div class="callout-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <!-- 5. Vibration / Main Unit (Bottom Left) -->
+                    <div class="ref-callout callout-ref-vib interactive-comp" data-comp="Main Unit" data-tel="status">
+                        <div class="ref-callout-icon orange-glow-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FF8A1F" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                         </div>
-                        <div class="callout-text-col">
-                            <span class="callout-title">MAIN UNIT</span>
-                            <div class="callout-value-row">
-                                <span class="callout-val" id="hud-main-val">OPERATIONAL</span>
-                                <span class="callout-status" id="hud-main-stat">NORMAL</span>
+                        <div class="ref-callout-body">
+                            <div class="ref-callout-title">VIBRATION SENSOR</div>
+                            <div class="ref-callout-row">
+                                <span class="ref-callout-val" id="hud-main-val">0.18 mm/s</span>
+                                <span class="ref-callout-badge badge-orange" id="hud-main-stat">Normal</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Floating Component Inspector Panel -->
+                    <!-- Floating Component Inspector Panel (Hidden by default, opens on click) -->
                     <div class="component-inspection-panel" id="inspectionPanel">
+                        <button class="ins-close-btn" id="insCloseBtn" title="Close Inspector">&times;</button>
                         <div id="inspection-empty">
                             <div class="ins-title">COMPONENT INSPECTOR</div>
                             <div class="ins-empty-text">CLICK A MACHINE COMPONENT TO INSPECT</div>
@@ -442,342 +467,305 @@
                                 <span class="ins-label">VALUE:</span>
                                 <span class="ins-val" id="ins-comp-value">--</span>
                             </div>
-                            <button class="ins-btn" id="ins-ask-btn">AUTO-FILL INVESTIGATION</button>
+                            <button class="ins-btn" id="ins-ask-btn">AUTO-FILL INVESTIGATION &rarr;</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="dt-bottom-bar">
-                    <span style="display:flex; align-items:center; gap:6px;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue-bright)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                        Click on any component to inspect details
-                    </span>
-                    <button class="btn-inspector-open" id="btnInspectorOpen">
-                        COMPONENT INSPECTOR &rarr;
+                <!-- Digital Twin Footer Bar matching Reference -->
+                <div class="dt-ref-bottom-bar">
+                    <div class="dt-footer-cell">
+                        <span class="dt-footer-label">COMPONENT</span>
+                        <span class="dt-footer-value" id="dt-footer-comp">Motor Core &amp; Main Chassis</span>
+                    </div>
+                    <div class="dt-footer-cell">
+                        <span class="dt-footer-label">STATUS</span>
+                        <span class="dt-footer-value text-orange-bold" id="dt-footer-status">&bull; Active</span>
+                    </div>
+                    <div class="dt-footer-cell">
+                        <span class="dt-footer-label">VALUE</span>
+                        <span class="dt-footer-value" id="dt-footer-val">VIB: 0.18</span>
+                    </div>
+                    <div class="dt-footer-cell">
+                        <span class="dt-footer-label">LAST INSPECTION</span>
+                        <span class="dt-footer-value text-muted-mono">18 Sep 2026, 17:42</span>
+                    </div>
+                    <button class="dt-footer-btn-details" id="btnInspectorOpen">
+                        View Details &rarr;
                     </button>
                 </div>
             </div>
 
-            <!-- RIGHT: LIVE TELEMETRY & RECENT ACTIVITY -->
+            <!-- RIGHT: LIVE TELEMETRY & RECENT ACTIVITY (22%) -->
             <div class="monitoring-panel right-panel">
                 <div class="panel-header" id="tel-header-title">
                     <span class="panel-header-icon">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
                         LIVE TELEMETRY
                     </span>
-                    <span style="font-family:var(--font-mono); font-size:9.5px; color:var(--blue-bright); display:flex; align-items:center; gap:4px;">
+                    <span class="tel-live-tag">
                         <span class="pulse-dot blue"></span> 3D VIME
                     </span>
                 </div>
 
                 <div class="telemetry-grid">
-                    <div class="telemetry-card">
+                    <!-- TEMPERATURE: Permanent Orange Sparkline -->
+                    <div class="telemetry-card tel-card-temp">
                         <div class="tel-header-row">
-                            <span class="tel-icon">
+                            <span class="tel-icon text-orange">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
                             </span>
                             <span class="tel-label">TEMPERATURE</span>
                         </div>
                         <div class="tel-value-row">
                             <span class="tel-value" id="tel-temp">72&deg;C</span>
-                            <span class="tel-state-badge" id="tel-temp-sub">NORMAL</span>
+                            <span class="tel-state-badge badge-orange-tint" id="tel-temp-sub">NORMAL</span>
                         </div>
                         <div class="tel-sparkline">
                             <svg viewBox="0 0 100 16" preserveAspectRatio="none">
-                                <path d="M0,12 Q25,2 50,10 T100,6" fill="none" stroke="#1683FF" stroke-width="1.8"/>
+                                <path d="M0,12 Q25,2 50,10 T100,6" fill="none" stroke="#FF8A1F" stroke-width="2"/>
                             </svg>
                         </div>
                     </div>
 
-                    <div class="telemetry-card">
+                    <!-- FAN RPM: Permanent Orange Sparkline -->
+                    <div class="telemetry-card tel-card-fan">
                         <div class="tel-header-row">
-                            <span class="tel-icon">
+                            <span class="tel-icon text-orange">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83m13.79-4l-5.74 9.94"/></svg>
                             </span>
                             <span class="tel-label">FAN RPM</span>
                         </div>
                         <div class="tel-value-row">
                             <span class="tel-value" id="tel-rpm">1240</span>
-                            <span class="tel-state-badge text-green" id="tel-rpm-sub">ACTIVE</span>
+                            <span class="tel-state-badge badge-green-tint" id="tel-rpm-sub">ACTIVE</span>
                         </div>
                         <div class="tel-sparkline">
                             <svg viewBox="0 0 100 16" preserveAspectRatio="none">
-                                <path d="M0,8 Q25,14 50,4 T100,10" fill="none" stroke="#19D39A" stroke-width="1.8"/>
+                                <path d="M0,10 Q25,15 50,5 T100,8" fill="none" stroke="#FF8A1F" stroke-width="2"/>
                             </svg>
                         </div>
                     </div>
 
-                    <div class="telemetry-card">
+                    <!-- PRESSURE: Electric Blue Sparkline -->
+                    <div class="telemetry-card tel-card-pressure">
                         <div class="tel-header-row">
-                            <span class="tel-icon">
+                            <span class="tel-icon text-blue">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                             </span>
                             <span class="tel-label">PRESSURE</span>
                         </div>
                         <div class="tel-value-row">
                             <span class="tel-value" id="tel-pressure">2.4 bar</span>
-                            <span class="tel-state-badge" id="tel-pressure-sub">NORMAL</span>
+                            <span class="tel-state-badge badge-blue-tint" id="tel-pressure-sub">NORMAL</span>
                         </div>
                         <div class="tel-sparkline">
                             <svg viewBox="0 0 100 16" preserveAspectRatio="none">
-                                <path d="M0,10 Q25,8 50,12 T100,7" fill="none" stroke="#38BDF8" stroke-width="1.8"/>
+                                <path d="M0,10 Q25,8 50,12 T100,7" fill="none" stroke="#1683FF" stroke-width="1.8"/>
                             </svg>
                         </div>
                     </div>
 
-                    <div class="telemetry-card">
+                    <!-- COOLANT: Electric Blue Sparkline -->
+                    <div class="telemetry-card tel-card-coolant">
                         <div class="tel-header-row">
-                            <span class="tel-icon">
+                            <span class="tel-icon text-blue">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
                             </span>
                             <span class="tel-label">COOLANT</span>
                         </div>
                         <div class="tel-value-row">
                             <span class="tel-value" id="tel-coolant">68%</span>
-                            <span class="tel-state-badge" id="tel-coolant-sub">NORMAL</span>
+                            <span class="tel-state-badge badge-blue-tint" id="tel-coolant-sub">NORMAL</span>
                         </div>
                         <div class="tel-sparkline">
                             <svg viewBox="0 0 100 16" preserveAspectRatio="none">
-                                <path d="M0,14 Q25,6 50,11 T100,5" fill="none" stroke="#22D3EE" stroke-width="1.8"/>
+                                <path d="M0,14 Q25,6 50,11 T100,5" fill="none" stroke="#1683FF" stroke-width="1.8"/>
                             </svg>
                         </div>
                     </div>
 
-                    <div class="telemetry-card">
-                        <div class="tel-header-row">
-                            <span class="tel-icon">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                            </span>
-                            <span class="tel-label">VIBRATION</span>
-                        </div>
-                        <div class="tel-value-row">
-                            <span class="tel-value text-blue" id="tel-vibration">0.18</span>
-                            <span class="tel-state-badge" id="tel-vib-sub">NORMAL</span>
-                        </div>
-                        <div class="tel-sparkline">
-                            <svg viewBox="0 0 100 16" preserveAspectRatio="none">
-                                <path d="M0,8 Q25,2 50,14 T100,8" fill="none" stroke="#38BDF8" stroke-width="1.8"/>
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div class="telemetry-card">
-                        <div class="tel-header-row">
-                            <span class="tel-icon">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-                            </span>
-                            <span class="tel-label">FAN STATE</span>
-                        </div>
-                        <div class="tel-value-row">
-                            <span class="tel-value text-green" id="tel-fan">ACTIVE</span>
-                            <span class="tel-state-badge text-green" id="tel-fan-sub">NORMAL</span>
-                        </div>
-                        <div class="tel-sparkline">
-                            <svg viewBox="0 0 100 16" preserveAspectRatio="none">
-                                <path d="M0,8 L30,8 L36,3 L46,13 L52,8 L100,8" fill="none" stroke="#20C997" stroke-width="1.8"/>
-                            </svg>
-                        </div>
+                    <!-- Hidden bindings for tel-vibration & tel-fan to preserve JS updates -->
+                    <div style="display:none;">
+                        <span id="tel-vibration">0.18</span>
+                        <span id="tel-vib-sub">NORMAL</span>
+                        <span id="tel-fan">ACTIVE</span>
+                        <span id="tel-fan-sub">NORMAL</span>
                     </div>
                 </div>
 
-                <div class="panel-header mt-auto">
+                <div class="panel-header mt-12">
                     <span class="panel-header-icon">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg>
                         RECENT ACTIVITY
                     </span>
-                    <span style="font-family:var(--font-mono); font-size:9.5px; color:var(--success); display:flex; align-items:center; gap:4px;">
+                    <span class="activity-live-tag">
                         <span class="pulse-dot"></span> LIVE
                     </span>
                 </div>
                 <div class="activity-log" id="activityLog">
                     <div class="activity-row">
-                        <span class="act-time">23:56:25</span>
-                        <span class="act-icon text-green">&check;</span>
+                        <span class="act-time">18:42:15</span>
+                        <span class="act-dot green-dot"></span>
                         <span class="act-desc">Telemetry connected (127.0.0.1)</span>
                     </div>
                     <div class="activity-row">
-                        <span class="act-time">23:56:22</span>
-                        <span class="act-icon text-info">&bull;</span>
+                        <span class="act-time">18:42:10</span>
+                        <span class="act-dot orange-dot"></span>
+                        <span class="act-desc">Vibration normalized to 0.18 mm/s</span>
+                    </div>
+                    <div class="activity-row">
+                        <span class="act-time">18:41:55</span>
+                        <span class="act-dot blue-dot"></span>
                         <span class="act-desc">System initialized</span>
                     </div>
                     <div class="activity-row">
-                        <span class="act-time">23:56:20</span>
-                        <span class="act-icon text-green">&check;</span>
-                        <span class="act-desc">State changed to NORMAL</span>
+                        <span class="act-time">18:41:30</span>
+                        <span class="act-dot green-dot"></span>
+                        <span class="act-desc">Thermal inspection verified</span>
                     </div>
                     <div class="activity-row">
-                        <span class="act-time">23:56:15</span>
-                        <span class="act-icon text-red">&Delta;</span>
-                        <span class="act-desc">State changed to CRITICAL</span>
-                    </div>
-                    <div class="activity-row">
-                        <span class="act-time">23:56:10</span>
-                        <span class="act-icon text-green">&check;</span>
+                        <span class="act-time">18:40:12</span>
+                        <span class="act-dot green-dot"></span>
                         <span class="act-desc">State changed to NORMAL</span>
                     </div>
                 </div>
 
-                <div class="panel-header mt-14" style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>INCIDENT SIMULATION</span>
-                    <span id="demo-indicator" style="font-size:9px; color:var(--cyan-bright); letter-spacing:1px; display:none;">SIMULATED TELEMETRY</span>
-                </div>
-                <div class="sim-controls">
-                    <button class="sim-btn active" id="sim-live">LIVE</button>
-                    <button class="sim-btn" id="sim-normal">NORMAL</button>
-                    <button class="sim-btn" id="sim-warning">WARN</button>
-                    <button class="sim-btn" id="sim-critical">CRIT</button>
-                </div>
-
-                <div class="demo-actions" style="display:flex; gap:8px; margin-top:8px;">
-                    <button id="btn-start-demo" style="flex:1; height:32px; font-size:10.5px; padding:0;">START DEMO INCIDENT</button>
-                    <button id="btn-reset-demo" style="flex:1; height:32px; font-size:10.5px; padding:0; background:transparent; border-color:var(--text-muted); color:var(--text-secondary);">RESET DEMO</button>
+                <!-- Simulation Controls Compact Bar -->
+                <div class="sim-strip-wrap">
+                    <div class="sim-strip-header">
+                        <span>SIMULATION BENCH</span>
+                        <span id="demo-indicator" class="sim-demo-badge">SIMULATED</span>
+                    </div>
+                    <div class="sim-controls">
+                        <button class="sim-btn active" id="sim-live">LIVE</button>
+                        <button class="sim-btn" id="sim-normal">NORMAL</button>
+                        <button class="sim-btn" id="sim-warning">WARN</button>
+                        <button class="sim-btn" id="sim-critical">CRIT</button>
+                    </div>
+                    <div class="demo-actions" style="display:flex; gap:6px; margin-top:6px;">
+                        <button id="btn-start-demo" class="sim-action-btn">TRIGGER DEMO</button>
+                        <button id="btn-reset-demo" class="sim-action-btn sim-reset-btn">RESET</button>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- MAINTENANCE & INDUSTRIAL ANALYTICS AREA (4-PANEL COMMAND DECK) -->
+        <!-- LOWER ANALYTICAL PANELS (3-PANEL COMMAND DECK MATCHING REFERENCE) -->
         <section class="maintenance-area">
-            <div class="maintenance-grid">
+            <div class="overview-analytics-3col">
                 <!-- 1. MAINTENANCE RISK ASSESSMENT -->
-                <div class="maint-panel crystal-sweep">
+                <div class="overview-analytical-card maint-risk-card">
                     <div class="panel-header">
                         <span class="panel-header-icon">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                            MAINTENANCE RISK
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF8A1F" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                            MAINTENANCE RISK ASSESSMENT
                         </span>
-                        <span class="pulse-dot"></span>
                     </div>
-                    <div class="maint-status-row">
-                        <div class="maint-box">
-                            <div class="maint-label">MAINTENANCE STATUS</div>
-                            <div class="maint-val-wrap">
-                                <span class="maint-ready-icon">&check;</span>
-                                <span class="maint-value text-green" id="maint-status">READY</span>
-                            </div>
+                    <div class="maint-risk-pills-grid">
+                        <div class="maint-risk-pill pill-blue">
+                            <span class="maint-pill-type">Mechanical</span>
+                            <span class="maint-pill-val">Low Risk</span>
                         </div>
-                        <div class="maint-box">
-                            <div class="maint-label">RISK LEVEL</div>
-                            <div class="maint-val-wrap">
-                                <span class="maint-value text-green" id="maint-risk">LOW</span>
-                                <div class="tiered-meter-bars">
-                                    <span class="meter-bar active"></span>
-                                    <span class="meter-bar"></span>
-                                    <span class="meter-bar"></span>
+                        <div class="maint-risk-pill pill-blue">
+                            <span class="maint-pill-type">Thermal</span>
+                            <span class="maint-pill-val">Low Risk</span>
+                        </div>
+                        <div class="maint-risk-pill pill-orange">
+                            <span class="maint-pill-type">Electrical</span>
+                            <span class="maint-pill-val">Medium Risk</span>
+                        </div>
+                        <div class="maint-risk-pill pill-blue">
+                            <span class="maint-pill-type">Operational</span>
+                            <span class="maint-pill-val">Stable</span>
+                        </div>
+                    </div>
+                    <!-- Hidden elements to preserve JS bindings for maint-status, maint-risk, maint-action -->
+                    <div style="display:none;">
+                        <span id="maint-status">READY</span>
+                        <span id="maint-risk">LOW</span>
+                        <span id="maint-action">Routine monitoring</span>
+                    </div>
+                </div>
+
+                <!-- 2. PREDICTIVE ANALYTICS WITH 10 ORANGE BARS -->
+                <div class="overview-analytical-card pred-analytics-card">
+                    <div class="panel-header">
+                        <span class="panel-header-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF8A1F" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                            PREDICTIVE ANALYTICS
+                        </span>
+                    </div>
+                    <div class="pred-analytics-body">
+                        <div class="pred-stats-row">
+                            <div class="pred-rul-group">
+                                <div class="pred-rul-label">RUL (Remaining Useful Life)</div>
+                                <div class="pred-rul-value-wrap">
+                                    <span class="pred-rul-num" id="pred-rul-val">&gt; 1,200</span>
+                                    <span class="pred-rul-unit">hours</span>
                                 </div>
                             </div>
+                            <div class="pred-trend-badge">
+                                &nearr; +12%
+                            </div>
+                        </div>
+                        <!-- 10 Vertical Glowing Orange Bars -->
+                        <div class="pred-orange-bars-container" title="Predicted RUL Operating Envelope">
+                            <div class="pred-bar b1" style="height: 35%;"></div>
+                            <div class="pred-bar b2" style="height: 48%;"></div>
+                            <div class="pred-bar b3" style="height: 60%;"></div>
+                            <div class="pred-bar b4" style="height: 52%;"></div>
+                            <div class="pred-bar b5" style="height: 70%;"></div>
+                            <div class="pred-bar b6" style="height: 82%;"></div>
+                            <div class="pred-bar b7" style="height: 75%;"></div>
+                            <div class="pred-bar b8" style="height: 90%;"></div>
+                            <div class="pred-bar b9" style="height: 85%;"></div>
+                            <div class="pred-bar b10" style="height: 100%;"></div>
+                        </div>
+                        <div class="pred-curve-sub">
+                            Degradation curve nominal &bull; 98.4% Confidence Interval
                         </div>
                     </div>
-                    <div class="maint-action-box">
-                        <div class="maint-label">NEXT SCHEDULED ACTION</div>
-                        <div class="maint-action-text" id="maint-action">Continue routine monitoring and scheduled maintenance.</div>
-                    </div>
+                    <!-- Hidden element for pred-fault-val binding -->
+                    <span id="pred-fault-val" style="display:none;">14.2%</span>
                 </div>
 
-                <!-- 2. PREDICTIVE ANALYTICS & RUL -->
-                <div class="pred-panel crystal-sweep">
+                <!-- 3. MODEL INSIGHTS & REPORT GENERATOR -->
+                <div class="overview-analytical-card model-insights-card">
                     <div class="panel-header">
                         <span class="panel-header-icon">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                            PREDICTIVE ANALYTICS (RUL)
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF8A1F" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            MODEL INSIGHTS
                         </span>
-                        <span style="font-family:var(--font-mono); font-size:9px; color:var(--blue-bright);">98.4% CONF</span>
                     </div>
-                    <div class="maint-status-row">
-                        <div class="maint-box">
-                            <div class="maint-label">ESTIMATED RUL</div>
-                            <div class="maint-val-wrap">
-                                <span class="maint-value text-blue" id="pred-rul-val">1,420 HRS</span>
-                            </div>
+                    <div class="model-insights-body">
+                        <div class="insights-spark-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF8A1F" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
                         </div>
-                        <div class="maint-box">
-                            <div class="maint-label">FAULT PROBABILITY</div>
-                            <div class="maint-val-wrap">
-                                <span class="maint-value text-cyan" id="pred-fault-val">14.2%</span>
-                            </div>
+                        <div class="insights-text">
+                            All parameters within optimal range. No immediate maintenance required. Sovereign AI recommends continuing standard operational cycle.
                         </div>
-                    </div>
-                    <div class="maint-action-box">
-                        <div class="maint-label">DEGRADATION TRAJECTORY</div>
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:2px;">
-                            <div>
-                                <span style="font-size:10.5px; color:var(--text-secondary);">Motor Bearing Wear Velocity</span>
-                                <div style="font-family:var(--font-mono); font-size:10px; color:var(--cyan-bright); margin-top:1px;">&plus;0.012 mm/kh (Nominal RUL)</div>
-                            </div>
-                            <div class="pred-mini-bars" style="display:flex; align-items:flex-end; gap:3px; height:18px; padding-right:2px;" title="Predictive Degradation Curve: Stable Linear Blue">
-                                <span style="width:3px; height:6px; background:var(--blue-bright); border-radius:1px; opacity:0.55;"></span>
-                                <span style="width:3px; height:8px; background:var(--blue-bright); border-radius:1px; opacity:0.65;"></span>
-                                <span style="width:3px; height:9px; background:var(--blue-bright); border-radius:1px; opacity:0.75;"></span>
-                                <span style="width:3px; height:11px; background:var(--blue-bright); border-radius:1px; opacity:0.85;"></span>
-                                <span style="width:3px; height:13px; background:var(--blue-bright); border-radius:1px; opacity:0.9;"></span>
-                                <span style="width:3px; height:15px; background:var(--blue-bright); border-radius:1px; opacity:0.95;"></span>
-                                <span style="width:3px; height:18px; background:var(--cyan-bright); border-radius:1px; box-shadow:0 0 6px var(--cyan-bright);"></span>
-                            </div>
-                        </div>
+                        <button class="btn-generate-report" id="btnOverviewGenReport">
+                            Generate Report &rarr;
+                        </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- 3. MACHINERY TELEMETRY INSIGHTS -->
-                <div class="spectral-panel crystal-sweep">
-                    <div class="panel-header">
-                        <span class="panel-header-icon">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                            MODEL &amp; SPECTRAL INSIGHTS
-                        </span>
-                        <span style="font-family:var(--font-mono); font-size:9px; color:var(--cyan-bright);">FFT 42.4 HZ</span>
-                    </div>
-                    <div class="maint-status-row">
-                        <div class="maint-box">
-                            <div class="maint-label">THERMAL DELTA</div>
-                            <div class="maint-val-wrap">
-                                <span class="maint-value text-blue">&plus;4.1&deg;C</span>
-                                <span style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted);">&Delta; AMBIENT</span>
-                            </div>
-                        </div>
-                        <div class="maint-box">
-                            <div class="maint-label">LUBRICATION VISCOSITY</div>
-                            <div class="maint-val-wrap">
-                                <span class="maint-value text-green">96.8%</span>
-                                <span style="font-family:var(--font-mono); font-size:9px; color:var(--success);">NOMINAL</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="maint-action-box">
-                        <div class="maint-label">AI DIAGNOSTIC OBSERVATION</div>
-                        <div class="maint-action-text" style="color:var(--text-secondary);">Compressor vibration harmonics stable within ISO 10816-3 Class II threshold.</div>
-                    </div>
+            <!-- OVERVIEW FOOTER STRIP -->
+            <div class="overview-footer-strip">
+                <div class="ov-footer-left">
+                    <span class="ov-footer-brand">KAVAAI SOVEREIGN</span>
+                    <span class="ov-footer-sep">&bull;</span>
+                    <span class="ov-footer-tagline">Built for Secure, Intelligent Industrial Operations</span>
                 </div>
-
-                <!-- 4. MACHINE EVENT TIMELINE -->
-                <div class="timeline-panel crystal-sweep">
-                    <div class="panel-header">
-                        <span class="panel-header-icon">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            EVENT TIMELINE
-                        </span>
-                        <span style="font-size:9.5px; font-family:var(--font-mono); color:var(--blue-bright); cursor:pointer;">LIVE FEED</span>
-                    </div>
-                    <div class="timeline-container" id="eventTimeline">
-                        <div class="timeline-row">
-                            <span class="tl-time">23:56:22</span>
-                            <span class="tl-tag-badge system">SYSTEM</span>
-                            <span class="tl-desc">System returned to normal state</span>
-                        </div>
-                        <div class="timeline-row">
-                            <span class="tl-time">23:56:15</span>
-                            <span class="tl-tag-badge alert">ALERT</span>
-                            <span class="tl-desc">Critical temperature detected: 100&deg;C</span>
-                        </div>
-                        <div class="timeline-row">
-                            <span class="tl-time">23:56:12</span>
-                            <span class="tl-tag-badge warning">WARN</span>
-                            <span class="tl-desc">Temperature trending high: 92&deg;C</span>
-                        </div>
-                        <div class="timeline-row">
-                            <span class="tl-time">23:56:10</span>
-                            <span class="tl-tag-badge system">SYSTEM</span>
-                            <span class="tl-desc">Telemetry data stream synchronized</span>
-                        </div>
-                    </div>
+                <div class="ov-footer-center">
+                    <span class="ov-footer-pill">AIR-GAPPED</span>
+                    <span class="ov-footer-pill">ZERO-LEAKAGE</span>
+                    <span class="ov-footer-pill">LOCAL INFERENCE</span>
+                </div>
+                <div class="ov-footer-right">
+                    <span class="ov-footer-motto">OBSERVE &bull; ANALYZE &bull; PREVENT &bull; ENABLE</span>
                 </div>
             </div>
         </section>
@@ -2378,6 +2366,6 @@ STATUS: WARNING (Conditional Operation Allowed)</div>
     </div>
 </div>
 
-<script src="app.js?v=56"></script>
+<script src="app.js?v=58"></script>
 </body>
 </html>

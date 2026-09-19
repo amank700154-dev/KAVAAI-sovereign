@@ -483,21 +483,22 @@ document.addEventListener("DOMContentLoaded", function () {
         const healthText = document.getElementById("health-status-text");
 
         if (circle) {
-            const offset = 283 - (283 * healthScore) / 100;
+            const circumference = 264;
+            const offset = circumference - (circumference * healthScore) / 100;
             circle.style.strokeDashoffset = offset;
             
             const healthPill = document.getElementById("health-status-pill");
             if (currentState === "NORMAL") {
-                circle.style.stroke = "var(--blue-primary)";
+                circle.style.stroke = "var(--orange-primary)";
                 if (healthText) {
                     healthText.textContent = "NORMAL";
                     healthText.className = "health-status text-green";
                 }
                 if (healthPill) {
-                    healthPill.className = "health-status-pill normal";
+                    healthPill.className = "health-status-pill health-pill-normal";
                 }
             } else if (currentState === "WARNING") {
-                circle.style.stroke = "var(--orange-primary)";
+                circle.style.stroke = "var(--orange-bright)";
                 if (healthText) {
                     healthText.textContent = "WARNING";
                     healthText.className = "health-status text-orange";
@@ -587,23 +588,23 @@ document.addEventListener("DOMContentLoaded", function () {
         // Update 5 HUD callout cards with real telemetry and conditional warnings
         const hudTempVal = document.getElementById("hud-temp-val");
         const hudTempStat = document.getElementById("hud-temp-stat");
-        const tempCallout = document.querySelector(".dt-hud-callout.callout-temp");
+        const tempCallout = document.querySelector(".dt-hud-callout.callout-temp, .callout-ref-temp");
         const tempHotspot = document.getElementById("comp-temp");
         if (hudTempVal) hudTempVal.innerHTML = `${data.temperature}&deg;C`;
         if (hudTempStat) {
             if (data.temperature > 95) {
-                hudTempStat.textContent = "CRITICAL";
-                hudTempStat.className = "callout-status text-red";
+                hudTempStat.textContent = "Critical";
+                hudTempStat.className = "ref-callout-badge text-red";
                 if (tempCallout) { tempCallout.classList.remove("warning"); tempCallout.classList.add("critical"); }
                 if (tempHotspot) { tempHotspot.classList.remove("warning"); tempHotspot.classList.add("critical"); }
             } else if (data.temperature > 80) {
-                hudTempStat.textContent = "WARNING";
-                hudTempStat.className = "callout-status text-orange";
+                hudTempStat.textContent = "Warning";
+                hudTempStat.className = "ref-callout-badge badge-orange";
                 if (tempCallout) { tempCallout.classList.remove("critical"); tempCallout.classList.add("warning"); }
                 if (tempHotspot) { tempHotspot.classList.remove("critical"); tempHotspot.classList.add("warning"); }
             } else {
-                hudTempStat.textContent = "NORMAL";
-                hudTempStat.className = "callout-status text-green";
+                hudTempStat.textContent = "Normal";
+                hudTempStat.className = "ref-callout-badge badge-orange";
                 if (tempCallout) { tempCallout.classList.remove("warning", "critical"); }
                 if (tempHotspot) { tempHotspot.classList.remove("warning", "critical"); }
             }
@@ -619,30 +620,53 @@ document.addEventListener("DOMContentLoaded", function () {
         const hudFanStat = document.getElementById("hud-fan-stat");
         if (hudFanVal) hudFanVal.textContent = `${data.rpm} RPM`;
         if (hudFanStat) {
-            hudFanStat.textContent = data.fan || "ACTIVE";
-            hudFanStat.className = "callout-status text-green";
+            hudFanStat.textContent = data.fan || "Active";
+            hudFanStat.className = "ref-callout-badge badge-blue";
         }
 
         const hudMainVal = document.getElementById("hud-main-val");
         const hudMainStat = document.getElementById("hud-main-stat");
-        if (hudMainVal) hudMainVal.textContent = data.status === "CRITICAL" ? "TRIPPED" : "OPERATIONAL";
+        if (hudMainVal) hudMainVal.textContent = data.vibration ? `${data.vibration} mm/s` : "0.18 mm/s";
         if (hudMainStat) {
-            hudMainStat.textContent = data.status || "NORMAL";
-            hudMainStat.className = `callout-status ${data.status === "CRITICAL" ? "text-red" : data.status === "WARNING" ? "text-orange" : "text-green"}`;
+            hudMainStat.textContent = data.status || "Normal";
+            hudMainStat.className = `ref-callout-badge ${data.status === "CRITICAL" ? "text-red" : "badge-orange"}`;
         }
     }
 
+    // Report Generator Action Button
+    const btnGenReport = document.getElementById("btnOverviewGenReport");
+    if (btnGenReport) {
+        btnGenReport.addEventListener("click", () => {
+            switchTab("agent");
+            autoFill("Generate comprehensive predictive maintenance report for Machine 101 based on current telemetry baseline.");
+        });
+    }
+
     // Digital Twin Component Interactive Selection
-    const twinComps = document.querySelectorAll(".twin-comp");
+    const twinComps = document.querySelectorAll(".twin-comp, .ref-callout");
     twinComps.forEach(c => {
         c.addEventListener("click", () => {
             twinComps.forEach(other => other.classList.remove("selected"));
             c.classList.add("selected");
+            const panel = document.getElementById("inspectionPanel");
+            if (panel) panel.classList.add("active");
+            
+            const compId = c.id || (c.getAttribute("data-comp") ? "comp-" + c.getAttribute("data-comp").toLowerCase().split(" ")[0] : "");
             if (currentTelemetry) {
-                updateInspectionPanel(c.id, currentTelemetry);
+                updateInspectionPanel(compId, currentTelemetry);
             }
         });
     });
+
+    // Close Button for Component Inspector
+    const insCloseBtn = document.getElementById("insCloseBtn");
+    if (insCloseBtn) {
+        insCloseBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const panel = document.getElementById("inspectionPanel");
+            if (panel) panel.classList.remove("active");
+        });
+    }
 
     // Wire HUD Callouts to Component Selection
     document.querySelectorAll(".dt-hud-callout").forEach(callout => {
@@ -660,18 +684,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnViewSchematic = document.getElementById("btn-view-schematic");
     if (btnView3D && btnViewSchematic) {
         btnView3D.addEventListener("click", () => {
-            btnView3D.classList.add("active");
+            btnView3D.classList.add("active", "dt-btn-orange-active");
             btnViewSchematic.classList.remove("active");
-            const machineryImg = document.querySelector(".dt-machinery-img");
-            if (machineryImg) machineryImg.style.filter = "drop-shadow(0 15px 35px rgba(0, 0, 0, 0.9)) contrast(108%) brightness(96%)";
-            showToast("3D Digital Twin View Activated", "info");
+            const machineImg = document.querySelector(".dt-machinery-img");
+            if (machineImg) machineImg.style.filter = "drop-shadow(0 20px 45px rgba(0, 4, 12, 0.95)) contrast(108%) brightness(98%)";
         });
         btnViewSchematic.addEventListener("click", () => {
             btnViewSchematic.classList.add("active");
-            btnView3D.classList.remove("active");
-            const machineryImg = document.querySelector(".dt-machinery-img");
-            if (machineryImg) machineryImg.style.filter = "invert(1) hue-rotate(180deg) brightness(85%) contrast(150%)";
-            showToast("Industrial Engineering Schematic View", "info");
+            btnView3D.classList.remove("active", "dt-btn-orange-active");
+            const machineImg = document.querySelector(".dt-machinery-img");
+            if (machineImg) machineImg.style.filter = "invert(0.85) hue-rotate(180deg) contrast(150%)";
         });
     }
 
@@ -681,7 +703,7 @@ document.addEventListener("DOMContentLoaded", function () {
         btnInspectorOpen.addEventListener("click", () => {
             const panel = document.getElementById("inspectionPanel");
             if (panel) {
-                panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                panel.classList.add("active");
                 const compMain = document.getElementById("comp-main");
                 if (compMain) compMain.click();
             }
@@ -747,6 +769,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 switchTab("agent");
             };
         }
+
+        const fComp = document.getElementById("dt-footer-comp");
+        const fStat = document.getElementById("dt-footer-status");
+        const fVal = document.getElementById("dt-footer-val");
+        if (fComp) fComp.textContent = insName.textContent;
+        if (fStat) fStat.textContent = "● " + insStatus.textContent;
+        if (fVal) fVal.textContent = insValue.textContent;
     }
 
     function autoFill(text) {
