@@ -13,7 +13,9 @@ ENV PYTHONUNBUFFERED=1 \
     HOST=0.0.0.0 \
     PORT=8000 \
     AIR_GAP_STRICT_MODE=true \
-    OLLAMA_HOST=http://host.docker.internal:11434
+    OLLAMA_BASE_URL=http://host.docker.internal:11434 \
+    OLLAMA_HOST=http://host.docker.internal:11434 \
+    OLLAMA_MODEL=qwen2.5:7b
 
 WORKDIR /app
 

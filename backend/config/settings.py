@@ -27,14 +27,16 @@ for p in [DATA_DIR, WORKSPACE_DIR, OUTPUT_DIR, KNOWLEDGE_BASE_DIR, VECTOR_STORE_
 LEGACY_OUTPUT_DIR = ROOT_DIR / "output"
 os.makedirs(str(LEGACY_OUTPUT_DIR), exist_ok=True)
 
-# Local Ollama AI Settings
-OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+# Local Ollama AI Settings (Supports both OLLAMA_BASE_URL and OLLAMA_HOST)
+_env_ollama_url = os.environ.get("OLLAMA_BASE_URL") or os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_HOST = _env_ollama_url.rstrip("/")
+OLLAMA_BASE_URL = OLLAMA_HOST
 OLLAMA_TIMEOUT_SECONDS = int(os.environ.get("OLLAMA_TIMEOUT", "90"))
 
 # Model Roles
 DEFAULT_ROLES = {
-    "REASONING_MODEL": "qwen2.5:7b",
-    "CODING_MODEL": "qwen2.5:7b",
+    "REASONING_MODEL": os.environ.get("OLLAMA_MODEL", "qwen2.5:7b"),
+    "CODING_MODEL": os.environ.get("OLLAMA_MODEL", "qwen2.5:7b"),
     "VISION_MODEL": "qwen2.5vl:7b",
     "EMBEDDING_MODEL": "all-MiniLM-L6-v2"
 }
@@ -50,14 +52,18 @@ if CONFIG_FILE.exists():
             if "roles" in disk_cfg:
                 MODEL_ROLES.update(disk_cfg["roles"])
             if "ollama" in disk_cfg:
-                OLLAMA_HOST = disk_cfg["ollama"].get("host", OLLAMA_HOST)
+                OLLAMA_HOST = disk_cfg["ollama"].get("host", OLLAMA_HOST).rstrip("/")
+                OLLAMA_BASE_URL = OLLAMA_HOST
                 OLLAMA_TIMEOUT_SECONDS = disk_cfg["ollama"].get("timeout_seconds", OLLAMA_TIMEOUT_SECONDS)
     except Exception as e:
         print(f"[Settings] Warning: failed to parse {CONFIG_FILE}: {e}")
 
 # Environment overrides (highest precedence)
-if "OLLAMA_HOST" in os.environ and os.environ["OLLAMA_HOST"].strip():
-    OLLAMA_HOST = os.environ["OLLAMA_HOST"].strip()
+env_url_override = os.environ.get("OLLAMA_BASE_URL") or os.environ.get("OLLAMA_HOST")
+if env_url_override and env_url_override.strip():
+    OLLAMA_HOST = env_url_override.strip().rstrip("/")
+    OLLAMA_BASE_URL = OLLAMA_HOST
+
 if "OLLAMA_TIMEOUT" in os.environ and os.environ["OLLAMA_TIMEOUT"].strip():
     try:
         OLLAMA_TIMEOUT_SECONDS = int(os.environ["OLLAMA_TIMEOUT"])
@@ -68,6 +74,12 @@ for role in DEFAULT_ROLES.keys():
     env_var = f"KAVAAI_{role}"
     if env_var in os.environ and os.environ[env_var].strip():
         MODEL_ROLES[role] = os.environ[env_var].strip()
+
+# Explicit OLLAMA_MODEL override for reasoning and coding
+if "OLLAMA_MODEL" in os.environ and os.environ["OLLAMA_MODEL"].strip():
+    m_val = os.environ["OLLAMA_MODEL"].strip()
+    MODEL_ROLES["REASONING_MODEL"] = m_val
+    MODEL_ROLES["CODING_MODEL"] = m_val
 
 # Air-Gap Sovereignty Settings
 AIR_GAP_ENFORCE_LOCAL_ONLY = True

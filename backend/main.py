@@ -56,7 +56,21 @@ strict_airgap = os.environ.get("AIR_GAP_STRICT_MODE", "true").lower() == "true"
 sovereignty_monitor.install_outbound_guard(strict=strict_airgap)
 
 app = Flask(__name__, static_folder=FRONTEND_DIR)
-CORS(app)
+
+# Configure CORS using environment variable with secure local + Vercel defaults
+cors_origins_env = os.environ.get(
+    "CORS_ORIGINS", 
+    "http://127.0.0.1:8000 http://localhost:8000 http://127.0.0.1:5500 http://localhost:5500 http://localhost:5173"
+)
+cors_origins = [o.strip() for o in cors_origins_env.split() if o.strip()]
+CORS(app, resources={r"/*": {"origins": cors_origins if cors_origins else "*"}})
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    return response
 
 
 # ==============================================================================
@@ -644,7 +658,8 @@ def get_auth_config():
 
 
 if __name__ == "__main__":
-    host = os.environ.get("HOST", "127.0.0.1")
+    default_host = "0.0.0.0" if (os.environ.get("RENDER") or os.environ.get("PORT")) else "127.0.0.1"
+    host = os.environ.get("HOST", default_host)
     try:
         port = int(os.environ.get("PORT", 8000))
     except (ValueError, TypeError):

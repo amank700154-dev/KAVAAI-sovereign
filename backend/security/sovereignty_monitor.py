@@ -32,7 +32,8 @@ from threading import Lock
 from typing import Dict, Any, List, Optional, Tuple
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_DIR = os.path.join(BASE_DIR, "output")
+ROOT_DIR = os.path.dirname(os.path.dirname(BASE_DIR))
+OUTPUT_DIR = os.environ.get("KAVAAI_OUTPUT_DIR", os.path.join(ROOT_DIR, "output"))
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 AUDIT_LOG_FILE = os.path.join(OUTPUT_DIR, "sovereignty_audit.jsonl")
 
@@ -274,6 +275,13 @@ class SovereigntyMonitor:
 
             parsed = urllib.parse.urlparse(endpoint)
             endpoint_clean = f"{parsed.scheme}://{parsed.netloc}{parsed.path}" if parsed.netloc else endpoint
+            endpoint_disp = parsed.netloc if parsed.netloc else endpoint
+
+            if not is_cloud:
+                print(
+                    f"\n[LOCAL_AI]\nprovider=ollama\nmodel={model_name}\nendpoint={endpoint_disp}\nnetwork_scope=LOCAL\n",
+                    flush=True
+                )
 
             self._record_raw_event(
                 category="AI_MODEL_INFERENCE",

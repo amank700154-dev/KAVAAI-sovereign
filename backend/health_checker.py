@@ -82,38 +82,96 @@ def check_backend() -> Dict[str, Any]:
     }
 
 
-def check_ollama(ollama_host: str = None, timeout: float = 2.0) -> Tuple[Dict[str, Any], list]:
+def check_ollama(ollama_host: str = None, timeout: float = 5.0, target_model: str = "qwen2.5:7b") -> Tuple[Dict[str, Any], list]:
     """
-    Directly probes local Ollama daemon.
-    Returns (check_result, installed_models_list).
+    Directly probes local Ollama daemon across 4 real verification steps:
+    1. Reachability of Ollama host
+    2. Reachability of /api/tags
+    3. Verification of target model (qwen2.5:7b)
+    4. Minimal real generation request completed
     Never fakes results.
     """
     if not ollama_host:
-        ollama_host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+        ollama_host = os.environ.get("OLLAMA_BASE_URL") or os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
-    tags_url = f"{ollama_host.rstrip('/')}/api/tags"
+    ollama_host = ollama_host.rstrip("/")
+    tags_url = f"{ollama_host}/api/tags"
+    generate_url = f"{ollama_host}/api/generate"
+    
+    server_ready = False
+    model_available = False
+    inference_pass = False
+    failure_reason = None
+    installed_models = []
+    
+    # 1 & 2. Check server and /api/tags
     try:
         resp = requests.get(tags_url, timeout=timeout)
         if resp.status_code == 200:
+            server_ready = True
             data = resp.json()
-            models = [m.get("name", "") for m in data.get("models", [])]
-            return {
-                "status": "PASS",
-                "symbol": "✓",
-                "details": f"Online at {ollama_host} ({len(models)} model(s) available)"
-            }, models
+            installed_models = [m.get("name", "") for m in data.get("models", [])]
         else:
-            return {
-                "status": "FAIL",
-                "symbol": "✗",
-                "details": f"Ollama returned HTTP {resp.status_code} at {ollama_host}"
-            }, []
+            failure_reason = f"/api/tags returned HTTP {resp.status_code}"
     except Exception as e:
-        return {
-            "status": "FAIL",
-            "symbol": "✗",
-            "details": f"Ollama offline at {ollama_host} ({type(e).__name__})"
-        }, []
+        failure_reason = f"Ollama unreachable at {ollama_host} ({type(e).__name__}: {e})"
+
+    # 3. Check target model existence
+    if server_ready:
+        model_available = any(
+            target_model.lower() == m.lower() or target_model.split(":")[0].lower() == m.lower()
+            for m in installed_models
+        )
+        if not model_available:
+            failure_reason = f"Model '{target_model}' not found in installed models: {installed_models}"
+
+    # 4. Minimal real inference test
+    inference_output = ""
+    if server_ready and model_available:
+        try:
+            t0 = time.time()
+            gen_resp = requests.post(
+                generate_url,
+                json={"model": target_model, "prompt": "Say OK in one word.", "stream": False},
+                timeout=15.0
+            )
+            dur = round((time.time() - t0) * 1000, 1)
+            if gen_resp.status_code == 200:
+                gen_data = gen_resp.json()
+                inference_output = gen_data.get("response", "").strip()
+                inference_pass = True
+            else:
+                failure_reason = f"Inference failed with HTTP {gen_resp.status_code}: {gen_resp.text[:100]}"
+        except Exception as e:
+            failure_reason = f"Inference request error ({type(e).__name__}: {e})"
+
+    # Formulate report lines
+    report_lines = [
+        f"OLLAMA SERVER: {'READY' if server_ready else 'FAILED'}",
+        f"MODEL: {target_model}",
+        f"MODEL AVAILABLE: {'YES' if model_available else 'NO'}",
+        f"INFERENCE TEST: {'PASS' if inference_pass else 'FAIL'}"
+    ]
+    if failure_reason:
+        report_lines.append(f"FAILURE DETAIL: {failure_reason}")
+
+    all_passed = server_ready and model_available and inference_pass
+    details = f"Online at {ollama_host} | Model: {target_model} (Available: {'YES' if model_available else 'NO'}) | Inference: {'PASS' if inference_pass else 'FAIL'}"
+    if failure_reason:
+        details += f" ({failure_reason})"
+
+    return {
+        "status": "PASS" if all_passed else "FAIL",
+        "symbol": "✓" if all_passed else "✗",
+        "details": details,
+        "server_ready": server_ready,
+        "model": target_model,
+        "model_available": model_available,
+        "inference_test": inference_pass,
+        "inference_output": inference_output,
+        "failure_reason": failure_reason,
+        "report_formatted": "\n".join(report_lines)
+    }, installed_models
 
 
 def check_models(ollama_online: bool, installed_models: list) -> Tuple[Dict[str, Any], Dict[str, Any]]:
@@ -123,7 +181,7 @@ def check_models(ollama_online: bool, installed_models: list) -> Tuple[Dict[str,
     """
     from model_router import _CONFIG
     roles = _CONFIG.get("roles", {})
-    reasoning_req = roles.get("REASONING_MODEL", "qwen2.5:7b")
+    reasoning_req = os.environ.get("OLLAMA_MODEL") or roles.get("REASONING_MODEL", "qwen2.5:7b")
     vision_req = roles.get("VISION_MODEL", "qwen2.5vl:7b")
 
     if not ollama_online:
@@ -148,7 +206,7 @@ def check_models(ollama_online: bool, installed_models: list) -> Tuple[Dict[str,
         reasoning_res = {
             "status": "PASS",
             "symbol": "✓",
-            "details": f"Model '{reasoning_req}' installed and ready"
+            "details": f"Model '{reasoning_req}' installed and verified for inference"
         }
     else:
         reasoning_res = {
@@ -170,9 +228,9 @@ def check_models(ollama_online: bool, installed_models: list) -> Tuple[Dict[str,
         }
     else:
         vision_res = {
-            "status": "FAIL",
-            "symbol": "✗",
-            "details": f"Model '{vision_req}' NOT INSTALLED. Run: ollama pull {vision_req}"
+            "status": "NOT_INSTALLED",
+            "symbol": "PENDING",
+            "details": f"Model '{vision_req}' optional/not installed (Reasoning model handles all text/planning workflows)"
         }
 
     return reasoning_res, vision_res

@@ -25,7 +25,18 @@ result_*.txt
 *.bak
 *.swp
 
+# Environment files & secrets
+.env
+.env.*
+*.local
+
+# Runtime storage & outputs
+output/
+workspace/output/
+chroma_db/
+
 # OS generated files
 .DS_Store
 Thumbs.db
 desktop.ini
+.vercel/

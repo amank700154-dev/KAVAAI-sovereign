@@ -2,9 +2,16 @@
 __pycache__/
 *.pyc
 .env
+.env.*
+*.local
 venv/
 .venv/
 chroma_db/
 data/vector_store/
 output/
 workspace/output/
+dist/
+build/
+.vercel/
+*.log
+

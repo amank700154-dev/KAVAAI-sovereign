@@ -23,23 +23,24 @@ from datetime import datetime
 # CONFIGURATION & MODEL REGISTRY
 # ==============================================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(BASE_DIR, "model_config.json")
+ROOT_DIR = os.path.dirname(os.path.dirname(BASE_DIR))
+CONFIG_FILE = os.path.join(ROOT_DIR, "model_config.json")
 
 DEFAULT_ROLES = {
-    "REASONING_MODEL": "qwen2.5:7b",
-    "CODING_MODEL": "qwen2.5:7b",
+    "REASONING_MODEL": os.environ.get("OLLAMA_MODEL", "qwen2.5:7b"),
+    "CODING_MODEL": os.environ.get("OLLAMA_MODEL", "qwen2.5:7b"),
     "VISION_MODEL": "qwen2.5vl:7b",
     "EMBEDDING_MODEL": "all-MiniLM-L6-v2"
 }
 
-DEFAULT_OLLAMA_HOST = "http://localhost:11434"
+DEFAULT_OLLAMA_HOST = (os.environ.get("OLLAMA_BASE_URL") or os.environ.get("OLLAMA_HOST", "http://localhost:11434")).rstrip("/")
 
 def load_config() -> dict:
     """Loads configuration from model_config.json or environment variables."""
     cfg = {
         "roles": dict(DEFAULT_ROLES),
         "ollama": {
-            "host": os.environ.get("OLLAMA_HOST", DEFAULT_OLLAMA_HOST),
+            "host": DEFAULT_OLLAMA_HOST,
             "timeout_seconds": 90
         }
     }
@@ -51,12 +52,16 @@ def load_config() -> dict:
                     cfg["roles"].update(disk_cfg["roles"])
                 if "ollama" in disk_cfg:
                     cfg["ollama"].update(disk_cfg["ollama"])
+                    if "host" in cfg["ollama"]:
+                        cfg["ollama"]["host"] = cfg["ollama"]["host"].rstrip("/")
         except Exception as e:
             print(f"[ModelRouter] Warning: failed to parse {CONFIG_FILE}: {e}")
 
     # Environment variable overrides (highest precedence)
-    if "OLLAMA_HOST" in os.environ and os.environ["OLLAMA_HOST"].strip():
-        cfg["ollama"]["host"] = os.environ["OLLAMA_HOST"].strip()
+    env_url = os.environ.get("OLLAMA_BASE_URL") or os.environ.get("OLLAMA_HOST")
+    if env_url and env_url.strip():
+        cfg["ollama"]["host"] = env_url.strip().rstrip("/")
+
     if "OLLAMA_TIMEOUT" in os.environ and os.environ["OLLAMA_TIMEOUT"].strip():
         try:
             cfg["ollama"]["timeout_seconds"] = int(os.environ["OLLAMA_TIMEOUT"])
@@ -67,6 +72,11 @@ def load_config() -> dict:
         env_var = f"KAVAAI_{role}"
         if env_var in os.environ and os.environ[env_var].strip():
             cfg["roles"][role] = os.environ[env_var].strip()
+
+    if "OLLAMA_MODEL" in os.environ and os.environ["OLLAMA_MODEL"].strip():
+        m_val = os.environ["OLLAMA_MODEL"].strip()
+        cfg["roles"]["REASONING_MODEL"] = m_val
+        cfg["roles"]["CODING_MODEL"] = m_val
 
     return cfg
 

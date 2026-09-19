@@ -978,11 +978,19 @@ Synthesize the root cause assessment without inventing unmeasured metrics.
 #### RECOMMENDED ACTION
 Provide concrete corrective actions based on the maintenance manual.
 """
-        model_result = invoke_local_model(MODEL_TEXT_REASONING, prompt, timeout=75)
+        reasoning_model = state.task_understanding.get("selected_model") or _CONFIG["roles"].get("REASONING_MODEL", "qwen2.5:7b")
+        model_result = invoke_local_model(reasoning_model, prompt, timeout=75)
         if model_result.get("success"):
             report = model_result.get("response", "")
+            state.log("REASONING", f"Local model '{reasoning_model}' generated reasoning assessment.")
         else:
-            report = self._build_deterministic_synthesis(state, temp, tel, manual_context, vision_analysis)
+            err_msg = model_result.get("error", "Ollama daemon unreachable")
+            report = (
+                f"LOCAL AI UNAVAILABLE\n"
+                f"Ollama server could not be reached: {err_msg}\n"
+                f"No external/cloud model fallback is permitted."
+            )
+            state.log("LOCAL_AI_ERROR", report)
             
         state.evidence["report"] = report
 

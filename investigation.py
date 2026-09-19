@@ -9,40 +9,43 @@ import re
 
 from sovereignty_monitor import sovereignty_monitor
 
-AI_PROVIDER = os.environ.get("AI_PROVIDER", "LOCAL_OLLAMA")
+OLLAMA_HOST = (os.environ.get("OLLAMA_BASE_URL") or os.environ.get("OLLAMA_HOST", "http://localhost:11434")).rstrip("/")
+REASONING_MODEL = os.environ.get("OLLAMA_MODEL") or os.environ.get("KAVAAI_REASONING_MODEL", "qwen2.5:7b")
+VISION_MODEL = os.environ.get("KAVAAI_VISION_MODEL", "qwen2.5vl:7b")
 
 class AIProviderError(Exception):
     pass
 
 def generate_ai_response(model, prompt, images=None):
-    if AI_PROVIDER == "LOCAL_OLLAMA":
-        payload = {
-            "model": model,
-            "prompt": prompt,
-            "stream": False
-        }
-        if images:
-            payload["images"] = images
+    generate_url = f"{OLLAMA_HOST}/api/generate"
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False
+    }
+    if images:
+        payload["images"] = images
+    
+    try:
+        response = requests.post(generate_url, json=payload, timeout=90)
+        if response.status_code != 200:
+            raise AIProviderError(f"LOCAL AI UNAVAILABLE\nOllama returned HTTP {response.status_code} for model '{model}': {response.text[:150]}\nNo external/cloud model fallback is permitted.")
         
         try:
-            response = requests.post("http://localhost:11434/api/generate", json=payload)
-            response.raise_for_status()
+            json_data = response.json()
+        except ValueError as e:
+            raise AIProviderError(f"Invalid JSON response from local AI: {e}") from e
             
-            try:
-                json_data = response.json()
-            except ValueError as e:
-                raise AIProviderError(f"Invalid JSON response from local AI: {e}") from e
-                
-            if "response" not in json_data:
-                raise AIProviderError("Malformed JSON response from local AI: 'response' key missing.")
-                
-            return json_data["response"]
-        except requests.exceptions.RequestException as e:
-            raise AIProviderError(f"Error connecting to local AI: {e}") from e
-    elif AI_PROVIDER == "CLOUD_AI":
-        # Cloud AI integration goes here
-        raise AIProviderError("Cloud AI provider not yet fully implemented.")
-    raise AIProviderError("Unknown AI provider.")
+        if "response" not in json_data:
+            raise AIProviderError("Malformed JSON response from local AI: 'response' key missing.")
+            
+        return json_data["response"]
+    except requests.exceptions.RequestException as e:
+        raise AIProviderError(
+            f"LOCAL AI UNAVAILABLE\n"
+            f"Ollama server could not be reached at {OLLAMA_HOST} ({type(e).__name__}: {e}).\n"
+            f"No external/cloud model fallback is permitted."
+        ) from e
 
 
 raw_input = sys.stdin.read().strip()
@@ -104,7 +107,7 @@ BOTH
 """
 
 try:
-    decision = generate_ai_response("qwen2.5:7b", decision_prompt).strip()
+    decision = generate_ai_response(REASONING_MODEL, decision_prompt).strip()
 except AIProviderError as e:
     print("Agent decision: ERROR")
     print("\n------------------------------------------")
@@ -325,7 +328,7 @@ IMPORTANT REASONING RULES:
 """
 
 try:
-    report = generate_ai_response("qwen2.5vl:7b", final_prompt)
+    report = generate_ai_response(REASONING_MODEL, final_prompt)
 except AIProviderError as e:
     print(f"Agent decision: ERROR\n**INVESTIGATION FAILED**\n\nAI Error:\n{e}", file=sys.stderr)
     sys.exit(1)

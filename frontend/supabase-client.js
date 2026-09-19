@@ -42,7 +42,7 @@ const KavaaiAuth = (function() {
      */
     async function fetchConfig() {
         try {
-            const apiBase = window.SIH_API_BASE_URL || (
+            const apiBase = window.KAVAAI_API_BASE_URL || window.VITE_API_BASE_URL || window.SIH_API_BASE_URL || (
                 (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") 
                 ? "http://127.0.0.1:8000" 
                 : ""
@@ -58,10 +58,11 @@ const KavaaiAuth = (function() {
             console.warn("[KAVAAI Auth] Runtime config endpoint unavailable. Using environment fallbacks.", e);
         }
 
-        // Check if injected via window.KAVAAI_ENV
-        if (!authConfig.isConfigured && window.KAVAAI_ENV) {
-            authConfig.supabaseUrl = window.KAVAAI_ENV.SUPABASE_URL || "";
-            authConfig.supabaseAnonKey = window.KAVAAI_ENV.SUPABASE_ANON_KEY || "";
+        // Check if injected via window.KAVAAI_ENV or global window vars
+        if (!authConfig.isConfigured) {
+            const envObj = window.KAVAAI_ENV || {};
+            authConfig.supabaseUrl = envObj.SUPABASE_URL || envObj.VITE_SUPABASE_URL || window.VITE_SUPABASE_URL || "";
+            authConfig.supabaseAnonKey = envObj.SUPABASE_ANON_KEY || envObj.VITE_SUPABASE_ANON_KEY || window.VITE_SUPABASE_ANON_KEY || "";
             authConfig.isConfigured = !!(authConfig.supabaseUrl && authConfig.supabaseAnonKey);
         }
         return authConfig;

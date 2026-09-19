@@ -56,19 +56,32 @@ IMAGE_ANALYSIS
 BOTH
 """
 
+import os
+import requests
+
+OLLAMA_HOST = (os.environ.get("OLLAMA_BASE_URL") or os.environ.get("OLLAMA_HOST", "http://localhost:11434")).rstrip("/")
+MODEL_NAME = os.environ.get("OLLAMA_MODEL") or os.environ.get("KAVAAI_REASONING_MODEL", "qwen2.5:7b")
+
+generate_url = f"{OLLAMA_HOST}/api/generate"
+
+print(f"\n[LOCAL_AI]\nprovider=ollama\nmodel={MODEL_NAME}\nendpoint={OLLAMA_HOST.split('://')[-1]}\nnetwork_scope=LOCAL\n")
+
 try:
     response = requests.post(
-        "http://localhost:11434/api/generate",
+        generate_url,
         json={
-            "model": "qwen2.5:7b",
+            "model": MODEL_NAME,
             "prompt": prompt,
             "stream": False
         },
-        timeout=30
+        timeout=60
     )
-    decision = response.json()["response"].strip()
-    print("\nAGENT DECISION:")
-    print(decision)
+    if response.status_code == 200:
+        decision = response.json().get("response", "").strip()
+        print("\nAGENT DECISION:")
+        print(decision)
+    else:
+        print(f"\nLOCAL AI UNAVAILABLE\nOllama returned HTTP {response.status_code}: {response.text}\nNo external/cloud model fallback is permitted.")
 except Exception as e:
-    print(f"\nError communicating with local AI engine: {e}")
+    print(f"\nLOCAL AI UNAVAILABLE\nOllama server could not be reached at {OLLAMA_HOST}: {e}\nNo external/cloud model fallback is permitted.")
 

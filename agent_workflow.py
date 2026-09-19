@@ -60,16 +60,30 @@ IMAGE_ANALYSIS
 BOTH
 """
 
-decision_response = requests.post(
-    "http://localhost:11434/api/generate",
-    json={
-        "model": "qwen2.5:7b",
-        "prompt": decision_prompt,
-        "stream": False
-    }
-)
+import os
+OLLAMA_HOST = (os.environ.get("OLLAMA_BASE_URL") or os.environ.get("OLLAMA_HOST", "http://localhost:11434")).rstrip("/")
+REASONING_MODEL = os.environ.get("OLLAMA_MODEL") or os.environ.get("KAVAAI_REASONING_MODEL", "qwen2.5:7b")
 
-decision = decision_response.json()["response"].strip()
+print(f"\n[LOCAL_AI]\nprovider=ollama\nmodel={REASONING_MODEL}\nendpoint={OLLAMA_HOST.split('://')[-1]}\nnetwork_scope=LOCAL\n")
+
+try:
+    decision_response = requests.post(
+        f"{OLLAMA_HOST}/api/generate",
+        json={
+            "model": REASONING_MODEL,
+            "prompt": decision_prompt,
+            "stream": False
+        },
+        timeout=60
+    )
+    if decision_response.status_code == 200:
+        decision = decision_response.json().get("response", "").strip()
+    else:
+        print(f"LOCAL AI UNAVAILABLE\nOllama returned HTTP {decision_response.status_code}: {decision_response.text}\nNo external/cloud model fallback is permitted.")
+        exit(1)
+except Exception as e:
+    print(f"LOCAL AI UNAVAILABLE\nOllama server could not be reached at {OLLAMA_HOST}: {e}\nNo external/cloud model fallback is permitted.")
+    exit(1)
 
 print("AGENT DECISION:", decision)
 
@@ -136,19 +150,27 @@ in the image.
 Do not guess or invent measurements.
 """
 
-    image_response = requests.post(
-        "http://localhost:11434/api/generate",
-        json={
-            "model": "qwen2.5vl:7b",
-            "prompt": image_prompt,
-            "images": [image_base64],
-            "stream": False
-        }
-    )
-
-    image_analysis = image_response.json()["response"]
-
-    print("Image analysis completed.")
+    vision_model = os.environ.get("KAVAAI_VISION_MODEL", "qwen2.5vl:7b")
+    try:
+        image_response = requests.post(
+            f"{OLLAMA_HOST}/api/generate",
+            json={
+                "model": vision_model,
+                "prompt": image_prompt,
+                "images": [image_base64],
+                "stream": False
+            },
+            timeout=60
+        )
+        if image_response.status_code == 200:
+            image_analysis = image_response.json().get("response", "")
+            print("Image analysis completed.")
+        else:
+            image_analysis = f"Image analysis unavailable: Model '{vision_model}' offline or not installed."
+            print(image_analysis)
+    except Exception as e:
+        image_analysis = f"Image analysis unavailable: {e}"
+        print(image_analysis)
 
 
 
@@ -180,16 +202,22 @@ Rules:
 FINAL ANSWER:
 """
 
-final_response = requests.post(
-    "http://localhost:11434/api/generate",
-    json={
-        "model": "qwen2.5vl:7b",
-        "prompt": final_prompt,
-        "stream": False
-    }
-)
-
-answer = final_response.json()["response"]
+try:
+    final_response = requests.post(
+        f"{OLLAMA_HOST}/api/generate",
+        json={
+            "model": REASONING_MODEL,
+            "prompt": final_prompt,
+            "stream": False
+        },
+        timeout=90
+    )
+    if final_response.status_code == 200:
+        answer = final_response.json().get("response", "")
+    else:
+        answer = f"LOCAL AI UNAVAILABLE\nOllama returned HTTP {final_response.status_code}: {final_response.text}\nNo external/cloud model fallback is permitted."
+except Exception as e:
+    answer = f"LOCAL AI UNAVAILABLE\nOllama server could not be reached at {OLLAMA_HOST}: {e}\nNo external/cloud model fallback is permitted."
 
 
 

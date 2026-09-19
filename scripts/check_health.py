@@ -55,6 +55,13 @@ def main():
     
     if live_report and "summary_table" in live_report:
         print(live_report["summary_table"])
+        ollama_check = live_report.get("checks", {}).get("ollama", {})
+        if "report_formatted" in ollama_check:
+            print("\n--------------------------------------------------")
+            print("             OLLAMA STATUS AUDIT                  ")
+            print("--------------------------------------------------")
+            print(ollama_check["report_formatted"])
+            print("--------------------------------------------------")
         print("\nDiagnostic Details (From Live Endpoint):")
         for comp, info in live_report.get("checks", {}).items():
             print(f"  * {comp:<20}: [{info['status']}] {info['details']}")
@@ -67,6 +74,13 @@ def main():
         from health_checker import run_all_health_checks
         local_report = run_all_health_checks()
         print(local_report["summary_table"])
+        ollama_check = local_report.get("checks", {}).get("ollama", {})
+        if "report_formatted" in ollama_check:
+            print("\n--------------------------------------------------")
+            print("             OLLAMA STATUS AUDIT                  ")
+            print("--------------------------------------------------")
+            print(ollama_check["report_formatted"])
+            print("--------------------------------------------------")
         print("\nDiagnostic Details (In-Process Audit):")
         for comp, info in local_report.get("checks", {}).items():
             print(f"  * {comp:<20}: [{info['status']}] {info['details']}")

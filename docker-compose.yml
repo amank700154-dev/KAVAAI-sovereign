@@ -20,8 +20,10 @@ services:
       - DEBUG=false
       - AIR_GAP_STRICT_MODE=true
       # Connects to host-managed Ollama daemon (zero GPU virtualization overhead)
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - OLLAMA_HOST=http://host.docker.internal:11434
       - OLLAMA_TIMEOUT=90
+      - OLLAMA_MODEL=qwen2.5:7b
       - KAVAAI_REASONING_MODEL=qwen2.5:7b
       - KAVAAI_CODING_MODEL=qwen2.5:7b
       - KAVAAI_VISION_MODEL=qwen2.5vl:7b

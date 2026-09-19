@@ -3,7 +3,7 @@ from flask_cors import CORS
 import subprocess
 import re
 import json
-
+import sys
 import os
 
 app = Flask(__name__)
@@ -70,7 +70,7 @@ def investigate():
         payload = json.dumps(data)
 
         process = subprocess.run(
-            ["python3", "investigation.py"],
+            [sys.executable, "investigation.py"],
             input=payload + "\n",
             text=True,
             capture_output=True,

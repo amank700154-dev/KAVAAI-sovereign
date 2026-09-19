@@ -1,0 +1,33 @@
+# ==============================================================================
+# KAVAAI SOVEREIGN — RENDER BLUEPRINT SPECIFICATION
+# Public Backend API Service for Vercel + Render + Supabase Deployment
+# ==============================================================================
+
+services:
+  - type: web
+    name: kavaai-sovereign-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: gunicorn -b 0.0.0.0:$PORT backend.main:app
+    healthCheckPath: /api/system/status
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: HOST
+        value: 0.0.0.0
+      - key: KAVAAI_DEPLOYMENT_MODE
+        value: CLOUD_PUBLIC
+      - key: AIR_GAP_STRICT_MODE
+        value: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: OLLAMA_BASE_URL
+        value: http://127.0.0.1:11434
+      - key: OLLAMA_MODEL
+        value: qwen2.5:7b
