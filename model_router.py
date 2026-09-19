@@ -20,6 +20,11 @@ DEFAULT_ROLES = {
 
 DEFAULT_OLLAMA_HOST = "http://localhost:11434"
 
+# Strict Air-Gap Sovereignty Guarantees
+ALLOW_EXTERNAL_AI = False
+ALLOW_CLOUD_FALLBACK = False
+NETWORK_MODE = "LOCAL_ONLY"
+
 def load_config() -> dict:
     """Loads configuration from model_config.json or environment variables."""
     cfg = {
@@ -40,11 +45,19 @@ def load_config() -> dict:
         except Exception as e:
             print(f"[ModelRouter] Warning: failed to parse {CONFIG_FILE}: {e}")
 
-    # Environment variable overrides
+    # Environment variable overrides (highest precedence)
+    if "OLLAMA_HOST" in os.environ and os.environ["OLLAMA_HOST"].strip():
+        cfg["ollama"]["host"] = os.environ["OLLAMA_HOST"].strip()
+    if "OLLAMA_TIMEOUT" in os.environ and os.environ["OLLAMA_TIMEOUT"].strip():
+        try:
+            cfg["ollama"]["timeout_seconds"] = int(os.environ["OLLAMA_TIMEOUT"])
+        except ValueError:
+            pass
+
     for role in DEFAULT_ROLES.keys():
         env_var = f"KAVAAI_{role}"
-        if env_var in os.environ:
-            cfg["roles"][role] = os.environ[env_var]
+        if env_var in os.environ and os.environ[env_var].strip():
+            cfg["roles"][role] = os.environ[env_var].strip()
 
     return cfg
 
@@ -129,9 +142,9 @@ def check_local_model_availability(force_refresh: bool = False) -> dict:
                 )
                 roles_status[role_name] = {
                     "configured": configured_model,
-                    "status": "INSTALLED" if is_installed else "NOT_PULLED",
+                    "status": "INSTALLED" if is_installed else "MODEL_NOT_INSTALLED",
                     "available": is_installed,
-                    "notes": "Ready for local inference" if is_installed else f"Run: ollama pull {configured_model}"
+                    "notes": "Ready for local inference" if is_installed else f"MODEL NOT INSTALLED: Run 'ollama pull {configured_model}'"
                 }
 
     _availability_cache = {
@@ -395,10 +408,15 @@ def invoke_local_model(model_name: str, prompt: str, images: list = None, timeou
                 )
             except Exception:
                 pass
+            err_detail = response.text
+            if response.status_code == 404:
+                err_msg = f"MODEL NOT INSTALLED: Required model '{clean_model}' is not pulled in local Ollama. Run: ollama pull {clean_model}"
+            else:
+                err_msg = f"Ollama HTTP {response.status_code}: {err_detail}"
             return {
                 "success": False,
                 "model_used": clean_model,
-                "error": f"Ollama HTTP {response.status_code}: {response.text}"
+                "error": err_msg
             }
     except requests.exceptions.ConnectionError:
         dur_ms = round((time.time() - t0) * 1000, 2)
@@ -408,7 +426,7 @@ def invoke_local_model(model_name: str, prompt: str, images: list = None, timeou
                 model_name=clean_model,
                 role="LOCAL_OLLAMA",
                 endpoint=generate_url,
-                status="OFFLINE_FALLBACK",
+                status="OFFLINE_ERROR",
                 prompt_chars=len(prompt),
                 response_chars=0,
                 latency_ms=dur_ms
@@ -418,8 +436,8 @@ def invoke_local_model(model_name: str, prompt: str, images: list = None, timeou
         return {
             "success": False,
             "model_used": clean_model,
-            "error": f"Local Ollama server is offline on {ollama_host}.",
-            "simulated": True
+            "error": f"OLLAMA UNAVAILABLE: Local Ollama daemon is offline at {ollama_host}. Start Ollama with 'ollama serve'.",
+            "simulated": False
         }
     except Exception as e:
         return {

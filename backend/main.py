@@ -5,7 +5,7 @@ import sys
 import os
 from datetime import datetime
 
-# Configure Paths
+# Configure Paths & Environment
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BACKEND_DIR)
 if ROOT_DIR not in sys.path:
@@ -13,7 +13,22 @@ if ROOT_DIR not in sys.path:
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
-OUTPUT_DIR = os.path.join(ROOT_DIR, "output")
+# Safe Zero-Dependency .env Loader
+ENV_FILE = os.path.join(ROOT_DIR, ".env")
+if os.path.exists(ENV_FILE):
+    try:
+        with open(ENV_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    k, v = k.strip(), v.strip()
+                    if k and k not in os.environ:
+                        os.environ[k] = v
+    except Exception as e:
+        print(f"[Warning] Error parsing .env: {e}")
+
+OUTPUT_DIR = os.environ.get("KAVAAI_OUTPUT_DIR", os.path.join(ROOT_DIR, "output"))
 WORKSPACE_OUTPUT_DIR = os.path.join(ROOT_DIR, "workspace", "output")
 FRONTEND_DIR = os.path.join(ROOT_DIR, "frontend")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -37,7 +52,8 @@ except Exception as e:
 
 from sovereignty_monitor import sovereignty_monitor
 # Install active application-level outbound guard
-sovereignty_monitor.install_outbound_guard(strict=True)
+strict_airgap = os.environ.get("AIR_GAP_STRICT_MODE", "true").lower() == "true"
+sovereignty_monitor.install_outbound_guard(strict=strict_airgap)
 
 app = Flask(__name__, static_folder=FRONTEND_DIR)
 CORS(app)
@@ -378,6 +394,63 @@ def get_models():
     })
 
 
+@app.route("/api/models/health", methods=["GET"])
+def get_models_health():
+    """Detailed health check endpoint for local Ollama daemon, model installations, and sovereignty policies."""
+    avail = check_local_model_availability(force_refresh=True)
+    roles = _CONFIG["roles"]
+    installed = avail.get("installed_models", [])
+    
+    missing = []
+    errors = []
+    
+    if not avail.get("ollama_online", False):
+        errors.append(f"OLLAMA UNAVAILABLE: Local Ollama daemon is offline at {_CONFIG['ollama']['host']}. Start Ollama with 'ollama serve'.")
+    
+    for role, m_name in roles.items():
+        if role == "EMBEDDING_MODEL":
+            continue
+        is_inst = any(m_name.lower() == im.lower() or m_name.split(":")[0].lower() == im.lower() for im in installed)
+        if not is_inst:
+            missing.append(m_name)
+            if avail.get("ollama_online", False):
+                errors.append(f"MODEL NOT INSTALLED: Required {role} '{m_name}' is not pulled. Run: ollama pull {m_name}")
+
+    missing_unique = list(set(missing))
+    is_healthy = avail.get("ollama_online", False) and len(missing_unique) == 0
+
+    return jsonify({
+        "status": "HEALTHY" if is_healthy else "ACTION_REQUIRED",
+        "ollama_online": avail.get("ollama_online", False),
+        "ollama_host": _CONFIG["ollama"]["host"],
+        "required_models": roles,
+        "installed_models": installed,
+        "missing_models": missing_unique,
+        "cloud_fallback_disabled": True,
+        "network_mode": "LOCAL_ONLY",
+        "errors": errors
+    }), (200 if is_healthy else 503)
+
+
+@app.route("/api/health", methods=["GET"])
+def get_kavaai_health():
+    """
+    Comprehensive KAVAAI Sovereign Health Check Endpoint.
+    Verifies Application, Backend, Ollama, Models, RAG, ChromaDB, Knowledge Base, Directories, GPU, Security Mode.
+    Supports ?format=text for visual summary table or JSON by default.
+    """
+    from health_checker import run_all_health_checks
+    report = run_all_health_checks()
+    
+    fmt = request.args.get("format", "").lower()
+    if fmt == "text" or "text/plain" in request.headers.get("Accept", ""):
+        return report["summary_table"] + "\n", 200, {"Content-Type": "text/plain; charset=utf-8"}
+        
+    http_code = 200 if report["status"] == "HEALTHY" else (200 if "ACTION_REQUIRED" in report["status"] else 503)
+    return jsonify(report), http_code
+
+
+
 # ==============================================================================
 # FILE DELIVERABLES DOWNLOAD ENDPOINT
 # ==============================================================================
@@ -571,8 +644,15 @@ def get_auth_config():
 
 
 if __name__ == "__main__":
+    host = os.environ.get("HOST", "127.0.0.1")
+    try:
+        port = int(os.environ.get("PORT", 8000))
+    except (ValueError, TypeError):
+        port = 8000
+    debug = os.environ.get("DEBUG", "false").lower() == "true"
+
     app.run(
-        host="127.0.0.1",
-        port=8000,
-        debug=False
+        host=host,
+        port=port,
+        debug=debug
     )

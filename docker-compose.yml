@@ -1,0 +1,57 @@
+# ==============================================================================
+# KAVAAI SOVEREIGN — ON-PREMISE CONTAINER COMPOSE ORCHESTRATION
+# SIH26117: Sovereign On-Premise Agentic AI Workbench for Confidential Work
+# Architecture: KAVAAI Container <-> Host-Managed Ollama Daemon (GPU Optimized)
+# ==============================================================================
+
+services:
+  kavaai-workbench:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kavaai-sovereign-workbench
+    restart: unless-stopped
+    ports:
+      # Bound strictly to 127.0.0.1 loopback for on-premise air-gap security
+      - "127.0.0.1:8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=false
+      - AIR_GAP_STRICT_MODE=true
+      # Connects to host-managed Ollama daemon (zero GPU virtualization overhead)
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - OLLAMA_TIMEOUT=90
+      - KAVAAI_REASONING_MODEL=qwen2.5:7b
+      - KAVAAI_CODING_MODEL=qwen2.5:7b
+      - KAVAAI_VISION_MODEL=qwen2.5vl:7b
+      - KAVAAI_EMBEDDING_MODEL=all-MiniLM-L6-v2
+      - KAVAAI_CHROMA_PATH=chroma_db
+      - KAVAAI_OUTPUT_DIR=output
+      - KAVAAI_KNOWLEDGE_BASE_PATH=knowledge_base
+    extra_hosts:
+      # Enables direct communication with host Ollama service across Linux & Windows/macOS
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # 1. Vector Database Persistence
+      - ./chroma_db:/app/chroma_db
+      # 2. Document Vault & SOP Manuals
+      - ./knowledge_base:/app/knowledge_base
+      # 3. Sample Industrial Machine Data
+      - ./data:/app/data
+      # 4. Generated Forensic Deliverables & Audit Logs
+      - ./output:/app/output
+      # 5. AST Sandbox Isolated Output Workspace
+      - ./workspace/output:/app/workspace/output
+      # 6. HuggingFace Embedder Model Weights Cache
+      - kavaai_hf_cache:/root/.cache/huggingface
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/api/system/status"]
+      interval: 20s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+volumes:
+  kavaai_hf_cache:
+    name: kavaai_huggingface_weights_cache

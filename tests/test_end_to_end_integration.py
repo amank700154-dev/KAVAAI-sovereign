@@ -184,6 +184,30 @@ class TestEndToEndIntegration(unittest.TestCase):
         doc_data = doc_resp.get_json()
         self.assertGreaterEqual(doc_data["total_files"], 3)
 
+    def test_07_backend_health_check_endpoint(self):
+        """Tests /api/health returns structured verification across all core components."""
+        resp = self.client.get("/api/health")
+        self.assertIn(resp.status_code, [200, 503])
+        data = resp.get_json()
+        self.assertIn("status", data)
+        self.assertIn("checks", data)
+        self.assertIn("summary_table", data)
+
+        required_components = [
+            "application", "backend", "ollama", "reasoning_model", "vision_model",
+            "rag", "chromadb", "knowledge_base", "required_directories", "gpu", "security_mode"
+        ]
+        for comp in required_components:
+            self.assertIn(comp, data["checks"])
+            self.assertIn("status", data["checks"][comp])
+            self.assertIn("symbol", data["checks"][comp])
+            self.assertIn("details", data["checks"][comp])
+
+        # Test text format
+        text_resp = self.client.get("/api/health?format=text")
+        self.assertEqual(text_resp.status_code, 200)
+        self.assertIn("KAVAAI HEALTH", text_resp.data.decode("utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()

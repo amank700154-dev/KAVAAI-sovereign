@@ -54,11 +54,19 @@ def load_config() -> dict:
         except Exception as e:
             print(f"[ModelRouter] Warning: failed to parse {CONFIG_FILE}: {e}")
 
-    # Environment variable overrides
+    # Environment variable overrides (highest precedence)
+    if "OLLAMA_HOST" in os.environ and os.environ["OLLAMA_HOST"].strip():
+        cfg["ollama"]["host"] = os.environ["OLLAMA_HOST"].strip()
+    if "OLLAMA_TIMEOUT" in os.environ and os.environ["OLLAMA_TIMEOUT"].strip():
+        try:
+            cfg["ollama"]["timeout_seconds"] = int(os.environ["OLLAMA_TIMEOUT"])
+        except ValueError:
+            pass
+
     for role in DEFAULT_ROLES.keys():
         env_var = f"KAVAAI_{role}"
-        if env_var in os.environ:
-            cfg["roles"][role] = os.environ[env_var]
+        if env_var in os.environ and os.environ[env_var].strip():
+            cfg["roles"][role] = os.environ[env_var].strip()
 
     return cfg
 

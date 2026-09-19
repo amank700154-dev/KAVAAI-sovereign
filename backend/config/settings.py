@@ -55,11 +55,19 @@ if CONFIG_FILE.exists():
     except Exception as e:
         print(f"[Settings] Warning: failed to parse {CONFIG_FILE}: {e}")
 
-# Environment overrides
+# Environment overrides (highest precedence)
+if "OLLAMA_HOST" in os.environ and os.environ["OLLAMA_HOST"].strip():
+    OLLAMA_HOST = os.environ["OLLAMA_HOST"].strip()
+if "OLLAMA_TIMEOUT" in os.environ and os.environ["OLLAMA_TIMEOUT"].strip():
+    try:
+        OLLAMA_TIMEOUT_SECONDS = int(os.environ["OLLAMA_TIMEOUT"])
+    except ValueError:
+        pass
+
 for role in DEFAULT_ROLES.keys():
     env_var = f"KAVAAI_{role}"
-    if env_var in os.environ:
-        MODEL_ROLES[role] = os.environ[env_var]
+    if env_var in os.environ and os.environ[env_var].strip():
+        MODEL_ROLES[role] = os.environ[env_var].strip()
 
 # Air-Gap Sovereignty Settings
 AIR_GAP_ENFORCE_LOCAL_ONLY = True

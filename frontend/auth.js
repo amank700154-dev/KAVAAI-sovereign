@@ -34,7 +34,6 @@ document.addEventListener("DOMContentLoaded", async function() {
         if (existingSession) {
             // Already authenticated -> Fast Unlock directly into dashboard
             unlockSystem(false);
-            return;
         } else {
             // Unauthenticated -> Lock dashboard and present login console
             if (dashboardWrapper) {
@@ -265,18 +264,8 @@ document.addEventListener("DOMContentLoaded", async function() {
     // =========================================================================
     // 5. GLOBAL LOGOUT TRIGGER (CONNECTED TO OPERATOR PROFILE)
     // =========================================================================
-    const opWrap = document.querySelector(".operator-profile-wrap");
-    if (opWrap && !document.getElementById("btnOperatorLogout")) {
-        const logoutBtn = document.createElement("button");
-        logoutBtn.id = "btnOperatorLogout";
-        logoutBtn.className = "operator-logout-btn";
-        logoutBtn.title = "Disconnect Operator Session";
-        logoutBtn.innerHTML = `
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            LOGOUT
-        `;
-        opWrap.appendChild(logoutBtn);
-
+    const logoutBtn = document.getElementById("btnOperatorLogout");
+    if (logoutBtn) {
         logoutBtn.addEventListener("click", async (e) => {
             e.stopPropagation();
             if (window.KavaaiAuth) {

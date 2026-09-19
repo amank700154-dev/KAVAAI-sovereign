@@ -9,8 +9,8 @@ from document_intelligence import (
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_MANUAL_PATH = os.path.join(BASE_DIR, "machine_manual.txt")
-DEFAULT_CHROMA_PATH = os.path.join(BASE_DIR, "chroma_db")
+DEFAULT_MANUAL_PATH = os.environ.get("KAVAAI_MANUAL_PATH", os.path.join(BASE_DIR, "machine_manual.txt"))
+DEFAULT_CHROMA_PATH = os.environ.get("KAVAAI_CHROMA_PATH", os.path.join(BASE_DIR, "chroma_db"))
 
 _cached_embedder = None
 

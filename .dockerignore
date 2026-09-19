@@ -1,0 +1,31 @@
+# Git & IDE metadata
+.git/
+.gitignore
+.gitattributes
+.vscode/
+.idea/
+
+# Python caches and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+env/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs & temporary benchmark files
+*.log
+result_*.txt
+*.tmp
+*.bak
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini

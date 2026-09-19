@@ -84,14 +84,23 @@ class SovereigntyMonitor:
         
         host_lower = host.lower().strip()
         
-        # Local loopback domains
-        if host_lower in ["localhost", "127.0.0.1", "::1", "0.0.0.0", "localhost.localdomain"]:
+        # Local loopback domains & container-host bridge gateways
+        if host_lower in [
+            "localhost", "127.0.0.1", "::1", "0.0.0.0", "localhost.localdomain",
+            "host.docker.internal", "gateway.docker.internal"
+        ]:
             return True
 
-        # Check local private IP ranges
+        # Check local private IP ranges and resolved IPs
         try:
-            # Match 127.*, 10.*, 192.168.*, 172.16-31.*
-            parts = host_lower.split(".")
+            target_ip = host_lower
+            if not all(p.isdigit() for p in host_lower.split(".")):
+                try:
+                    target_ip = socket.gethostbyname(host_lower)
+                except Exception:
+                    target_ip = host_lower
+
+            parts = target_ip.split(".")
             if len(parts) == 4 and all(p.isdigit() for p in parts):
                 first = int(parts[0])
                 second = int(parts[1])

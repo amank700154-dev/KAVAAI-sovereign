@@ -1,0 +1,53 @@
+{
+  "system": {
+    "name": "KAVAAI SOVEREIGN",
+    "problem_statement": "SIH26117",
+    "product_category": "Sovereign On-Premise Agentic AI Workbench",
+    "version": "1.0.0",
+    "security_profile": "AIR_GAPPED_LOCAL_ONLY"
+  },
+  "networking": {
+    "application_host": "127.0.0.1",
+    "application_port": 8000,
+    "ollama_host": "127.0.0.1",
+    "ollama_port": 11434,
+    "loopback_enforced": true,
+    "public_binding_allowed": false,
+    "wan_egress_policy": "BLOCKED"
+  },
+  "models": {
+    "inference_engine": "OLLAMA",
+    "endpoint": "http://localhost:11434",
+    "timeout_seconds": 90,
+    "roles": {
+      "REASONING_MODEL": "qwen2.5:7b",
+      "CODING_MODEL": "qwen2.5:7b",
+      "VISION_MODEL": "qwen2.5vl:7b",
+      "EMBEDDING_MODEL": "all-MiniLM-L6-v2"
+    },
+    "cloud_fallback": false
+  },
+  "storage_paths": {
+    "chroma_db": "chroma_db",
+    "chroma_sqlite_file": "chroma_db/chroma.sqlite3",
+    "chroma_collection": "industrial_documents",
+    "knowledge_base": "knowledge_base",
+    "data_sample": "data",
+    "output_deliverables": "output",
+    "sandbox_workspace": "workspace/output",
+    "frontend_assets": "frontend"
+  },
+  "deliverables": {
+    "supported_formats": ["DOCX", "XLSX", "PPTX", "TXT", "CSV", "PY"],
+    "retention_policy": "PERSISTENT_LOCAL_DISK",
+    "verification_engine": "AST_AND_OPENXML_ASSERTIONS"
+  },
+  "hardware": {
+    "gpu_acceleration": "CUDA",
+    "tested_gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+    "cuda_version": "12.1",
+    "fallback_mode": "CPU_INFERENCE",
+    "minimum_ram_gb": 16,
+    "minimum_disk_free_gb": 12
+  }
+}
