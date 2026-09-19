@@ -1000,6 +1000,8 @@ Provide concrete corrective actions based on the maintenance manual.
             anomaly = f"NORMAL OPERATION: Measured temperature {temp}°C is within the normal operating range (60°C to 80°C)."
             status_text = "NORMAL"
 
+        action_text = "1. Execute Phase 1 response: Schedule radiator fin cleaning within 48 hours.\n2. Verify coolant fluid reservoir.\n3. Continue thermal monitoring." if is_warn else "Continue routine monitoring."
+
         report = f"""
 #### ANOMALY
 {anomaly}
@@ -1038,7 +1040,7 @@ Provide concrete corrective actions based on the maintenance manual.
 Operational status is {status_text}. The recorded temperature of {temp}°C {"enters the Phase 1 warning zone per SOP-042" if is_warn else ("requires emergency safety trip" if is_crit else "operates reliably inside manufacturer bounds")}.
 
 #### RECOMMENDED ACTION
-{"1. Execute Phase 1 response: Schedule radiator fin cleaning within 48 hours.\n2. Verify coolant fluid reservoir.\n3. Continue thermal monitoring." if is_warn else "Continue routine monitoring."}
+{action_text}
 """
         return report.strip()
 

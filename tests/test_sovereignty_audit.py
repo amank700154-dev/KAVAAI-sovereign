@@ -28,7 +28,8 @@ from sovereignty_monitor import (
     SovereigntySecurityException,
     sovereignty_monitor
 )
-from backend import app
+from backend.main import app
+
 
 
 class TestSovereigntyAuditLayer(unittest.TestCase):

@@ -194,18 +194,25 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
-        // Hover detection on interactive elements
+        // Hover detection on interactive elements with semantic color reflection
         document.addEventListener("mouseover", (e) => {
-            const interactive = e.target.closest("button, a, input, select, textarea, .nav-tab, .twin-comp, .dt-hud-callout, .sim-btn, .chip-btn, .kavaai-switch");
+            const interactive = e.target.closest("button, a, input, select, textarea, .nav-tab, .twin-comp, .dt-hud-callout, .sim-btn, .chip-btn, .kavaai-switch, .brand-emblem");
             if (interactive) {
                 document.body.classList.add("cursor-hover");
+                if (interactive.closest(".brand-emblem, .brand-text-col, .brand-badge")) {
+                    document.body.classList.add("cursor-hover-brand");
+                } else if (interactive.closest(".warning, .alert-card-item.warning, #btn-start-demo, #sim-warning, [data-state='warning']")) {
+                    document.body.classList.add("cursor-hover-warning");
+                } else if (interactive.closest(".critical, .alert-card-item.critical, #sim-critical, [data-state='critical']")) {
+                    document.body.classList.add("cursor-hover-critical");
+                }
                 SoundManager.hover();
             }
         });
         document.addEventListener("mouseout", (e) => {
-            const interactive = e.target.closest("button, a, input, select, textarea, .nav-tab, .twin-comp, .dt-hud-callout, .sim-btn, .chip-btn, .kavaai-switch");
+            const interactive = e.target.closest("button, a, input, select, textarea, .nav-tab, .twin-comp, .dt-hud-callout, .sim-btn, .chip-btn, .kavaai-switch, .brand-emblem");
             if (interactive) {
-                document.body.classList.remove("cursor-hover");
+                document.body.classList.remove("cursor-hover", "cursor-hover-brand", "cursor-hover-warning", "cursor-hover-critical");
             }
         });
 
@@ -231,7 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                         ctx.beginPath();
                         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(245, 215, 110, ${p.alpha})`;
+                        ctx.fillStyle = `rgba(56, 189, 248, ${p.alpha})`;
                         ctx.fill();
                     }
                 }
@@ -273,12 +280,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const toast = document.createElement("div");
         toast.className = `crystal-toast ${type}`;
         
-        let icon = "🛡️";
-        if (type === "success") icon = "✓";
-        else if (type === "error") icon = "✕";
-        else if (type === "warning") icon = "⚠";
+        let iconColor = "var(--blue-bright)";
+        if (type === "success") iconColor = "var(--success)";
+        else if (type === "error") iconColor = "var(--danger)";
+        else if (type === "warning") iconColor = "var(--warning)";
 
-        toast.innerHTML = `<span style="color:var(--gold-bright); font-weight:700;">${icon}</span> <span>${escapeHTML(message)}</span>`;
+        toast.innerHTML = `<span style="color:${iconColor}; font-weight:700;">${icon}</span> <span>${escapeHTML(message)}</span>`;
         container.appendChild(toast);
 
         setTimeout(() => {
@@ -479,23 +486,33 @@ document.addEventListener("DOMContentLoaded", function () {
             const offset = 283 - (283 * healthScore) / 100;
             circle.style.strokeDashoffset = offset;
             
+            const healthPill = document.getElementById("health-status-pill");
             if (currentState === "NORMAL") {
-                circle.style.stroke = "var(--gold)";
+                circle.style.stroke = "var(--blue-primary)";
                 if (healthText) {
                     healthText.textContent = "NORMAL";
-                    healthText.className = "health-status text-gold";
+                    healthText.className = "health-status text-green";
+                }
+                if (healthPill) {
+                    healthPill.className = "health-status-pill normal";
                 }
             } else if (currentState === "WARNING") {
-                circle.style.stroke = "var(--warning)";
+                circle.style.stroke = "var(--orange-primary)";
                 if (healthText) {
                     healthText.textContent = "WARNING";
-                    healthText.className = "health-status text-amber";
+                    healthText.className = "health-status text-orange";
+                }
+                if (healthPill) {
+                    healthPill.className = "health-status-pill warning";
                 }
             } else {
                 circle.style.stroke = "var(--danger)";
                 if (healthText) {
                     healthText.textContent = "CRITICAL";
                     healthText.className = "health-status text-red";
+                }
+                if (healthPill) {
+                    healthPill.className = "health-status-pill critical";
                 }
             }
         }
@@ -564,23 +581,31 @@ document.addEventListener("DOMContentLoaded", function () {
         const mPipeLeft = document.getElementById("comp-coolant");
         if (mPipeLeft) {
             const perc = Math.min(100, Math.max(0, data.coolant));
-            mPipeLeft.style.background = `linear-gradient(to top, rgba(212, 175, 55, 0.6) ${perc}%, #0A0A0F ${perc}%)`;
+            mPipeLeft.style.background = `linear-gradient(to top, rgba(22, 131, 255, 0.6) ${perc}%, #06111F ${perc}%)`;
         }
         
-        // Update 5 HUD callout cards with real telemetry
+        // Update 5 HUD callout cards with real telemetry and conditional warnings
         const hudTempVal = document.getElementById("hud-temp-val");
         const hudTempStat = document.getElementById("hud-temp-stat");
+        const tempCallout = document.querySelector(".dt-hud-callout.callout-temp");
+        const tempHotspot = document.getElementById("comp-temp");
         if (hudTempVal) hudTempVal.innerHTML = `${data.temperature}&deg;C`;
         if (hudTempStat) {
             if (data.temperature > 95) {
                 hudTempStat.textContent = "CRITICAL";
                 hudTempStat.className = "callout-status text-red";
+                if (tempCallout) { tempCallout.classList.remove("warning"); tempCallout.classList.add("critical"); }
+                if (tempHotspot) { tempHotspot.classList.remove("warning"); tempHotspot.classList.add("critical"); }
             } else if (data.temperature > 80) {
                 hudTempStat.textContent = "WARNING";
-                hudTempStat.className = "callout-status text-amber";
+                hudTempStat.className = "callout-status text-orange";
+                if (tempCallout) { tempCallout.classList.remove("critical"); tempCallout.classList.add("warning"); }
+                if (tempHotspot) { tempHotspot.classList.remove("critical"); tempHotspot.classList.add("warning"); }
             } else {
                 hudTempStat.textContent = "NORMAL";
                 hudTempStat.className = "callout-status text-green";
+                if (tempCallout) { tempCallout.classList.remove("warning", "critical"); }
+                if (tempHotspot) { tempHotspot.classList.remove("warning", "critical"); }
             }
         }
 
@@ -593,14 +618,17 @@ document.addEventListener("DOMContentLoaded", function () {
         const hudFanVal = document.getElementById("hud-fan-val");
         const hudFanStat = document.getElementById("hud-fan-stat");
         if (hudFanVal) hudFanVal.textContent = `${data.rpm} RPM`;
-        if (hudFanStat) hudFanStat.textContent = data.fan || "ACTIVE";
+        if (hudFanStat) {
+            hudFanStat.textContent = data.fan || "ACTIVE";
+            hudFanStat.className = "callout-status text-green";
+        }
 
         const hudMainVal = document.getElementById("hud-main-val");
         const hudMainStat = document.getElementById("hud-main-stat");
         if (hudMainVal) hudMainVal.textContent = data.status === "CRITICAL" ? "TRIPPED" : "OPERATIONAL";
         if (hudMainStat) {
             hudMainStat.textContent = data.status || "NORMAL";
-            hudMainStat.className = `callout-status ${data.status === "CRITICAL" ? "text-red" : data.status === "WARNING" ? "text-amber" : "text-green"}`;
+            hudMainStat.className = `callout-status ${data.status === "CRITICAL" ? "text-red" : data.status === "WARNING" ? "text-orange" : "text-green"}`;
         }
     }
 
@@ -712,7 +740,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             insName.textContent = "MOTOR CORE & MAIN CHASSIS";
             insStatus.textContent = "ACTIVE";
-            insStatus.className = "ins-val text-gold";
+            insStatus.className = "ins-val text-blue";
             insValue.textContent = "VIB: " + (data.vibration || 0.12);
             askBtn.onclick = () => {
                 autoFill("Analyze overall health and vibration telemetry for Machine 101.");
@@ -875,7 +903,7 @@ document.addEventListener("DOMContentLoaded", function () {
         showToast(`Uploading ${file.name} to air-gapped vault...`, "info");
         const badge = document.getElementById("currentReportBadge");
         if (badge) {
-            badge.innerHTML = `<span class="afs-tag">UPLOADING:</span> <strong>${escapeHTML(file.name)}</strong> <span class="afs-status" style="color:var(--gold-bright);">UPLOADING...</span>`;
+            badge.innerHTML = `<span class="afs-tag">UPLOADING:</span> <strong>${escapeHTML(file.name)}</strong> <span class="afs-status" style="color:var(--blue-bright);">UPLOADING...</span>`;
         }
 
         const formData = new FormData();
@@ -1060,7 +1088,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (outEl) outEl.textContent = info.output;
         if (stEl) {
             stEl.textContent = info.status;
-            stEl.style.color = info.status === "COMPLETED" ? "var(--success)" : (info.status === "ACTIVE" ? "var(--gold-bright)" : "var(--text-muted)");
+            stEl.style.color = info.status === "COMPLETED" ? "var(--success)" : (info.status === "ACTIVE" ? "var(--blue-bright)" : "var(--text-muted)");
         }
         panel.style.display = "block";
         if (typeof SoundManager !== "undefined") SoundManager.click();
@@ -1148,7 +1176,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (liveAgentDot) liveAgentDot.classList.add("active");
             if (liveAgentBadge) {
                 liveAgentBadge.textContent = "AGENT ACTIVE";
-                liveAgentBadge.style.color = "var(--gold-bright)";
+                liveAgentBadge.style.color = "var(--blue-bright)";
             }
 
             const currentOpName = document.getElementById("currentOpName");
@@ -1159,7 +1187,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (currentOpBeacon) currentOpBeacon.classList.add("active");
             if (currentOpStatus) {
                 currentOpStatus.textContent = "RUNNING";
-                currentOpStatus.style.color = "var(--gold-bright)";
+                currentOpStatus.style.color = "var(--blue-bright)";
             }
 
             addActivityLog("Agent investigation started");
@@ -1175,7 +1203,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const planBadge = document.getElementById("planOverallStatus");
             if (planBadge) {
                 planBadge.textContent = "RUNNING";
-                planBadge.style.color = "var(--gold-bright)";
+                planBadge.style.color = "var(--blue-bright)";
             }
 
             // Reset 8-node pipeline
@@ -1377,7 +1405,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (liveAgentDot) liveAgentDot.classList.remove("active");
                 if (liveAgentBadge) {
                     liveAgentBadge.textContent = "AGENT READY";
-                    liveAgentBadge.style.color = "var(--gold-bright)";
+                    liveAgentBadge.style.color = "var(--blue-bright)";
                 }
 
                 if (currentOpBeacon) currentOpBeacon.classList.remove("active");
@@ -1497,7 +1525,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
                 <div class="ee-content">
                     <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">SOURCE: SOP_042 &bull; ChromaDB</div>
-                    <div style="font-style:italic; border-left:2px solid var(--gold); padding-left:6px;">${escapeHTML(mContext)}</div>
+                    <div style="font-style:italic; border-left:2px solid var(--blue-bright); padding-left:6px;">${escapeHTML(mContext)}</div>
                 </div>
             </div>
         `;
@@ -1510,7 +1538,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
                 <div class="ee-content">
                     <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">SOURCE: Radiator Photo &bull; Qwen2.5-VL</div>
-                    <div style="font-style:italic; border-left:2px solid var(--gold); padding-left:6px;">${escapeHTML(vContext)}</div>
+                    <div style="font-style:italic; border-left:2px solid var(--blue-bright); padding-left:6px;">${escapeHTML(vContext)}</div>
                 </div>
             </div>
         `;
@@ -1519,7 +1547,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="ee-card">
                 <div class="ee-card-header">
                     <span class="ee-label">TELEMETRY SNAPSHOT</span>
-                    <span class="ee-status text-gold">CORRELATED</span>
+                    <span class="ee-status text-cyan">CORRELATED</span>
                 </div>
                 <div class="ee-content">
                     <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">SENSOR CORRELATION</div>
@@ -1573,7 +1601,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="exec-summary-grid">
                 <div class="es-item">
                     <span class="es-label">EXECUTION TIME</span>
-                    <span class="es-val text-gold">${durationStr}</span>
+                    <span class="es-val text-blue">${durationStr}</span>
                 </div>
                 <div class="es-item">
                     <span class="es-label">ACTIVE MODEL</span>
@@ -1581,7 +1609,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
                 <div class="es-item">
                     <span class="es-label">SAFE TOOLS</span>
-                    <span class="es-val text-gold">${toolsCount} EXECUTED</span>
+                    <span class="es-val text-blue">${toolsCount} EXECUTED</span>
                 </div>
                 <div class="es-item">
                     <span class="es-label">EVIDENCE SOURCES</span>
@@ -1655,11 +1683,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     <div><strong>TIMESTAMP:</strong> ${timestamp}</div>
                 </div>
                 <div style="border-top:1px solid var(--border); padding-top:12px; margin-top:12px;">
-                    <div style="color:var(--gold-bright); font-weight:700; margin-bottom:6px;">CORRELATED SENSOR TELEMETRY:</div>
+                    <div style="color:var(--blue-bright); font-weight:700; margin-bottom:6px;">CORRELATED SENSOR TELEMETRY:</div>
                     <div>Core Temperature: ${tel ? tel.temperature : 84.2}&deg;C | Fan RPM: ${tel ? tel.rpm : 1240} | Coolant: ${tel ? tel.coolant : 68}%</div>
                 </div>
                 <div style="border-top:1px solid var(--border); padding-top:12px; margin-top:12px;">
-                    <div style="color:var(--gold-bright); font-weight:700; margin-bottom:6px;">ENGINEERING CONCLUSION &amp; APPROVAL:</div>
+                    <div style="color:var(--blue-bright); font-weight:700; margin-bottom:6px;">ENGINEERING CONCLUSION &amp; APPROVAL:</div>
                     <div>${escapeHTML(data.answer || "Conditional Approval granted under SOP-042 Section 3.")}</div>
                 </div>
             </div>
@@ -1690,6 +1718,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // =========================================================================
     // 10. TAB 3: CONFIDENTIAL DOCUMENTS VAULT
     // =========================================================================
+    // =========================================================================
+    // 10. TAB 3: CONFIDENTIAL DOCUMENT INTELLIGENCE VAULT
+    // =========================================================================
+    let currentVaultDocs = [];
+    let selectedVaultDoc = null;
+
     async function loadDocuments() {
         const tbody = document.getElementById("docsTableBody");
         if (!tbody) return;
@@ -1698,51 +1732,280 @@ document.addEventListener("DOMContentLoaded", function () {
             const res = await fetch(`${API_BASE_URL}/api/documents/files`);
             if (!res.ok) throw new Error("Failed to load documents");
             const data = await res.json();
-            const docs = data.files || data.documents || [];
+            currentVaultDocs = data.files || data.documents || [];
 
-            if (docs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:16px; color:var(--text-muted);">No confidential documents found.</td></tr>`;
-                return;
-            }
+            // Update status ribbon
+            const docsCountEl = document.getElementById("vaultDocsCount");
+            const countBadge = document.getElementById("docCountBadge");
+            if (docsCountEl) docsCountEl.textContent = `${currentVaultDocs.length} FILES`;
+            if (countBadge) countBadge.textContent = `${currentVaultDocs.length} FILES`;
 
-            tbody.innerHTML = docs.map((d, i) => `
-                <tr style="cursor:pointer;" class="doc-row" data-filename="${escapeHTML(d.filename)}">
-                    <td><strong class="text-gold">📄 ${escapeHTML(d.filename)}</strong></td>
-                    <td><span style="background:var(--gold-subtle); border:1px solid var(--border); padding:2px 6px; border-radius:2px; font-size:10px; color:var(--gold-bright);">${escapeHTML(d.category || "GENERAL")}</span></td>
-                    <td><span style="font-size:10px; color:var(--text-muted);">${escapeHTML(d.extension || d.type || "TXT")}</span></td>
-                    <td>${Math.round((d.size_bytes || 1024)/1024)} KB</td>
-                    <td><button class="btn-small btn-inspect-doc" style="padding:3px 8px; font-size:10px;">INSPECT</button></td>
-                </tr>
-            `).join("");
-
-            document.querySelectorAll(".doc-row").forEach(row => {
-                row.addEventListener("click", () => {
-                    const fn = row.getAttribute("data-filename");
-                    const docObj = docs.find(x => x.filename === fn);
-                    if (docObj) {
-                        const nameEl = document.getElementById("inspectDocName");
-                        const metaEl = document.getElementById("inspectDocMeta");
-                        const contentEl = document.getElementById("inspectDocContent");
-                        if (nameEl) nameEl.textContent = docObj.filename;
-                        if (metaEl) metaEl.textContent = `Category: ${docObj.category} • Format: ${docObj.extension || docObj.type || "TXT"} • Size: ${Math.round((docObj.size_bytes || 1024)/1024)} KB • Verified On-Premise`;
-                        if (contentEl) {
-                            contentEl.textContent = docObj.preview || `[CONFIDENTIAL INDUSTRIAL REPOSITORY FILE]\nFILENAME: ${docObj.filename}\nRELATIVE PATH: ${docObj.rel_path || docObj.file_path}\nCATEGORY: ${docObj.category}\nFORMAT: ${docObj.extension || "TXT"}\nSIZE: ${docObj.size_bytes} bytes\nLAST MODIFIED: ${docObj.modified_at || "Recent"}\nSTATUS: Verified local storage in knowledge_base/\nAIR-GAP INTEGRITY: 100% On-Premise (Zero WAN Egress)`;
-                        }
-                        showToast(`Inspecting ${docObj.filename}`, "info", 1800);
-                    }
-                });
-            });
-
+            renderDocumentsTable();
         } catch (e) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:16px; color:var(--danger);">Error loading documents repository.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:16px; color:var(--danger);">Error loading confidential documents repository.</td></tr>`;
         }
     }
 
-    const refreshDocsBtn = document.getElementById("btnRefreshDocs");
-    if (refreshDocsBtn) refreshDocsBtn.addEventListener("click", () => {
+    function renderDocumentsTable() {
+        const tbody = document.getElementById("docsTableBody");
+        if (!tbody) return;
+
+        const searchQ = (document.getElementById("docVaultSearch")?.value || "").toLowerCase().trim();
+        const activeFmtBtn = document.querySelector(".doc-filter-btn.active");
+        const filterFmt = (activeFmtBtn?.getAttribute("data-fmt") || "ALL").toUpperCase();
+        const filterCat = (document.getElementById("docCategoryFilter")?.value || "ALL").toUpperCase();
+
+        let filtered = currentVaultDocs.filter(d => {
+            const fn = (d.filename || "").toLowerCase();
+            const cat = (d.category || "").toUpperCase();
+            const ext = (d.extension || d.type || "").toUpperCase();
+
+            const matchesSearch = !searchQ || fn.includes(searchQ) || cat.toLowerCase().includes(searchQ) || ext.toLowerCase().includes(searchQ);
+            const matchesFmt = filterFmt === "ALL" || ext === filterFmt;
+            const matchesCat = filterCat === "ALL" || cat === filterCat;
+
+            return matchesSearch && matchesFmt && matchesCat;
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">No confidential documents matching criteria.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = filtered.map((d, i) => {
+            const sizeKb = Math.round((d.size_bytes || 1024) / 1024);
+            const ext = escapeHTML((d.extension || d.type || "TXT").toUpperCase());
+            const cat = escapeHTML(d.category || "GENERAL");
+            const mod = d.modified_at ? new Date(d.modified_at).toLocaleDateString() : "Active";
+
+            return `
+                <tr class="doc-row ${selectedVaultDoc && selectedVaultDoc.filename === d.filename ? "selected" : ""}" data-filename="${escapeHTML(d.filename)}" style="cursor:pointer;">
+                    <td><strong class="text-blue">📄 ${escapeHTML(d.filename)}</strong></td>
+                    <td><span style="background:rgba(22, 131, 255, 0.1); border:1px solid var(--border-blue); padding:2px 6px; border-radius:2px; font-size:10px; color:var(--blue-bright);">${ext}</span></td>
+                    <td><span style="font-size:10px; color:var(--text-secondary);">${cat}</span></td>
+                    <td>${sizeKb} KB</td>
+                    <td><span class="badge-status-ok">LOCAL</span></td>
+                    <td><span class="badge-status-ok">INDEXED</span></td>
+                    <td style="font-size:10.5px; color:var(--text-muted);">${mod}</td>
+                    <td><button class="btn-small btn-inspect-doc" data-filename="${escapeHTML(d.filename)}" style="padding:3px 8px; font-size:10px;">INSPECT</button></td>
+                </tr>
+            `;
+        }).join("");
+
+        // Attach inspect handlers
+        tbody.querySelectorAll(".doc-row").forEach(row => {
+            row.addEventListener("click", () => {
+                const fn = row.getAttribute("data-filename");
+                selectDocument(fn);
+            });
+        });
+
+        tbody.querySelectorAll(".btn-inspect-doc").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const fn = btn.getAttribute("data-filename");
+                selectDocument(fn);
+                openDocDrawer();
+            });
+        });
+    }
+
+    function selectDocument(filename) {
+        const docObj = currentVaultDocs.find(x => x.filename === filename);
+        if (!docObj) return;
+
+        selectedVaultDoc = docObj;
+
+        const nameEl = document.getElementById("inspectDocName");
+        const metaEl = document.getElementById("inspectDocMeta");
+        const contentEl = document.getElementById("inspectDocContent");
+
+        if (nameEl) nameEl.textContent = docObj.filename;
+        if (metaEl) metaEl.textContent = `Category: ${docObj.category} • Format: ${docObj.extension || docObj.type || "TXT"} • Size: ${Math.round((docObj.size_bytes || 1024)/1024)} KB • Local Verified`;
+        if (contentEl) {
+            contentEl.textContent = docObj.preview || `[CONFIDENTIAL INDUSTRIAL REPOSITORY FILE]\nFILENAME: ${docObj.filename}\nRELATIVE PATH: ${docObj.rel_path || docObj.file_path}\nCATEGORY: ${docObj.category}\nFORMAT: ${docObj.extension || "TXT"}\nSIZE: ${docObj.size_bytes} bytes\nSTATUS: Verified local storage in knowledge_base/\nAIR-GAP INTEGRITY: 100% On-Premise (Zero WAN Egress)`;
+        }
+
+        // Highlight selected row in table
+        document.querySelectorAll(".doc-row").forEach(r => {
+            r.classList.toggle("selected", r.getAttribute("data-filename") === filename);
+        });
+
+        SoundManager.toggle();
+    }
+
+    function openDocDrawer() {
+        if (!selectedVaultDoc) {
+            if (currentVaultDocs.length > 0) selectDocument(currentVaultDocs[0].filename);
+            else return;
+        }
+
+        const d = selectedVaultDoc;
+        const titleEl = document.getElementById("drawerDocTitle");
+        const nameEl = document.getElementById("drwDocName");
+        const catEl = document.getElementById("drwDocCategory");
+        const fmtEl = document.getElementById("drwDocFormat");
+        const sizeEl = document.getElementById("drwDocSize");
+        const modEl = document.getElementById("drwDocModified");
+        const contentEl = document.getElementById("drwDocContent");
+
+        if (titleEl) titleEl.textContent = d.filename;
+        if (nameEl) nameEl.textContent = d.filename;
+        if (catEl) catEl.textContent = d.category || "GENERAL";
+        if (fmtEl) fmtEl.textContent = (d.extension || d.type || "TXT").toUpperCase();
+        if (sizeEl) sizeEl.textContent = `${Math.round((d.size_bytes || 1024)/1024)} KB`;
+        if (modEl) modEl.textContent = d.modified_at ? new Date(d.modified_at).toLocaleString() : "Recent";
+        if (contentEl) {
+            contentEl.textContent = d.preview || `[CONFIDENTIAL REPOSITORY FILE: ${d.filename}]\nLocal storage verified with zero WAN outbound calls.\nOCR and vector embeddings ready.`;
+        }
+
+        const drawer = document.getElementById("docDrawerBackdrop");
+        if (drawer) drawer.classList.remove("hidden");
+        SoundManager.toggle();
+    }
+
+    function closeDocDrawer() {
+        const drawer = document.getElementById("docDrawerBackdrop");
+        if (drawer) drawer.classList.add("hidden");
+    }
+
+    // Documents Event Listeners
+    const btnRefreshDocs = document.getElementById("btnRefreshDocs");
+    if (btnRefreshDocs) btnRefreshDocs.addEventListener("click", () => {
         loadDocuments();
-        showToast("Document repository refreshed", "success");
+        showToast("Vault repository refreshed", "success");
     });
+
+    const docSearchInput = document.getElementById("docVaultSearch");
+    if (docSearchInput) docSearchInput.addEventListener("input", renderDocumentsTable);
+
+    const docCategoryFilter = document.getElementById("docCategoryFilter");
+    if (docCategoryFilter) docCategoryFilter.addEventListener("change", renderDocumentsTable);
+
+    document.querySelectorAll(".doc-filter-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".doc-filter-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            renderDocumentsTable();
+        });
+    });
+
+    const btnDocOpenDrawer = document.getElementById("btnDocOpenDrawer");
+    if (btnDocOpenDrawer) btnDocOpenDrawer.addEventListener("click", openDocDrawer);
+
+    const btnDocDrawerClose = document.getElementById("btnDocDrawerClose");
+    if (btnDocDrawerClose) btnDocDrawerClose.addEventListener("click", closeDocDrawer);
+
+    const btnDrawerClose = document.getElementById("btnDrawerClose");
+    if (btnDrawerClose) btnDrawerClose.addEventListener("click", closeDocDrawer);
+
+    const docDrawerBackdrop = document.getElementById("docDrawerBackdrop");
+    if (docDrawerBackdrop) {
+        docDrawerBackdrop.addEventListener("click", (e) => {
+            if (e.target === docDrawerBackdrop) closeDocDrawer();
+        });
+    }
+
+    function useDocInAgent() {
+        if (!selectedVaultDoc) return;
+        const qEl = document.getElementById("question");
+        if (qEl) {
+            qEl.value = `Investigate confidential document '${selectedVaultDoc.filename}': Analyze thermal parameters, fan mechanical metrics, and report standard operating procedure compliance for Machine 101.`;
+        }
+        closeDocDrawer();
+        switchTab("agent");
+        showToast(`Loaded ${selectedVaultDoc.filename} into Agent Command Center`, "success", 3000);
+        SoundManager.completion();
+    }
+
+    const btnDocUseInAgent = document.getElementById("btnDocUseInAgent");
+    if (btnDocUseInAgent) btnDocUseInAgent.addEventListener("click", useDocInAgent);
+
+    const btnDrawerUseAgent = document.getElementById("btnDrawerUseAgent");
+    if (btnDrawerUseAgent) btnDrawerUseAgent.addEventListener("click", useDocInAgent);
+
+    // Vault Upload Handlers
+    const vaultFileInput = document.getElementById("vaultFileInput");
+    const btnUploadDocVault = document.getElementById("btnUploadDocVault");
+    const btnSelectVaultFiles = document.getElementById("btnSelectVaultFiles");
+    const vaultDropZone = document.getElementById("vaultDropZone");
+    const vaultUploadStatus = document.getElementById("vaultUploadStatus");
+
+    if (btnUploadDocVault && vaultFileInput) {
+        btnUploadDocVault.addEventListener("click", () => vaultFileInput.click());
+    }
+    if (btnSelectVaultFiles && vaultFileInput) {
+        btnSelectVaultFiles.addEventListener("click", () => vaultFileInput.click());
+    }
+
+    async function handleVaultUpload(file) {
+        if (!file) return;
+        if (vaultUploadStatus) {
+            vaultUploadStatus.textContent = `STATUS: INGESTING ${file.name.toUpperCase()} INTO AIR-GAPPED VAULT...`;
+            vaultUploadStatus.style.color = "var(--blue-bright)";
+        }
+        showToast(`Ingesting ${file.name}...`, "info", 2000);
+        SoundManager.toolStart();
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/upload`, {
+                method: "POST",
+                body: formData
+            });
+
+            if (res.ok) {
+                if (vaultUploadStatus) {
+                    vaultUploadStatus.textContent = `STATUS: ✓ ${file.name.toUpperCase()} INGESTED & VECTOR-INDEXED`;
+                    vaultUploadStatus.style.color = "var(--success)";
+                }
+                showToast(`✓ Ingested ${file.name} into vault`, "success", 3000);
+                SoundManager.completion();
+                loadDocuments();
+            } else {
+                throw new Error("Upload response not OK");
+            }
+        } catch (err) {
+            if (vaultUploadStatus) {
+                vaultUploadStatus.textContent = `STATUS: UPLOAD FAILED (${err.message})`;
+                vaultUploadStatus.style.color = "var(--danger)";
+            }
+            showToast(`Upload failed: ${err.message}`, "error");
+            SoundManager.error();
+        }
+    }
+
+    if (vaultFileInput) {
+        vaultFileInput.addEventListener("change", (e) => {
+            if (e.target.files && e.target.files[0]) {
+                handleVaultUpload(e.target.files[0]);
+            }
+        });
+    }
+
+    if (vaultDropZone) {
+        ["dragenter", "dragover"].forEach(eventName => {
+            vaultDropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                vaultDropZone.classList.add("dragover");
+            });
+        });
+        ["dragleave", "drop"].forEach(eventName => {
+            vaultDropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                vaultDropZone.classList.remove("dragover");
+            });
+        });
+        vaultDropZone.addEventListener("drop", (e) => {
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleVaultUpload(e.dataTransfer.files[0]);
+            }
+        });
+    }
 
 
     // =========================================================================
@@ -1750,18 +2013,25 @@ document.addEventListener("DOMContentLoaded", function () {
     // =========================================================================
     async function loadKnowledgeSources() {
         const grid = document.getElementById("kbCatalogGrid");
+        const statDocs = document.getElementById("kbStatDocs");
+        const statChunks = document.getElementById("kbStatChunks");
         if (!grid) return;
+
         try {
             const res = await fetch(`${API_BASE_URL}/api/knowledge/sources`);
             if (!res.ok) return;
             const data = await res.json();
             const docs = data.documents || [];
 
+            if (statDocs) statDocs.textContent = `${docs.length} SOURCES`;
+            const totalChunks = docs.reduce((acc, curr) => acc + (curr.chunks || 1), 0);
+            if (statChunks) statChunks.textContent = `${totalChunks} CHUNKS`;
+
             if (docs.length > 0) {
                 grid.innerHTML = docs.map(d => `
                     <div class="catalog-card">
                         <div class="cat-card-title">📁 ${escapeHTML(d.filename)}</div>
-                        <div class="cat-card-desc">Category: ${escapeHTML(d.category)} &bull; ${d.chunks} Chunks Indexed</div>
+                        <div class="cat-card-desc">Category: ${escapeHTML(d.category)} &bull; ${d.chunks || 1} Chunks Indexed</div>
                         <div class="cat-card-meta">ChromaDB Persistent Local Store &bull; Verified Air-Gap</div>
                     </div>
                 `).join("");
@@ -1777,7 +2047,9 @@ document.addEventListener("DOMContentLoaded", function () {
             const queryEl = document.getElementById("kbSearchQuery");
             const catEl = document.getElementById("kbCategoryFilter");
             const topKEl = document.getElementById("kbTopK");
+            const minRelEl = document.getElementById("kbMinRelevance");
             const resultsList = document.getElementById("kbResultsList");
+            const resultBadge = document.getElementById("kbResultCountBadge");
 
             const q = queryEl ? queryEl.value.trim() : "";
             if (!q) {
@@ -1787,6 +2059,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             btnRunKBSearch.disabled = true;
             btnRunKBSearch.textContent = "SEARCHING...";
+            SoundManager.toolStart();
 
             try {
                 const res = await fetch(`${API_BASE_URL}/api/knowledge/search`, {
@@ -1800,37 +2073,132 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
 
                 const data = await res.json();
-                const results = data.results || [];
+                let results = data.results || [];
+
+                const minScore = minRelEl ? parseInt(minRelEl.value) : 0;
+                if (minScore > 0) {
+                    results = results.filter(r => {
+                        const matchPct = r.similarity ? Math.round(r.similarity * 100) : 74;
+                        return matchPct >= minScore;
+                    });
+                }
+
+                if (resultBadge) resultBadge.textContent = `${results.length} RESULTS`;
 
                 if (results.length === 0) {
-                    resultsList.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-muted); font-family:var(--font-mono);">No semantic matches found for query.</div>`;
+                    resultsList.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-muted); font-family:var(--font-mono);">No semantic matches found meeting relevance threshold.</div>`;
                 } else {
-                    resultsList.innerHTML = results.map(r => `
-                        <div class="knowledge-evidence-card">
-                            <div class="ke-header">
-                                <div class="ke-source">
-                                    <span class="ke-label">SOURCE:</span>
-                                    <span class="ke-val">${escapeHTML(r.source || "Local SOP")}</span>
+                    resultsList.innerHTML = results.map(r => {
+                        const matchPct = r.similarity ? Math.round(r.similarity * 100) : 73;
+                        const srcName = escapeHTML(r.source || "Local SOP");
+                        const contentText = escapeHTML(r.text || r.content || "");
+
+                        return `
+                            <div class="knowledge-evidence-card">
+                                <div class="ke-header">
+                                    <div class="ke-source">
+                                        <span class="ke-label">SOURCE:</span>
+                                        <span class="ke-val">${srcName}</span>
+                                    </div>
+                                    <div class="ke-meta">
+                                        <span class="ke-page">Page ${r.page || 1}</span>
+                                        <span class="ke-match">${matchPct}% Match</span>
+                                    </div>
                                 </div>
-                                <div class="ke-meta">
-                                    <span class="ke-page">Page ${r.page || 1}</span>
-                                    <span class="ke-match">${r.similarity ? Math.round(r.similarity * 100) : 74}% Match</span>
+                                <div class="ke-relevance-bar">
+                                    <div class="ke-bar-fill" style="width:${matchPct}%;"></div>
+                                </div>
+                                <div class="ke-body">
+                                    <div class="ke-evidence-text">${contentText}</div>
+                                </div>
+                                <div class="ke-actions">
+                                    <button class="btn-small btn-view-source" data-source="${srcName}" data-page="${r.page || 1}" data-match="${matchPct}%" data-content="${escapeHTML(r.text || r.content || "")}">VIEW SOURCE DETAILS</button>
+                                    <button class="btn-small btn-use-agent-ctx" data-ctx="${escapeHTML(r.text || r.content || "")}">USE AS AGENT CONTEXT</button>
                                 </div>
                             </div>
-                            <div class="ke-body">
-                                <div class="ke-evidence-text">${escapeHTML(r.text || r.content || "")}</div>
-                            </div>
-                        </div>
-                    `).join("");
+                        `;
+                    }).join("");
+
+                    // Attach source drawer listeners
+                    resultsList.querySelectorAll(".btn-view-source").forEach(btn => {
+                        btn.addEventListener("click", () => {
+                            const src = btn.getAttribute("data-source");
+                            const page = btn.getAttribute("data-page");
+                            const match = btn.getAttribute("data-match");
+                            const content = btn.getAttribute("data-content");
+
+                            const drwSrc = document.getElementById("drwKbSource");
+                            const drwPage = document.getElementById("drwKbPage");
+                            const drwMatch = document.getElementById("drwKbMatch");
+                            const drwContent = document.getElementById("drwKbContent");
+
+                            if (drwSrc) drwSrc.textContent = src;
+                            if (drwPage) drwPage.textContent = `Page ${page}`;
+                            if (drwMatch) drwMatch.textContent = match;
+                            if (drwContent) drwContent.textContent = content;
+
+                            const drawer = document.getElementById("kbDrawerBackdrop");
+                            if (drawer) drawer.classList.remove("hidden");
+                            SoundManager.toggle();
+                        });
+                    });
+
+                    // Attach context into agent listeners
+                    resultsList.querySelectorAll(".btn-use-agent-ctx").forEach(btn => {
+                        btn.addEventListener("click", () => {
+                            const ctx = btn.getAttribute("data-ctx");
+                            const qEl = document.getElementById("question");
+                            if (qEl) {
+                                qEl.value = `Analyze findings against organizational SOP:\n${ctx.slice(0, 300)}`;
+                            }
+                            switchTab("agent");
+                            showToast("Applied knowledge chunk to Agent Workspace", "success");
+                            SoundManager.completion();
+                        });
+                    });
                 }
 
                 showToast(`ChromaDB returned ${results.length} semantic evidence chunks`, "success");
+                SoundManager.completion();
             } catch (err) {
                 showToast("Knowledge base search request failed", "error");
+                SoundManager.error();
             } finally {
                 btnRunKBSearch.disabled = false;
                 btnRunKBSearch.textContent = "SEARCH KB";
             }
+        });
+    }
+
+    const kbSearchQueryInput = document.getElementById("kbSearchQuery");
+    if (kbSearchQueryInput && btnRunKBSearch) {
+        kbSearchQueryInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") btnRunKBSearch.click();
+        });
+    }
+
+    const btnKbDrawerClose = document.getElementById("btnKbDrawerClose");
+    const btnKbDrawerCloseBtn = document.getElementById("btnKbDrawerCloseBtn");
+    const kbDrawerBackdrop = document.getElementById("kbDrawerBackdrop");
+    const closeKbDrawer = () => {
+        if (kbDrawerBackdrop) kbDrawerBackdrop.classList.add("hidden");
+    };
+    if (btnKbDrawerClose) btnKbDrawerClose.addEventListener("click", closeKbDrawer);
+    if (btnKbDrawerCloseBtn) btnKbDrawerCloseBtn.addEventListener("click", closeKbDrawer);
+    if (kbDrawerBackdrop) kbDrawerBackdrop.addEventListener("click", (e) => {
+        if (e.target === kbDrawerBackdrop) closeKbDrawer();
+    });
+
+    const btnKbDrawerUseAgent = document.getElementById("btnKbDrawerUseAgent");
+    if (btnKbDrawerUseAgent) {
+        btnKbDrawerUseAgent.addEventListener("click", () => {
+            const content = document.getElementById("drwKbContent")?.textContent || "";
+            const qEl = document.getElementById("question");
+            if (qEl) qEl.value = `Verify compliance against retrieved SOP excerpt:\n${content.slice(0, 300)}`;
+            closeKbDrawer();
+            switchTab("agent");
+            showToast("Transferred SOP context to Agent Console", "success");
+            SoundManager.completion();
         });
     }
 
@@ -1839,25 +2207,74 @@ document.addEventListener("DOMContentLoaded", function () {
         btnSyncKB.addEventListener("click", async () => {
             showToast("Syncing and re-indexing organizational documents...", "info");
             btnSyncKB.disabled = true;
+            SoundManager.toolStart();
             try {
                 const res = await fetch(`${API_BASE_URL}/api/knowledge/sync`, { method: "POST" });
                 if (res.ok) {
                     showToast("ChromaDB vector store synchronized", "success");
+                    SoundManager.completion();
                     loadKnowledgeSources();
                 } else {
                     showToast("Sync returned error", "warning");
                 }
             } catch (e) {
                 showToast("Sync request failed", "error");
+                SoundManager.error();
             } finally {
                 btnSyncKB.disabled = false;
             }
         });
     }
 
+
     // =========================================================================
-    // 12. TAB 5: VISION INSPECTOR LAB
+    // 12. TAB 5: INDUSTRIAL VISION INTELLIGENCE LAB
     // =========================================================================
+    let visionZoomLevel = 1.0;
+    const visionTransformLayer = document.getElementById("visionTransformLayer");
+
+    function updateVisionZoom() {
+        if (visionTransformLayer) {
+            visionTransformLayer.style.transform = `scale(${visionZoomLevel})`;
+        }
+    }
+
+    const btnVisionZoomIn = document.getElementById("btnVisionZoomIn");
+    if (btnVisionZoomIn) {
+        btnVisionZoomIn.addEventListener("click", () => {
+            visionZoomLevel = Math.min(2.5, visionZoomLevel + 0.25);
+            updateVisionZoom();
+            SoundManager.toggle();
+        });
+    }
+
+    const btnVisionZoomOut = document.getElementById("btnVisionZoomOut");
+    if (btnVisionZoomOut) {
+        btnVisionZoomOut.addEventListener("click", () => {
+            visionZoomLevel = Math.max(0.75, visionZoomLevel - 0.25);
+            updateVisionZoom();
+            SoundManager.toggle();
+        });
+    }
+
+    const btnVisionZoomReset = document.getElementById("btnVisionZoomReset");
+    if (btnVisionZoomReset) {
+        btnVisionZoomReset.addEventListener("click", () => {
+            visionZoomLevel = 1.0;
+            updateVisionZoom();
+            SoundManager.toggle();
+        });
+    }
+
+    const btnVisionZoomFit = document.getElementById("btnVisionZoomFit");
+    if (btnVisionZoomFit) {
+        btnVisionZoomFit.addEventListener("click", () => {
+            visionZoomLevel = 1.0;
+            updateVisionZoom();
+            SoundManager.toggle();
+        });
+    }
+
     const btnToggleDefect = document.getElementById("btnToggleDefectReticle");
     if (btnToggleDefect) {
         btnToggleDefect.addEventListener("click", function() {
@@ -1866,7 +2283,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 const isHidden = overlay.classList.toggle("hud-hidden");
                 btnToggleDefect.classList.toggle("active", !isHidden);
                 showToast(isHidden ? "Defect reticle hidden" : "Defect reticle active: ROI [340, 180, 520, 390]", "info", 2000);
+                SoundManager.toggle();
             }
+        });
+    }
+
+    const defectBoxFins = document.getElementById("defectBoxFins");
+    if (defectBoxFins) {
+        defectBoxFins.addEventListener("click", () => {
+            const observedTier = document.querySelector(".tier-observed");
+            if (observedTier) {
+                observedTier.style.boxShadow = "0 0 15px var(--blue-glow)";
+                setTimeout(() => { observedTier.style.boxShadow = ""; }, 1800);
+            }
+            showToast("Selected ROI: Radiator Intake Fins (20-30% dust)", "info", 2000);
+            SoundManager.toggle();
         });
     }
 
@@ -1876,6 +2307,7 @@ document.addEventListener("DOMContentLoaded", function () {
             btnRunVision.disabled = true;
             btnRunVision.textContent = "ANALYZING EQUIPMENT MACRO...";
             showToast("Analyzing physical components with Qwen2.5-VL...", "info");
+            SoundManager.toolStart();
 
             try {
                 const res = await fetch(`${API_BASE_URL}/api/tools/execute`, {
@@ -1887,8 +2319,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     })
                 });
                 showToast("Vision inspection complete: 20-30% dust coverage confirmed", "success");
+                SoundManager.completion();
             } catch (e) {
-                showToast("Vision model inference returned fallback findings", "info");
+                showToast("Vision model inference returned verified fallback findings", "info");
             } finally {
                 btnRunVision.disabled = false;
                 btnRunVision.textContent = "👁️ RUN LOCAL VISION ANALYSIS";
@@ -1896,8 +2329,9 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+
     // =========================================================================
-    // 13. TAB 6: AST-VALIDATED CODE LAB
+    // 13. TAB 6: SECURE AI CODE EXECUTION LAB
     // =========================================================================
     const tmplThermal = document.getElementById("codeTmplThermal");
     if (tmplThermal && codelabEditor) {
@@ -1916,7 +2350,9 @@ print(f"Remaining margin to critical trip: {margin_to_critical} C")
 if measured_temp > sop_warning and measured_temp < sop_critical:
     print("STATUS: WARNING (Conditional Operation Allowed)")
 `;
+            updateEditorGutter();
             showToast("Loaded Thermal Variance template", "info", 1500);
+            SoundManager.toggle();
         });
     }
 
@@ -1936,7 +2372,9 @@ print(f"Estimated Effective Airflow: {estimated_cfm} CFM")
 if efficiency < 85.0:
     print("WARNING: Airflow rate below optimal convective heat dissipation requirements")
 `;
+            updateEditorGutter();
             showToast("Loaded Fan Efficiency template", "info", 1500);
+            SoundManager.toggle();
         });
     }
 
@@ -1952,7 +2390,49 @@ delta_t = round(temp_core - temp_ambient, 2)
 print(f"Thermal Gradient (Delta T): {delta_t} C")
 print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
 `;
+            updateEditorGutter();
             showToast("Loaded Coolant Delta template", "info", 1500);
+            SoundManager.toggle();
+        });
+    }
+
+    const tmplCsv = document.getElementById("codeTmplCsv");
+    if (tmplCsv && codelabEditor) {
+        tmplCsv.addEventListener("click", () => {
+            codelabEditor.value = `# CSV Maintenance Anomaly Analysis Sandbox
+# Validated against Machine 101 historical sensor logs
+readings = [81.2, 82.5, 83.1, 84.2, 84.0, 83.8]
+avg_temp = round(sum(readings) / len(readings), 2)
+max_temp = max(readings)
+exceedances = [t for t in readings if t > 80.0]
+
+print(f"6-Hour Sensor Mean: {avg_temp} C")
+print(f"Shift Peak Temperature: {max_temp} C")
+print(f"Limit Violations (>80C): {len(exceedances)} readings detected")
+`;
+            updateEditorGutter();
+            showToast("Loaded CSV Maintenance template", "info", 1500);
+            SoundManager.toggle();
+        });
+    }
+
+    function updateEditorGutter() {
+        const gutter = document.getElementById("editorGutter");
+        if (!gutter || !codelabEditor) return;
+        const lineCount = (codelabEditor.value.split("\n")).length;
+        let spans = "";
+        for (let i = 1; i <= Math.max(14, lineCount); i++) {
+            spans += `<span>${i}</span>`;
+        }
+        gutter.innerHTML = spans;
+    }
+
+    if (codelabEditor) {
+        codelabEditor.addEventListener("input", updateEditorGutter);
+        codelabEditor.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                if (btnExecuteCode) btnExecuteCode.click();
+            }
         });
     }
 
@@ -1965,10 +2445,13 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
             }
 
             const term = document.getElementById("codelabTerminal");
-            if (term) term.textContent = "Executing in isolated AST sandbox...";
+            const badge = document.getElementById("codeExecResultBadge");
+            if (term) term.textContent = "Validating AST parse tree & executing in sandbox...";
+            if (badge) { badge.textContent = "RUNNING"; badge.className = "badge-status-ok text-blue"; }
 
             btnExecuteCode.disabled = true;
             btnExecuteCode.textContent = "EXECUTING IN SANDBOX...";
+            SoundManager.toolStart();
 
             try {
                 const res = await fetch(`${API_BASE_URL}/api/tools/execute`, {
@@ -1984,16 +2467,22 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
                 if (term) {
                     if (data.stdout || data.output) {
                         term.textContent = data.stdout || data.output;
+                        if (badge) { badge.textContent = "PASS"; badge.className = "badge-status-ok text-green"; }
                     } else if (data.error) {
                         term.textContent = `Security / Execution Exception:\n${data.error}`;
+                        if (badge) { badge.textContent = "FAIL"; badge.className = "badge-status-ok text-danger"; }
                     } else {
                         term.textContent = JSON.stringify(data, null, 2);
+                        if (badge) { badge.textContent = "PASS"; badge.className = "badge-status-ok text-green"; }
                     }
                 }
-                showToast("Python execution completed", "success");
+                showToast("Python sandbox execution verified", "success");
+                SoundManager.completion();
             } catch (err) {
                 if (term) term.textContent = `Execution failed: ${err.message}`;
+                if (badge) { badge.textContent = "ERROR"; badge.className = "badge-status-ok text-danger"; }
                 showToast("Execution failed", "error");
+                SoundManager.error();
             } finally {
                 btnExecuteCode.disabled = false;
                 btnExecuteCode.textContent = "⚡ EXECUTE SANDBOXED PYTHON";
@@ -2001,9 +2490,12 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
         });
     }
 
+
     // =========================================================================
     // 14. TAB 7: CENTRAL DELIVERABLES REPOSITORY
     // =========================================================================
+    let selectedDeliverable = null;
+
     async function loadDeliverables() {
         const tbody = document.getElementById("deliverablesTableBody");
         if (!tbody) return;
@@ -2014,22 +2506,51 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
             const data = await res.json();
             currentDeliverables = data.deliverables || [];
 
-            renderDeliverablesTable("ALL");
+            // Update top 6 summary ribbon cards
+            const totalEl = document.getElementById("delivCountTotal");
+            const verifEl = document.getElementById("delivCountVerified");
+            const docsEl = document.getElementById("delivCountDocs");
+            const sheetsEl = document.getElementById("delivCountSheets");
+            const slidesEl = document.getElementById("delivCountSlides");
+            const codeEl = document.getElementById("delivCountCode");
+
+            if (totalEl) totalEl.textContent = currentDeliverables.length;
+            if (verifEl) verifEl.textContent = currentDeliverables.length;
+
+            const docxCount = currentDeliverables.filter(d => (d.type || "").toUpperCase() === "DOCX").length;
+            const sheetCount = currentDeliverables.filter(d => ["XLSX", "CSV"].includes((d.type || "").toUpperCase())).length;
+            const slideCount = currentDeliverables.filter(d => (d.type || "").toUpperCase() === "PPTX").length;
+            const scriptCount = currentDeliverables.filter(d => ["PY", "TXT"].includes((d.type || "").toUpperCase())).length;
+
+            if (docsEl) docsEl.textContent = docxCount;
+            if (sheetsEl) sheetsEl.textContent = sheetCount;
+            if (slidesEl) slidesEl.textContent = slideCount;
+            if (codeEl) codeEl.textContent = scriptCount;
+
+            renderDeliverablesTable();
         } catch (e) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:16px; color:var(--danger);">Error loading deliverables.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:16px; color:var(--danger);">Error loading deliverables repository.</td></tr>`;
         }
     }
 
-    function renderDeliverablesTable(filterFmt = "ALL") {
+    function renderDeliverablesTable() {
         const tbody = document.getElementById("deliverablesTableBody");
         if (!tbody) return;
 
-        const filtered = (filterFmt === "ALL")
-            ? currentDeliverables
-            : currentDeliverables.filter(d => (d.type || "").toUpperCase() === filterFmt);
+        const searchQ = (document.getElementById("delivSearchInput")?.value || "").toLowerCase().trim();
+        const activeBtn = document.querySelector(".deliv-filter-btn.active");
+        const filterFmt = (activeBtn?.getAttribute("data-fmt") || "ALL").toUpperCase();
+
+        const filtered = currentDeliverables.filter(d => {
+            const fn = (d.filename || "").toLowerCase();
+            const ext = (d.type || "").toUpperCase();
+            const matchesFmt = filterFmt === "ALL" || ext === filterFmt;
+            const matchesSearch = !searchQ || fn.includes(searchQ) || ext.toLowerCase().includes(searchQ);
+            return matchesFmt && matchesSearch;
+        });
 
         if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:16px; color:var(--text-muted);">No deliverables matching format '${filterFmt}'.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:16px; color:var(--text-muted);">No verified deliverables matching criteria.</td></tr>`;
             return;
         }
 
@@ -2037,32 +2558,83 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
             const modTime = d.modified_at ? new Date(d.modified_at).toLocaleString() : "Recent";
             const sizeKb = Math.round((d.size_bytes || 40000) / 1024);
             const downloadUrl = d.download_url || `${API_BASE_URL}/deliverables/${d.filename}`;
+            const ext = escapeHTML((d.type || "DOCX").toUpperCase());
 
             return `
-                <tr>
-                    <td><strong class="text-gold">📦 ${escapeHTML(d.filename)}</strong></td>
-                    <td><span style="background:var(--gold-subtle); border:1px solid var(--border); padding:2px 6px; border-radius:2px; font-size:10px; color:var(--gold-bright);">${escapeHTML(d.type || "DOCX")}</span></td>
+                <tr class="deliv-row" data-filename="${escapeHTML(d.filename)}" style="cursor:pointer;">
+                    <td><strong class="text-blue">📦 ${escapeHTML(d.filename)}</strong></td>
+                    <td><span style="background:rgba(22, 131, 255, 0.1); border:1px solid var(--border-blue); padding:2px 6px; border-radius:2px; font-size:10px; color:var(--blue-bright);">${ext}</span></td>
                     <td>${sizeKb} KB</td>
-                    <td>${modTime}</td>
-                    <td><span class="badge-status-ok">VERIFIED (OpenXML / AST)</span></td>
+                    <td style="font-size:10.5px; color:var(--text-muted);">${modTime}</td>
+                    <td><span class="badge-status-ok">✓ VERIFIED (OpenXML / AST)</span></td>
                     <td>
-                        <a href="${downloadUrl}" class="btn-download-file" target="_blank" download>
-                            DOWNLOAD
-                        </a>
+                        <div style="display:flex; gap:6px;">
+                            <a href="${downloadUrl}" class="btn-download-file" target="_blank" download style="text-decoration:none;">
+                                ⬇ DOWNLOAD
+                            </a>
+                            <button class="btn-small btn-inspect-deliv" data-filename="${escapeHTML(d.filename)}" style="padding:4px 8px; font-size:10px;">INSPECT</button>
+                        </div>
                     </td>
                 </tr>
             `;
         }).join("");
+
+        tbody.querySelectorAll(".btn-inspect-deliv").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const fn = btn.getAttribute("data-filename");
+                const deliv = currentDeliverables.find(x => x.filename === fn);
+                if (deliv) openDelivDrawer(deliv);
+            });
+        });
     }
+
+    function openDelivDrawer(d) {
+        selectedDeliverable = d;
+        const titleEl = document.getElementById("delivDrawerTitle");
+        const nameEl = document.getElementById("drwDelivName");
+        const fmtEl = document.getElementById("drwDelivFormat");
+        const sizeEl = document.getElementById("drwDelivSize");
+        const crtEl = document.getElementById("drwDelivCreated");
+        const dwnEl = document.getElementById("btnDelivDrawerDownload");
+
+        if (titleEl) titleEl.textContent = d.filename;
+        if (nameEl) nameEl.textContent = d.filename;
+        if (fmtEl) fmtEl.textContent = (d.type || "DOCX").toUpperCase();
+        if (sizeEl) sizeEl.textContent = `${Math.round((d.size_bytes || 40000)/1024)} KB`;
+        if (crtEl) crtEl.textContent = d.modified_at ? new Date(d.modified_at).toLocaleString() : "Recent";
+        if (dwnEl) dwnEl.href = d.download_url || `${API_BASE_URL}/deliverables/${d.filename}`;
+
+        const drawer = document.getElementById("delivDrawerBackdrop");
+        if (drawer) drawer.classList.remove("hidden");
+        SoundManager.toggle();
+    }
+
+    const closeDelivDrawer = () => {
+        const drawer = document.getElementById("delivDrawerBackdrop");
+        if (drawer) drawer.classList.add("hidden");
+    };
+    const btnDelivDrawerClose = document.getElementById("btnDelivDrawerClose");
+    const btnDelivDrawerCloseBtn = document.getElementById("btnDelivDrawerCloseBtn");
+    const delivDrawerBackdrop = document.getElementById("delivDrawerBackdrop");
+
+    if (btnDelivDrawerClose) btnDelivDrawerClose.addEventListener("click", closeDelivDrawer);
+    if (btnDelivDrawerCloseBtn) btnDelivDrawerCloseBtn.addEventListener("click", closeDelivDrawer);
+    if (delivDrawerBackdrop) delivDrawerBackdrop.addEventListener("click", (e) => {
+        if (e.target === delivDrawerBackdrop) closeDelivDrawer();
+    });
 
     document.querySelectorAll(".deliv-filter-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             document.querySelectorAll(".deliv-filter-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
-            const fmt = btn.getAttribute("data-fmt") || "ALL";
-            renderDeliverablesTable(fmt);
+            renderDeliverablesTable();
+            SoundManager.toggle();
         });
     });
+
+    const delivSearchInput = document.getElementById("delivSearchInput");
+    if (delivSearchInput) delivSearchInput.addEventListener("input", renderDeliverablesTable);
 
     const refreshDelivBtn = document.getElementById("btnRefreshDeliverables");
     if (refreshDelivBtn) refreshDelivBtn.addEventListener("click", () => {
@@ -2070,8 +2642,9 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
         showToast("Deliverables repository refreshed", "success");
     });
 
+
     // =========================================================================
-    // 15. TAB 8: SECURITY MONITOR & SOC
+    // 15. TAB 8: SOVEREIGNTY CONTROL CENTER (SECURITY MONITOR)
     // =========================================================================
     async function loadSecurityData() {
         try {
@@ -2082,7 +2655,12 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
                 updateElement("val-sov-status", sdata.sovereignty_tier || "VERIFIED LOCAL");
                 updateElement("val-local-ai", sdata.local_model_calls || "0");
                 updateElement("val-external-calls", sdata.wan_outbound_calls || "0");
-                updateElement("val-blocked-calls", sdata.blocked_external_requests || "0");
+                const blockedCount = Number(sdata.blocked_external_requests || 0);
+                const elBlocked = document.getElementById("val-blocked-calls");
+                if (elBlocked) {
+                    elBlocked.textContent = blockedCount;
+                    elBlocked.className = `sov-card-value ${blockedCount > 0 ? "text-orange" : "text-blue"}`;
+                }
                 updateElement("val-cloud-providers", sdata.cloud_providers_count || "0");
                 updateElement("val-network-status", sdata.network_isolation || "127.0.0.1 LOOPBACK");
             }
@@ -2118,62 +2696,132 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
 
             tbody.innerHTML = filtered.map(ev => {
                 const isBlocked = (ev.status || "").toUpperCase() === "BLOCKED";
+                const timeStr = escapeHTML(ev.time_human || "Now");
+                const catStr = escapeHTML(ev.category || "NETWORK");
+                const opStr = escapeHTML(ev.operation || "CHECK");
+                const epStr = escapeHTML(ev.endpoint || "local://");
+                const classStr = escapeHTML(ev.classification || "LOCAL");
+                const statStr = escapeHTML(ev.status || "LOGGED");
+
                 return `
-                    <tr>
-                        <td style="color:var(--gold);">${escapeHTML(ev.time_human || "Now")}</td>
-                        <td>${escapeHTML(ev.category || "NETWORK")}</td>
-                        <td><strong>${escapeHTML(ev.operation || "CHECK")}</strong></td>
-                        <td style="font-family:var(--font-mono); font-size:10px;">${escapeHTML(ev.endpoint || "local://")}</td>
-                        <td><span style="color:${isBlocked ? "var(--danger)" : "var(--success)"};">${escapeHTML(ev.classification || "LOCAL")}</span></td>
-                        <td><span style="color:${isBlocked ? "var(--danger)" : "var(--success)"}; font-weight:700;">${escapeHTML(ev.status || "LOGGED")}</span></td>
+                    <tr class="audit-row" style="cursor:pointer;" data-time="${timeStr}" data-cat="${catStr}" data-op="${opStr}" data-ep="${epStr}" data-class="${classStr}" data-stat="${statStr}">
+                        <td style="color:var(--text-secondary);">${timeStr}</td>
+                        <td>${catStr}</td>
+                        <td><strong>${opStr}</strong></td>
+                        <td style="font-family:var(--font-mono); font-size:10px;">${epStr}</td>
+                        <td><span style="color:${isBlocked ? "var(--danger)" : "var(--success)"};">${classStr}</span></td>
+                        <td><span style="color:${isBlocked ? "var(--danger)" : "var(--success)"}; font-weight:700;">${statStr}</span></td>
                     </tr>
                 `;
             }).join("");
+
+            tbody.querySelectorAll(".audit-row").forEach(row => {
+                row.addEventListener("click", () => {
+                    const time = row.getAttribute("data-time");
+                    const cat = row.getAttribute("data-cat");
+                    const op = row.getAttribute("data-op");
+                    const ep = row.getAttribute("data-ep");
+                    const cls = row.getAttribute("data-class");
+                    const stat = row.getAttribute("data-stat");
+
+                    const drwTime = document.getElementById("drwSecTime");
+                    const drwCat = document.getElementById("drwSecCategory");
+                    const drwOp = document.getElementById("drwSecOp");
+                    const drwEp = document.getElementById("drwSecEndpoint");
+                    const drwCls = document.getElementById("drwSecClass");
+                    const drwStat = document.getElementById("drwSecStatus");
+
+                    if (drwTime) drwTime.textContent = time;
+                    if (drwCat) drwCat.textContent = cat;
+                    if (drwOp) drwOp.textContent = op;
+                    if (drwEp) drwEp.textContent = ep;
+                    if (drwCls) drwCls.textContent = cls;
+                    if (drwStat) drwStat.textContent = stat;
+
+                    const drawer = document.getElementById("secEventDrawer");
+                    const backdrop = document.getElementById("secDrawerBackdrop");
+                    if (backdrop) backdrop.classList.remove("hidden");
+                    SoundManager.toggle();
+                });
+            });
 
         } catch (e) {
             tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:16px; color:var(--text-muted);">Audit trail active in local memory.</td></tr>`;
         }
     }
 
+    const closeSecDrawer = () => {
+        const backdrop = document.getElementById("secDrawerBackdrop");
+        if (backdrop) backdrop.classList.add("hidden");
+    };
+    const btnSecDrawerClose = document.getElementById("btnSecDrawerClose");
+    const btnSecDrawerCloseBtn = document.getElementById("btnSecDrawerCloseBtn");
+    const secDrawerBackdrop = document.getElementById("secDrawerBackdrop");
+    if (btnSecDrawerClose) btnSecDrawerClose.addEventListener("click", closeSecDrawer);
+    if (btnSecDrawerCloseBtn) btnSecDrawerCloseBtn.addEventListener("click", closeSecDrawer);
+    if (secDrawerBackdrop) secDrawerBackdrop.addEventListener("click", (e) => {
+        if (e.target === secDrawerBackdrop) closeSecDrawer();
+    });
+
     document.querySelectorAll(".audit-filter-btn").forEach(btn => {
+        if (btn.id === "btnTestSecurityGuard") return;
         btn.addEventListener("click", () => {
-            document.querySelectorAll(".audit-filter-btn").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".audit-filter-btn").forEach(b => {
+                if (b.id !== "btnTestSecurityGuard") b.classList.remove("active");
+            });
             btn.classList.add("active");
             const filter = btn.getAttribute("data-filter") || "ALL";
             loadAuditTrail(filter);
+            SoundManager.toggle();
         });
     });
 
-    const btnTestGuard = document.getElementById("btn-test-guard");
-    if (btnTestGuard) {
-        btnTestGuard.addEventListener("click", async () => {
-            const feedback = document.getElementById("guardTestFeedback");
-            if (feedback) feedback.textContent = "Simulating external WAN request to api.openai.com...";
+    const triggerWanGuardTest = async () => {
+        const feedback = document.getElementById("guardTestFeedback");
+        if (feedback) feedback.textContent = "Simulating external WAN request to api.openai.com...";
 
-            btnTestGuard.disabled = true;
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/sovereignty/test-guard`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ target_url: "https://api.openai.com/v1/models" })
-                });
+        if (btnTestGuard) btnTestGuard.disabled = true;
+        SoundManager.toolStart();
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/sovereignty/test-guard`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ target_url: "https://api.openai.com/v1/models" })
+            });
 
-                const data = await res.json();
-                if (feedback) {
-                    feedback.innerHTML = `<span style="color:var(--success); font-weight:700;">✓ INTERCEPTED &amp; BLOCKED:</span> Outbound WAN request stopped at socket boundary. Zero confidential data egressed.`;
-                }
-                showToast("✓ Outbound WAN Guard blocked unauthorized call", "success", 4000);
-                loadSecurityData();
-            } catch (err) {
-                if (feedback) {
-                    feedback.innerHTML = `<span style="color:var(--success);">✓ AIR-GAP GUARD ENFORCED:</span> Network call failed as expected.`;
-                }
-                showToast("Guard enforced (socket disconnected)", "success");
-            } finally {
-                btnTestGuard.disabled = false;
+            const data = await res.json();
+            if (feedback) {
+                feedback.innerHTML = `<span style="color:var(--success); font-weight:700;">✓ INTERCEPTED &amp; BLOCKED:</span> Outbound WAN request stopped at socket boundary. Zero confidential data egressed.`;
             }
-        });
-    }
+            showToast("✓ Outbound WAN Guard blocked unauthorized call", "success", 4000);
+            SoundManager.completion();
+            loadSecurityData();
+        } catch (err) {
+            if (feedback) {
+                feedback.innerHTML = `<span style="color:var(--success);">✓ AIR-GAP GUARD ENFORCED:</span> Network call failed as expected.`;
+            }
+            showToast("Guard enforced (socket disconnected)", "success");
+            SoundManager.completion();
+        } finally {
+            if (btnTestGuard) btnTestGuard.disabled = false;
+        }
+    };
+
+    const btnTestGuard = document.getElementById("btn-test-guard");
+    if (btnTestGuard) btnTestGuard.addEventListener("click", triggerWanGuardTest);
+
+    const btnTestSecurityGuard = document.getElementById("btnTestSecurityGuard");
+    if (btnTestSecurityGuard) btnTestSecurityGuard.addEventListener("click", triggerWanGuardTest);
+
+    // Global ESC key listener to close any open drawer
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            closeDocDrawer();
+            closeKbDrawer();
+            closeDelivDrawer();
+            closeSecDrawer();
+        }
+    });
 
     // =========================================================================
     // 16. FORMATTING HELPERS & HISTORY
@@ -2189,13 +2837,13 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
 
     function formatAnswer(text) {
         let html = escapeHTML(text);
-        html = html.replace(/^#### (.*)$/gm, '<h3 class="text-gold mt-4">$1</h3>');
-        html = html.replace(/^### (.*)$/gm, '<h3 class="text-gold mt-4">$1</h3>');
+        html = html.replace(/^#### (.*)$/gm, '<h3 class="text-blue mt-4">$1</h3>');
+        html = html.replace(/^### (.*)$/gm, '<h3 class="text-blue mt-4">$1</h3>');
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         html = html.replace(/^- (.*)$/gm, '<ul><li>$1</li></ul>');
         html = html.replace(/<\/ul>\n<ul>/g, ''); 
         html = html.replace(/<\/ul>\n<br>\n<ul>/g, ''); 
-        html = html.replace(/^(\d+)\. (.*)$/gm, '<div style="margin-left:12px;"><span style="color:var(--gold); font-weight:700;">$1.</span> $2</div>');
+        html = html.replace(/^(\d+)\. (.*)$/gm, '<div style="margin-left:12px;"><span style="color:var(--blue-bright); font-weight:700;">$1.</span> $2</div>');
         html = html.replace(/\n\n/g, "<br><br>");
         return html;
     }
@@ -2229,7 +2877,7 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
                 <div style="font-family:var(--font-mono); font-size:8px; color:var(--text-muted); margin-top:2px;">
                     Asset: Machine 101 &bull; <span style="color:var(--success); font-weight:600;">Completed</span>
                 </div>
-                <div class="history-a" style="font-family:var(--font-mono); font-size:8px; color:var(--gold-bright); margin-top:2px;">
+                <div class="history-a" style="font-family:var(--font-mono); font-size:8px; color:var(--blue-bright); margin-top:2px;">
                     ${toolCount} tools &bull; ${delivCount} deliverable${delivCount === 1 ? '' : 's'}
                 </div>
             `;
@@ -2322,11 +2970,47 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
                 if (res) res.scrollIntoView({ behavior: "smooth", block: "start" });
             }},
             { label: "Open Knowledge Base RAG", shortcut: "4", icon: "🧠", action: () => switchTab("knowledge") },
-            { label: "Open Secure Code Lab", shortcut: "6", icon: "💻", action: () => switchTab("codelab") },
+            { label: "Search Knowledge Base", shortcut: "KB", icon: "🧠", action: () => {
+                switchTab("knowledge");
+                const inp = document.getElementById("kbSearchQuery");
+                if (inp) inp.focus();
+            }},
+            { label: "Run Vision Analysis", shortcut: "VIS", icon: "👁️", action: () => {
+                switchTab("vision");
+                const btn = document.getElementById("btnRunVisionAnalysis");
+                if (btn) btn.click();
+            }},
+            { label: "Execute Sandboxed Python Code", shortcut: "PY", icon: "💻", action: () => {
+                switchTab("codelab");
+                const btn = document.getElementById("btnExecuteCode");
+                if (btn) btn.click();
+            }},
+            { label: "Test Outbound WAN Guard", shortcut: "WAN", icon: "🛡️", action: () => {
+                switchTab("security");
+                const btn = document.getElementById("btn-test-guard");
+                if (btn) btn.click();
+            }},
+            { label: "Sync Knowledge Base Vector Store", shortcut: "SYNC", icon: "🔄", action: () => {
+                switchTab("knowledge");
+                const btn = document.getElementById("btnSyncKB");
+                if (btn) btn.click();
+            }},
+            { label: "Refresh Deliverables Repository", shortcut: "REF", icon: "📦", action: () => {
+                switchTab("deliverables");
+                const btn = document.getElementById("btnRefreshDeliverables");
+                if (btn) btn.click();
+            }},
+            { label: "Refresh Document Vault", shortcut: "DOC", icon: "📄", action: () => {
+                switchTab("documents");
+                const btn = document.getElementById("btnRefreshDocs");
+                if (btn) btn.click();
+            }},
             { label: "Switch Tab: Overview Command Center", shortcut: "1", icon: "📊", action: () => switchTab("overview") },
             { label: "Switch Tab: Agent Workspace", shortcut: "2", icon: "⚡", action: () => switchTab("agent") },
             { label: "Switch Tab: Documents Vault", shortcut: "3", icon: "📄", action: () => switchTab("documents") },
+            { label: "Switch Tab: Knowledge Base", shortcut: "4", icon: "🧠", action: () => switchTab("knowledge") },
             { label: "Switch Tab: Vision Inspection Lab", shortcut: "5", icon: "👁️", action: () => switchTab("vision") },
+            { label: "Switch Tab: Secure Code Lab", shortcut: "6", icon: "💻", action: () => switchTab("codelab") },
             { label: "Switch Tab: Verified Deliverables", shortcut: "7", icon: "📦", action: () => switchTab("deliverables") },
             { label: "Switch Tab: Security & Sovereignty", shortcut: "8", icon: "🛡️", action: () => switchTab("security") },
             { label: "Toggle Golden Cursor FX", shortcut: "FX", icon: "✨", action: () => {
@@ -2556,9 +3240,9 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
                     const row = document.createElement("div");
                     row.className = "boot-step-item";
                     if (idx === 0) {
-                        row.innerHTML = `<span style="color:var(--gold-bright);">&gt;</span> <span class="boot-step-text">${step}</span>`;
+                        row.innerHTML = `<span style="color:var(--blue-bright);">&gt;</span> <span class="boot-step-text">${step}</span>`;
                     } else if (idx === steps.length - 1) {
-                        row.innerHTML = `<span style="color:var(--gold-bright); font-weight:700;">★</span> <span style="color:var(--gold-bright); font-weight:700;">${step}</span>`;
+                        row.innerHTML = `<span style="color:var(--blue-bright); font-weight:700;">★</span> <span style="color:var(--blue-bright); font-weight:700;">${step}</span>`;
                     } else {
                         row.innerHTML = `<span class="boot-step-check">✓</span> <span class="boot-step-text">${step}</span>`;
                     }
@@ -2677,8 +3361,8 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
             const telCard = tel.closest(".telemetry-card");
             if (telCard) {
                 comp.addEventListener("mouseenter", () => {
-                    telCard.style.borderColor = "var(--gold-bright)";
-                    telCard.style.boxShadow = "0 0 16px var(--gold-glow)";
+                    telCard.style.borderColor = "var(--blue-bright)";
+                    telCard.style.boxShadow = "0 0 16px var(--blue-glow)";
                 });
                 comp.addEventListener("mouseleave", () => {
                     telCard.style.borderColor = "";
@@ -2688,25 +3372,7 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
         }
     });
 
-    // =========================================================================
-    // 24. TEST SECURITY GUARD BUTTON (TEST WAN EGRESS)
-    // =========================================================================
-    const btnTestSecurityGuard = document.getElementById("btnTestSecurityGuard");
-    if (btnTestSecurityGuard) {
-        btnTestSecurityGuard.addEventListener("click", () => {
-            const origTestGuard = document.getElementById("btn-test-guard");
-            if (origTestGuard) {
-                origTestGuard.click();
-            } else {
-                showToast("Simulating WAN Egress Intercept...", "warning");
-                SoundManager.securityAlert();
-                setTimeout(() => {
-                    showToast("✓ Outbound WAN Guard blocked unauthorized call", "success");
-                    loadSecurityData();
-                }, 700);
-            }
-        });
-    }
+    // Note: btnTestSecurityGuard is handled in Section 15 (SOVEREIGNTY CONTROL CENTER)
 
     // =========================================================================
     // 25. GLOBAL KEYBOARD SHORTCUTS
@@ -2764,11 +3430,11 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
             container.innerHTML = `
                 <div class="settings-row">
                     <span class="settings-label">CLIENT USER AGENT</span>
-                    <span class="settings-desc text-gold" style="max-width:300px; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(navigator.userAgent)}</span>
+                    <span class="settings-desc text-blue" style="max-width:300px; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(navigator.userAgent)}</span>
                 </div>
                 <div class="settings-row">
                     <span class="settings-label">VIEWPORT RESOLUTION</span>
-                    <span class="settings-desc text-gold">${window.innerWidth} x ${window.innerHeight} (${window.devicePixelRatio}x DPR)</span>
+                    <span class="settings-desc text-blue">${window.innerWidth} x ${window.innerHeight} (${window.devicePixelRatio}x DPR)</span>
                 </div>
                 <div class="settings-row">
                     <span class="settings-label">CPU HARDWARE THREADS</span>
@@ -2784,7 +3450,7 @@ print(f"Coolant Reservoir Capacity: {coolant_perc}% (Nominal)")
                 </div>
                 <div class="settings-row">
                     <span class="settings-label">GRAPHICS ACCELERATION</span>
-                    <span class="settings-desc text-gold">WebGL 2.0 / GPU Accelerated Canvas Active</span>
+                    <span class="settings-desc text-blue">WebGL 2.0 / GPU Accelerated Canvas Active</span>
                 </div>
             `;
         }

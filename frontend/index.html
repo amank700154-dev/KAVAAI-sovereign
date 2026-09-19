@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=52">
+    <link rel="stylesheet" href="style.css?v=56">
 </head>
 <body>
 
@@ -81,7 +81,7 @@
                 </div>
                 <div class="status-capsule" id="stat-model-router">
                     <span class="capsule-label">MODEL</span>
-                    <span class="capsule-value gold" id="topRouterModel">QWEN2.5:7B</span>
+                    <span class="capsule-value blue" id="topRouterModel">QWEN2.5:7B</span>
                 </div>
                 <div class="status-capsule" id="stat-airgap">
                     <span class="capsule-label">AIR-GAP</span>
@@ -187,7 +187,7 @@
                 </div>
                 <div class="ribbon-text-col">
                     <div class="ribbon-label">ACTIVE MODEL</div>
-                    <div class="ribbon-val text-gold" id="ov-active-model">qwen2.5:7b</div>
+                    <div class="ribbon-val text-blue" id="ov-active-model">qwen2.5:7b</div>
                     <div class="ribbon-sub">Coding: qwen2.5 | Vision: qwen2.5vl</div>
                 </div>
                 <div class="ribbon-status-dot"></div>
@@ -278,10 +278,10 @@
                     </span>
                 </div>
                 <ul class="system-status-list">
-                    <li><span class="status-bullet"></span> On-Premise Engine Active</li>
-                    <li><span class="status-bullet"></span> Local AI Ready</li>
-                    <li><span class="status-bullet"></span> Telemetry Connected</li>
-                    <li><span class="status-bullet"></span> All Systems Operational</li>
+                    <li><span class="status-bullet blue"></span> On-Premise Engine Active</li>
+                    <li><span class="status-bullet blue"></span> Local AI Ready</li>
+                    <li><span class="status-bullet green"></span> Telemetry Connected</li>
+                    <li><span class="status-bullet green"></span> All Systems Operational</li>
                 </ul>
 
                 <div class="panel-header mt-20">
@@ -305,7 +305,7 @@
             <div class="monitoring-panel center-panel">
                 <div class="panel-header">
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue-bright)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                         <div>
                             <div>DIGITAL TWIN &mdash; MACHINE 101</div>
                             <div style="font-size:9.5px; font-weight:400; color:var(--text-secondary); font-family:var(--font-mono); text-transform:none; margin-top:2px;">
@@ -432,7 +432,7 @@
                             <div class="ins-title">COMPONENT INSPECTION</div>
                             <div class="ins-row">
                                 <span class="ins-label">COMPONENT:</span>
-                                <span class="ins-val text-gold" id="ins-comp-name">--</span>
+                                <span class="ins-val text-blue" id="ins-comp-name">--</span>
                             </div>
                             <div class="ins-row">
                                 <span class="ins-label">STATUS:</span>
@@ -449,7 +449,7 @@
 
                 <div class="dt-bottom-bar">
                     <span style="display:flex; align-items:center; gap:6px;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue-bright)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                         Click on any component to inspect details
                     </span>
                     <button class="btn-inspector-open" id="btnInspectorOpen">
@@ -465,8 +465,8 @@
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
                         LIVE TELEMETRY
                     </span>
-                    <span style="font-family:var(--font-mono); font-size:9.5px; color:var(--gold-bright); display:flex; align-items:center; gap:4px;">
-                        <span class="pulse-dot gold"></span> 3D VIME
+                    <span style="font-family:var(--font-mono); font-size:9.5px; color:var(--blue-bright); display:flex; align-items:center; gap:4px;">
+                        <span class="pulse-dot blue"></span> 3D VIME
                     </span>
                 </div>
 
@@ -484,7 +484,7 @@
                         </div>
                         <div class="tel-sparkline">
                             <svg viewBox="0 0 100 16" preserveAspectRatio="none">
-                                <path d="M0,12 Q25,2 50,10 T100,6" fill="none" stroke="#D4AF37" stroke-width="1.8"/>
+                                <path d="M0,12 Q25,2 50,10 T100,6" fill="none" stroke="#1683FF" stroke-width="1.8"/>
                             </svg>
                         </div>
                     </div>
@@ -502,7 +502,7 @@
                         </div>
                         <div class="tel-sparkline">
                             <svg viewBox="0 0 100 16" preserveAspectRatio="none">
-                                <path d="M0,8 Q25,14 50,4 T100,10" fill="none" stroke="#20C997" stroke-width="1.8"/>
+                                <path d="M0,8 Q25,14 50,4 T100,10" fill="none" stroke="#19D39A" stroke-width="1.8"/>
                             </svg>
                         </div>
                     </div>
@@ -520,7 +520,7 @@
                         </div>
                         <div class="tel-sparkline">
                             <svg viewBox="0 0 100 16" preserveAspectRatio="none">
-                                <path d="M0,10 Q25,8 50,12 T100,7" fill="none" stroke="#D4AF37" stroke-width="1.8"/>
+                                <path d="M0,10 Q25,8 50,12 T100,7" fill="none" stroke="#38BDF8" stroke-width="1.8"/>
                             </svg>
                         </div>
                     </div>
@@ -538,7 +538,7 @@
                         </div>
                         <div class="tel-sparkline">
                             <svg viewBox="0 0 100 16" preserveAspectRatio="none">
-                                <path d="M0,14 Q25,6 50,11 T100,5" fill="none" stroke="#D4AF37" stroke-width="1.8"/>
+                                <path d="M0,14 Q25,6 50,11 T100,5" fill="none" stroke="#22D3EE" stroke-width="1.8"/>
                             </svg>
                         </div>
                     </div>
@@ -551,12 +551,12 @@
                             <span class="tel-label">VIBRATION</span>
                         </div>
                         <div class="tel-value-row">
-                            <span class="tel-value text-gold" id="tel-vibration">0.18</span>
+                            <span class="tel-value text-blue" id="tel-vibration">0.18</span>
                             <span class="tel-state-badge" id="tel-vib-sub">NORMAL</span>
                         </div>
                         <div class="tel-sparkline">
                             <svg viewBox="0 0 100 16" preserveAspectRatio="none">
-                                <path d="M0,8 Q25,2 50,14 T100,8" fill="none" stroke="#F5D76E" stroke-width="1.8"/>
+                                <path d="M0,8 Q25,2 50,14 T100,8" fill="none" stroke="#38BDF8" stroke-width="1.8"/>
                             </svg>
                         </div>
                     </div>
@@ -619,7 +619,7 @@
 
                 <div class="panel-header mt-14" style="display:flex; justify-content:space-between; align-items:center;">
                     <span>INCIDENT SIMULATION</span>
-                    <span id="demo-indicator" style="font-size:9px; color:var(--gold-bright); letter-spacing:1px; display:none;">SIMULATED TELEMETRY</span>
+                    <span id="demo-indicator" style="font-size:9px; color:var(--cyan-bright); letter-spacing:1px; display:none;">SIMULATED TELEMETRY</span>
                 </div>
                 <div class="sim-controls">
                     <button class="sim-btn active" id="sim-live">LIVE</button>
@@ -635,15 +635,17 @@
             </div>
         </section>
 
-        <!-- MAINTENANCE & TIMELINE AREA -->
+        <!-- MAINTENANCE & INDUSTRIAL ANALYTICS AREA (4-PANEL COMMAND DECK) -->
         <section class="maintenance-area">
             <div class="maintenance-grid">
-                <div class="maint-panel">
+                <!-- 1. MAINTENANCE RISK ASSESSMENT -->
+                <div class="maint-panel crystal-sweep">
                     <div class="panel-header">
                         <span class="panel-header-icon">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                            MAINTENANCE RISK ASSESSMENT
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                            MAINTENANCE RISK
                         </span>
+                        <span class="pulse-dot"></span>
                     </div>
                     <div class="maint-status-row">
                         <div class="maint-box">
@@ -666,18 +668,93 @@
                         </div>
                     </div>
                     <div class="maint-action-box">
-                        <div class="maint-label">NEXT ACTION</div>
+                        <div class="maint-label">NEXT SCHEDULED ACTION</div>
                         <div class="maint-action-text" id="maint-action">Continue routine monitoring and scheduled maintenance.</div>
                     </div>
                 </div>
 
-                <div class="timeline-panel">
+                <!-- 2. PREDICTIVE ANALYTICS & RUL -->
+                <div class="pred-panel crystal-sweep">
                     <div class="panel-header">
                         <span class="panel-header-icon">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            MACHINE EVENT TIMELINE
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                            PREDICTIVE ANALYTICS (RUL)
                         </span>
-                        <span style="font-size:10px; color:var(--gold-bright); cursor:pointer;">VIEW ALL &rarr;</span>
+                        <span style="font-family:var(--font-mono); font-size:9px; color:var(--blue-bright);">98.4% CONF</span>
+                    </div>
+                    <div class="maint-status-row">
+                        <div class="maint-box">
+                            <div class="maint-label">ESTIMATED RUL</div>
+                            <div class="maint-val-wrap">
+                                <span class="maint-value text-blue" id="pred-rul-val">1,420 HRS</span>
+                            </div>
+                        </div>
+                        <div class="maint-box">
+                            <div class="maint-label">FAULT PROBABILITY</div>
+                            <div class="maint-val-wrap">
+                                <span class="maint-value text-cyan" id="pred-fault-val">14.2%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="maint-action-box">
+                        <div class="maint-label">DEGRADATION TRAJECTORY</div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:2px;">
+                            <div>
+                                <span style="font-size:10.5px; color:var(--text-secondary);">Motor Bearing Wear Velocity</span>
+                                <div style="font-family:var(--font-mono); font-size:10px; color:var(--cyan-bright); margin-top:1px;">&plus;0.012 mm/kh (Nominal RUL)</div>
+                            </div>
+                            <div class="pred-mini-bars" style="display:flex; align-items:flex-end; gap:3px; height:18px; padding-right:2px;" title="Predictive Degradation Curve: Stable Linear Blue">
+                                <span style="width:3px; height:6px; background:var(--blue-bright); border-radius:1px; opacity:0.55;"></span>
+                                <span style="width:3px; height:8px; background:var(--blue-bright); border-radius:1px; opacity:0.65;"></span>
+                                <span style="width:3px; height:9px; background:var(--blue-bright); border-radius:1px; opacity:0.75;"></span>
+                                <span style="width:3px; height:11px; background:var(--blue-bright); border-radius:1px; opacity:0.85;"></span>
+                                <span style="width:3px; height:13px; background:var(--blue-bright); border-radius:1px; opacity:0.9;"></span>
+                                <span style="width:3px; height:15px; background:var(--blue-bright); border-radius:1px; opacity:0.95;"></span>
+                                <span style="width:3px; height:18px; background:var(--cyan-bright); border-radius:1px; box-shadow:0 0 6px var(--cyan-bright);"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. MACHINERY TELEMETRY INSIGHTS -->
+                <div class="spectral-panel crystal-sweep">
+                    <div class="panel-header">
+                        <span class="panel-header-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            MODEL &amp; SPECTRAL INSIGHTS
+                        </span>
+                        <span style="font-family:var(--font-mono); font-size:9px; color:var(--cyan-bright);">FFT 42.4 HZ</span>
+                    </div>
+                    <div class="maint-status-row">
+                        <div class="maint-box">
+                            <div class="maint-label">THERMAL DELTA</div>
+                            <div class="maint-val-wrap">
+                                <span class="maint-value text-blue">&plus;4.1&deg;C</span>
+                                <span style="font-family:var(--font-mono); font-size:9px; color:var(--text-muted);">&Delta; AMBIENT</span>
+                            </div>
+                        </div>
+                        <div class="maint-box">
+                            <div class="maint-label">LUBRICATION VISCOSITY</div>
+                            <div class="maint-val-wrap">
+                                <span class="maint-value text-green">96.8%</span>
+                                <span style="font-family:var(--font-mono); font-size:9px; color:var(--success);">NOMINAL</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="maint-action-box">
+                        <div class="maint-label">AI DIAGNOSTIC OBSERVATION</div>
+                        <div class="maint-action-text" style="color:var(--text-secondary);">Compressor vibration harmonics stable within ISO 10816-3 Class II threshold.</div>
+                    </div>
+                </div>
+
+                <!-- 4. MACHINE EVENT TIMELINE -->
+                <div class="timeline-panel crystal-sweep">
+                    <div class="panel-header">
+                        <span class="panel-header-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            EVENT TIMELINE
+                        </span>
+                        <span style="font-size:9.5px; font-family:var(--font-mono); color:var(--blue-bright); cursor:pointer;">LIVE FEED</span>
                     </div>
                     <div class="timeline-container" id="eventTimeline">
                         <div class="timeline-row">
@@ -692,13 +769,13 @@
                         </div>
                         <div class="timeline-row">
                             <span class="tl-time">23:56:12</span>
-                            <span class="tl-tag-badge warning">WARNING</span>
+                            <span class="tl-tag-badge warning">WARN</span>
                             <span class="tl-desc">Temperature trending high: 92&deg;C</span>
                         </div>
                         <div class="timeline-row">
                             <span class="tl-time">23:56:10</span>
                             <span class="tl-tag-badge system">SYSTEM</span>
-                            <span class="tl-desc">Telemetry data updated</span>
+                            <span class="tl-desc">Telemetry data stream synchronized</span>
                         </div>
                     </div>
                 </div>
@@ -969,7 +1046,7 @@
                                 </div>
                                 <div class="ndp-row">
                                     <span class="ndp-label">INPUT:</span>
-                                    <span class="ndp-val text-gold" id="ndpInput">Inspection findings &amp; telemetry correlations</span>
+                                    <span class="ndp-val text-blue" id="ndpInput">Inspection findings &amp; telemetry correlations</span>
                                 </div>
                                 <div class="ndp-row">
                                     <span class="ndp-label">OUTPUT:</span>
@@ -1064,7 +1141,7 @@
                         <div class="exec-card-grid">
                             <div class="exec-item">
                                 <span class="exec-label">TASK TYPE:</span>
-                                <span class="exec-val text-gold" id="execTaskType">MULTIMODAL_INVESTIGATION</span>
+                                <span class="exec-val text-blue" id="execTaskType">MULTIMODAL_INVESTIGATION</span>
                             </div>
                             <div class="exec-item">
                                 <span class="exec-label">TARGET ROLE:</span>
@@ -1184,7 +1261,7 @@
     <div class="tab-pane" id="pane-documents">
         <div class="workbench-section-header">
             <div>
-                <div class="header-pretitle text-gold">ON-PREMISE STORAGE &bull; LOCAL INGESTION</div>
+                <div class="header-pretitle text-blue">ON-PREMISE STORAGE &bull; LOCAL INGESTION</div>
                 <h2>CONFIDENTIAL DOCUMENT INTELLIGENCE VAULT</h2>
                 <div class="section-subtitle">Local document parsing, OCR transcription, vector chunking &amp; air-gapped storage</div>
             </div>
@@ -1198,7 +1275,7 @@
         <div class="module-status-ribbon">
             <div class="mod-status-capsule">
                 <span class="msc-label">LOCAL INDEX</span>
-                <span class="msc-val text-gold" id="vaultChunksCount">22 CHUNKS</span>
+                <span class="msc-val text-blue" id="vaultChunksCount">22 CHUNKS</span>
                 <span class="msc-sub">all-MiniLM-L6-v2</span>
             </div>
             <div class="mod-status-capsule">
@@ -1330,7 +1407,7 @@ RECOMMENDATION: Forward to engineering for formal Approval Note evaluation.
     <div class="tab-pane" id="pane-knowledge">
         <div class="workbench-section-header">
             <div>
-                <div class="header-pretitle text-gold">ORGANIZATIONAL MEMORY &bull; CHROMADB VECTOR STORE</div>
+                <div class="header-pretitle text-blue">ORGANIZATIONAL MEMORY &bull; CHROMADB VECTOR STORE</div>
                 <h2>LOCAL KNOWLEDGE INTELLIGENCE CENTER</h2>
                 <div class="section-subtitle">Air-gapped semantic retrieval, SOP compliance verification &bull; Zero external WAN egress</div>
             </div>
@@ -1348,7 +1425,7 @@ RECOMMENDATION: Forward to engineering for formal Approval Note evaluation.
             </div>
             <div class="mod-status-capsule">
                 <span class="msc-label">EMBEDDED CHUNKS</span>
-                <span class="msc-val text-gold" id="kbStatChunks">22 CHUNKS</span>
+                <span class="msc-val text-blue" id="kbStatChunks">22 CHUNKS</span>
                 <span class="msc-sub">all-MiniLM-L6-v2</span>
             </div>
             <div class="mod-status-capsule">
@@ -1493,14 +1570,14 @@ RECOMMENDATION: Forward to engineering for formal Approval Note evaluation.
     <div class="tab-pane" id="pane-vision">
         <div class="workbench-section-header">
             <div>
-                <div class="header-pretitle text-gold">SURFACE INSPECTION &bull; DEFECT LOCALIZATION</div>
+                <div class="header-pretitle text-blue">SURFACE INSPECTION &bull; DEFECT LOCALIZATION</div>
                 <h2>INDUSTRIAL VISION INTELLIGENCE LAB</h2>
                 <div class="section-subtitle">Local multimodal vision analysis of industrial equipment photos, defect bounding &amp; component state</div>
             </div>
             <div class="section-action-group">
                 <div class="status-capsule">
                     <span class="capsule-label">VISION MODEL</span>
-                    <span class="capsule-value gold">QWEN2.5-VL LOCAL</span>
+                    <span class="capsule-value blue">QWEN2.5-VL LOCAL</span>
                 </div>
             </div>
         </div>
@@ -1585,7 +1662,7 @@ RECOMMENDATION: Forward to engineering for formal Approval Note evaluation.
                         </div>
                         <div class="v-finding-item">
                             <span class="v-label">AIRFLOW IMPEDANCE:</span>
-                            <span class="v-val text-gold">20-30% dust clogging restricts laminar convective heat exchange across cooling matrix.</span>
+                            <span class="v-val text-blue">20-30% dust clogging restricts laminar convective heat exchange across cooling matrix.</span>
                         </div>
                     </div>
 
@@ -1597,7 +1674,7 @@ RECOMMENDATION: Forward to engineering for formal Approval Note evaluation.
                         </div>
                         <div class="v-finding-item">
                             <span class="v-label">THERMAL CORRELATION:</span>
-                            <span class="v-val text-gold">Elevated temperature (84.2°C) is directly caused by dust airflow impedance at nominal 1240 RPM.</span>
+                            <span class="v-val text-cyan">Elevated temperature (84.2°C) is directly caused by dust airflow impedance at nominal 1240 RPM.</span>
                         </div>
                     </div>
                 </div>
@@ -1611,7 +1688,7 @@ RECOMMENDATION: Forward to engineering for formal Approval Note evaluation.
     <div class="tab-pane" id="pane-codelab">
         <div class="workbench-section-header">
             <div>
-                <div class="header-pretitle text-gold">ISOLATED COMPUTATION &bull; PYTHON AST VERIFICATION</div>
+                <div class="header-pretitle text-blue">ISOLATED COMPUTATION &bull; PYTHON AST VERIFICATION</div>
                 <h2>SECURE AI CODE EXECUTION LAB</h2>
                 <div class="section-subtitle">Sandboxed Python execution for technical calculations, margin evaluation &amp; data verification</div>
             </div>
@@ -1632,7 +1709,7 @@ RECOMMENDATION: Forward to engineering for formal Approval Note evaluation.
             </div>
             <div class="mod-status-capsule">
                 <span class="msc-label">NETWORK STATE</span>
-                <span class="msc-val text-gold">DISABLED</span>
+                <span class="msc-val text-green">DISABLED</span>
                 <span class="msc-sub">Air-Gapped Isolation</span>
             </div>
             <div class="mod-status-capsule">
@@ -1753,7 +1830,7 @@ STATUS: WARNING (Conditional Operation Allowed)</div>
     <div class="tab-pane" id="pane-deliverables">
         <div class="workbench-section-header">
             <div>
-                <div class="header-pretitle text-gold">PHYSICAL ARTIFACT REPOSITORY &bull; OPENXML / CSV / PDF</div>
+                <div class="header-pretitle text-blue">PHYSICAL ARTIFACT REPOSITORY &bull; OPENXML / CSV / PDF</div>
                 <h2>VERIFIED WORK PRODUCT CENTER</h2>
                 <div class="section-subtitle">Physical work products synthesized by KAVAAI Sovereign across 6 verified industrial formats</div>
             </div>
@@ -1766,7 +1843,7 @@ STATUS: WARNING (Conditional Operation Allowed)</div>
         <div class="module-status-ribbon">
             <div class="mod-status-capsule">
                 <span class="msc-label">TOTAL OUTPUTS</span>
-                <span class="msc-val text-gold" id="delivCountTotal">0</span>
+                <span class="msc-val text-blue" id="delivCountTotal">0</span>
                 <span class="msc-sub">Air-Gapped Synthesis</span>
             </div>
             <div class="mod-status-capsule">
@@ -1871,7 +1948,7 @@ STATUS: WARNING (Conditional Operation Allowed)</div>
 
             <div class="sov-header">
                 <div class="sov-title-group">
-                    <div class="sov-eyebrow text-gold">SIH26117 MANDATORY COMPLIANCE &bull; SOVEREIGNTY AUDIT</div>
+                    <div class="sov-eyebrow text-blue">SIH26117 MANDATORY COMPLIANCE &bull; SOVEREIGNTY AUDIT</div>
                     <h2>SOVEREIGNTY CONTROL CENTER</h2>
                     <div class="sov-subtitle">Real-time local loopback verification &bull; Zero confidential data egress &bull; Live WAN request interception</div>
                 </div>
@@ -1899,7 +1976,7 @@ STATUS: WARNING (Conditional Operation Allowed)</div>
                         <span class="sov-card-label">LOCAL AI CALLS</span>
                         <span>⚡</span>
                     </div>
-                    <div class="sov-card-value text-gold" id="val-local-ai">0</div>
+                    <div class="sov-card-value text-blue" id="val-local-ai">0</div>
                     <div class="sov-card-sub">100% On-Premise Inference</div>
                 </div>
 
@@ -1917,7 +1994,7 @@ STATUS: WARNING (Conditional Operation Allowed)</div>
                         <span class="sov-card-label">BLOCKED CALLS</span>
                         <span>🚫</span>
                     </div>
-                    <div class="sov-card-value text-amber" id="val-blocked-calls">0</div>
+                    <div class="sov-card-value text-blue" id="val-blocked-calls">0</div>
                     <div class="sov-card-sub">Outbound Requests Intercepted</div>
                 </div>
 
@@ -1953,7 +2030,7 @@ STATUS: WARNING (Conditional Operation Allowed)</div>
                         <button class="audit-filter-btn" data-filter="AI_MODEL_INFERENCE">AI CALLS</button>
                         <button class="audit-filter-btn" data-filter="TOOL_EXECUTION">TOOLS</button>
                         <button class="audit-filter-btn" data-filter="DOCUMENT_INTELLIGENCE">DOCUMENTS</button>
-                        <button class="audit-filter-btn" id="btnTestSecurityGuard" style="color:var(--gold-bright); border-color:var(--gold-border-strong); background:rgba(212,175,55,0.08);" title="Test Outbound Network Interceptor">⚡ TEST WAN EGRESS</button>
+                        <button class="audit-filter-btn" id="btnTestSecurityGuard" style="color:var(--blue-bright); border-color:var(--blue-border-strong); background:rgba(22,131,255,0.08);" title="Test Outbound Network Interceptor">⚡ TEST WAN EGRESS</button>
                     </div>
                 </div>
                 <div class="audit-table-wrap">
@@ -1986,6 +2063,200 @@ STATUS: WARNING (Conditional Operation Allowed)</div>
         <div class="footer-left">KAVAAI SOVEREIGN v1.0.0</div>
         <div class="footer-right">CONFIDENTIAL &bull; ON-PREMISE &bull; AIR-GAPPED</div>
     </footer>
+</div>
+
+<!-- ==================================================================== -->
+<!-- SPECIALIZED INSPECTION DRAWERS                                       -->
+<!-- ==================================================================== -->
+
+<!-- 1. DOCUMENT DETAILS DRAWER -->
+<div class="crystal-drawer-backdrop hidden" id="docDrawerBackdrop">
+    <div class="crystal-drawer" id="docDetailsDrawer">
+        <div class="drawer-header">
+            <div class="drawer-title-col">
+                <span class="drawer-pretitle text-blue">CONFIDENTIAL VAULT INSPECTOR</span>
+                <h3 id="drawerDocTitle">Document Details</h3>
+            </div>
+            <button class="drawer-close-btn" id="btnDocDrawerClose">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <div class="drawer-section">
+                <div class="drawer-section-title">FILE INFORMATION</div>
+                <div class="drawer-meta-grid">
+                    <div class="dmg-item"><span class="dmg-label">FILENAME:</span> <span class="dmg-val text-blue" id="drwDocName">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">CATEGORY:</span> <span class="dmg-val" id="drwDocCategory">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">FORMAT:</span> <span class="dmg-val" id="drwDocFormat">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">FILE SIZE:</span> <span class="dmg-val" id="drwDocSize">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">MODIFIED:</span> <span class="dmg-val" id="drwDocModified">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">STORAGE:</span> <span class="dmg-val text-green">100% On-Premise Local</span></div>
+                </div>
+            </div>
+
+            <div class="drawer-section mt-16">
+                <div class="drawer-section-title">INGESTION &amp; OCR PROCESSING</div>
+                <div class="doc-processing-timeline">
+                    <div class="dpt-item active">
+                        <span class="dpt-dot"></span>
+                        <div class="dpt-info">
+                            <strong>Vault Storage Ingestion</strong>
+                            <span>Stored in local knowledge_base/ repository with strict air-gap boundary</span>
+                        </div>
+                    </div>
+                    <div class="dpt-item active">
+                        <span class="dpt-dot"></span>
+                        <div class="dpt-info">
+                            <strong>OCR &amp; Text Extraction</strong>
+                            <span id="drwDocOcrStatus">Completed via PyMuPDF / Tesseract local pipeline</span>
+                        </div>
+                    </div>
+                    <div class="dpt-item active">
+                        <span class="dpt-dot"></span>
+                        <div class="dpt-info">
+                            <strong>Vector Chunking &amp; Embeddings</strong>
+                            <span id="drwDocChunksStatus">1 Chunk indexed into ChromaDB persistent collection</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="drawer-section mt-16">
+                <div class="drawer-section-title">CONTENT PREVIEW</div>
+                <div class="drawer-content-preview" id="drwDocContent">
+                    Loading content preview...
+                </div>
+            </div>
+        </div>
+        <div class="drawer-footer">
+            <button class="btn-action-primary" id="btnDrawerUseAgent">⚡ USE IN AGENT WORKSPACE</button>
+            <button class="btn-action-secondary" id="btnDrawerClose">CLOSE</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. KNOWLEDGE SOURCE DRAWER -->
+<div class="crystal-drawer-backdrop hidden" id="kbDrawerBackdrop">
+    <div class="crystal-drawer" id="kbSourceDrawer">
+        <div class="drawer-header">
+            <div class="drawer-title-col">
+                <span class="drawer-pretitle text-blue">ORGANIZATIONAL MEMORY INSPECTOR</span>
+                <h3 id="kbDrawerTitle">Source Chunk Details</h3>
+            </div>
+            <button class="drawer-close-btn" id="btnKbDrawerClose">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <div class="drawer-section">
+                <div class="drawer-section-title">EVIDENCE SOURCE METRICS</div>
+                <div class="drawer-meta-grid">
+                    <div class="dmg-item"><span class="dmg-label">SOURCE FILE:</span> <span class="dmg-val text-blue" id="drwKbSource">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">PAGE:</span> <span class="dmg-val" id="drwKbPage">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">SIMILARITY MATCH:</span> <span class="dmg-val text-green" id="drwKbMatch">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">COLLECTION:</span> <span class="dmg-val">industrial_documents</span></div>
+                </div>
+            </div>
+
+            <div class="drawer-section mt-16">
+                <div class="drawer-section-title">RETRIEVED EVIDENCE TEXT</div>
+                <div class="drawer-content-preview" id="drwKbContent">
+                    Loading evidence text...
+                </div>
+            </div>
+        </div>
+        <div class="drawer-footer">
+            <button class="btn-action-primary" id="btnKbDrawerUseAgent">⚡ USE AS AGENT CONTEXT</button>
+            <button class="btn-action-secondary" id="btnKbDrawerCloseBtn">CLOSE</button>
+        </div>
+    </div>
+</div>
+
+<!-- 3. DELIVERABLE INSPECTOR DRAWER -->
+<div class="crystal-drawer-backdrop hidden" id="delivDrawerBackdrop">
+    <div class="crystal-drawer" id="delivInspectDrawer">
+        <div class="drawer-header">
+            <div class="drawer-title-col">
+                <span class="drawer-pretitle text-blue">WORK PRODUCT VERIFICATION</span>
+                <h3 id="delivDrawerTitle">Deliverable Inspector</h3>
+            </div>
+            <button class="drawer-close-btn" id="btnDelivDrawerClose">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <div class="drawer-section">
+                <div class="drawer-section-title">ARTIFACT SPECIFICATION</div>
+                <div class="drawer-meta-grid">
+                    <div class="dmg-item"><span class="dmg-label">FILENAME:</span> <span class="dmg-val text-blue" id="drwDelivName">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">FORMAT:</span> <span class="dmg-val" id="drwDelivFormat">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">SIZE:</span> <span class="dmg-val" id="drwDelivSize">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">CREATED:</span> <span class="dmg-val" id="drwDelivCreated">-</span></div>
+                </div>
+            </div>
+
+            <div class="drawer-section mt-16">
+                <div class="drawer-section-title">STRUCTURAL INTEGRITY &amp; AUDIT</div>
+                <div class="doc-processing-timeline">
+                    <div class="dpt-item active">
+                        <span class="dpt-dot"></span>
+                        <div class="dpt-info">
+                            <strong>Format Schema Compliance</strong>
+                            <span>Strict OpenXML / ISO standard file structure verified</span>
+                        </div>
+                    </div>
+                    <div class="dpt-item active">
+                        <span class="dpt-dot"></span>
+                        <div class="dpt-info">
+                            <strong>Air-Gapped Synthesis</strong>
+                            <span>Generated 100% on-premise without external SaaS or cloud formatters</span>
+                        </div>
+                    </div>
+                    <div class="dpt-item active">
+                        <span class="dpt-dot"></span>
+                        <div class="dpt-info">
+                            <strong>Security Cleanliness</strong>
+                            <span>AST safety scan confirmed zero embedded macros or external web endpoints</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="drawer-footer">
+            <a href="#" class="btn-action-primary" id="btnDelivDrawerDownload" target="_blank" download>⬇ DOWNLOAD ARTIFACT</a>
+            <button class="btn-action-secondary" id="btnDelivDrawerCloseBtn">CLOSE</button>
+        </div>
+    </div>
+</div>
+
+<!-- 4. SECURITY AUDIT EVENT DRAWER -->
+<div class="crystal-drawer-backdrop hidden" id="secDrawerBackdrop">
+    <div class="crystal-drawer" id="secEventDrawer">
+        <div class="drawer-header">
+            <div class="drawer-title-col">
+                <span class="drawer-pretitle text-blue">AUDIT TRAIL EVENT INSPECTOR</span>
+                <h3>Security Event Details</h3>
+            </div>
+            <button class="drawer-close-btn" id="btnSecDrawerClose">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <div class="drawer-section">
+                <div class="drawer-section-title">EVENT CLASSIFICATION</div>
+                <div class="drawer-meta-grid">
+                    <div class="dmg-item"><span class="dmg-label">TIME:</span> <span class="dmg-val text-blue" id="drwSecTime">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">CATEGORY:</span> <span class="dmg-val" id="drwSecCategory">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">OPERATION:</span> <span class="dmg-val" id="drwSecOp">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">ENDPOINT:</span> <span class="dmg-val" id="drwSecEndpoint">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">CLASSIFICATION:</span> <span class="dmg-val" id="drwSecClass">-</span></div>
+                    <div class="dmg-item"><span class="dmg-label">STATUS:</span> <span class="dmg-val" id="drwSecStatus">-</span></div>
+                </div>
+            </div>
+
+            <div class="drawer-section mt-16">
+                <div class="drawer-section-title">AUDIT RATIONALE &amp; ENFORCEMENT</div>
+                <div class="drawer-content-preview" id="drwSecRationale">
+                    Local network isolation policy strictly limits all HTTP/TCP sockets to 127.0.0.1 loopback. Zero outbound WAN calls permitted.
+                </div>
+            </div>
+        </div>
+        <div class="drawer-footer">
+            <button class="btn-action-secondary" id="btnSecDrawerCloseBtn">CLOSE</button>
+        </div>
+    </div>
 </div>
 
 <!-- COMMAND PALETTE (CTRL + K) -->
@@ -2026,7 +2297,7 @@ STATUS: WARNING (Conditional Operation Allowed)</div>
             <div class="settings-row">
                 <div class="settings-info">
                     <span class="settings-label">Golden Cursor FX</span>
-                    <span class="settings-desc">Precision gold reticle, ambient aura, and particle illumination</span>
+                    <span class="settings-desc">Precision cyan reticle, ambient aura, and particle illumination</span>
                 </div>
                 <div class="kavaai-switch active" id="sw-cursor-fx"></div>
             </div>
@@ -2107,6 +2378,6 @@ STATUS: WARNING (Conditional Operation Allowed)</div>
     </div>
 </div>
 
-<script src="app.js?v=52"></script>
+<script src="app.js?v=56"></script>
 </body>
 </html>
