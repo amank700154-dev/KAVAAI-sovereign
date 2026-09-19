@@ -558,6 +558,18 @@ def execute_tool():
     return jsonify(result)
 
 
+# ==============================================================================
+# AUTHENTICATION CONFIGURATION ENDPOINT (PUBLIC ANON CREDENTIALS ONLY)
+# ==============================================================================
+@app.route("/api/auth/config", methods=["GET"])
+def get_auth_config():
+    """Returns public frontend authentication configuration (URL and Anon key only)."""
+    return jsonify({
+        "supabase_url": os.getenv("SUPABASE_URL", ""),
+        "supabase_anon_key": os.getenv("SUPABASE_ANON_KEY", "")
+    })
+
+
 if __name__ == "__main__":
     app.run(
         host="127.0.0.1",

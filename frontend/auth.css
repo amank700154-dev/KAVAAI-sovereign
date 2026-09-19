@@ -1,0 +1,775 @@
+/* ==========================================================================
+   KAVAAI SOVEREIGN — INDUSTRIAL AUTHENTICATION & LOGIN CONSOLE
+   Visual Hierarchy: Black/Navy Void -> Electric Blue System -> Controlled Orange Action
+   ========================================================================== */
+
+:root {
+    --auth-bg-void: #03070D;
+    --auth-bg-navy: #060F1B;
+    --auth-panel-surface: rgba(8, 18, 32, 0.92);
+    --auth-panel-surface-elevated: rgba(12, 25, 44, 0.96);
+    --auth-blue-system: #1597FF;
+    --auth-blue-cyan: #00C8FF;
+    --auth-blue-border: rgba(21, 151, 255, 0.35);
+    --auth-blue-glow: rgba(21, 151, 255, 0.25);
+    --auth-orange-action: #FF8A00;
+    --auth-orange-bright: #FFA827;
+    --auth-orange-glow: rgba(255, 138, 0, 0.35);
+    --auth-green-verified: #00D68F;
+    --auth-red-critical: #FF4D4F;
+    --auth-text-primary: #EDF4FC;
+    --auth-text-secondary: #8CA3C0;
+    --auth-text-muted: #4F6785;
+}
+
+/* --------------------------------------------------------------------------
+   1. FULL-SCREEN AUTHENTICATION CONTAINER
+   -------------------------------------------------------------------------- */
+#kavaai-auth-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--auth-bg-void);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--auth-text-primary);
+    transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#kavaai-auth-screen.auth-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.03);
+    visibility: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   2. LAYERED TECHNICAL BACKGROUND
+   -------------------------------------------------------------------------- */
+.auth-bg-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(to right, rgba(21, 151, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(21, 151, 255, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+}
+
+.auth-bg-radial-blue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 900px;
+    height: 900px;
+    background: radial-gradient(circle, rgba(21, 151, 255, 0.09) 0%, rgba(3, 7, 13, 0) 70%);
+    pointer-events: none;
+}
+
+.auth-bg-radial-orange {
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 520px;
+    height: 520px;
+    background: radial-gradient(circle, rgba(255, 138, 0, 0.045) 0%, rgba(3, 7, 13, 0) 65%);
+    pointer-events: none;
+}
+
+.auth-scanline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(21, 151, 255, 0.6), rgba(255, 138, 0, 0.8), rgba(21, 151, 255, 0.6), transparent);
+    box-shadow: 0 0 12px rgba(255, 138, 0, 0.5);
+    opacity: 0.35;
+    animation: auth-scanline-move 8s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes auth-scanline-move {
+    0% { top: 0%; opacity: 0; }
+    10% { opacity: 0.4; }
+    90% { opacity: 0.4; }
+    100% { top: 100%; opacity: 0; }
+}
+
+/* Sparse Floating Coordinates & Diagnostic Telemetry */
+.auth-floating-coords {
+    position: absolute;
+    font-family: 'JetBrains Mono', 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--auth-text-muted);
+    letter-spacing: 0.14em;
+    pointer-events: none;
+    user-select: none;
+    line-height: 1.6;
+}
+.coords-tl { top: 28px; left: 36px; }
+.coords-tr { top: 28px; right: 36px; text-align: right; }
+.coords-bl { bottom: 28px; left: 36px; }
+.coords-br { bottom: 28px; right: 36px; text-align: right; }
+
+.auth-hud-tag {
+    color: var(--auth-blue-system);
+    margin-right: 6px;
+    font-weight: 600;
+}
+.auth-hud-tag-orange {
+    color: var(--auth-orange-action);
+    margin-right: 6px;
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   3. CENTER AUTHENTICATION CONSOLE CARD
+   -------------------------------------------------------------------------- */
+.auth-console-container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 470px;
+    padding: 20px;
+}
+
+.auth-console-card {
+    position: relative;
+    background: var(--auth-panel-surface);
+    border: 1px solid var(--auth-blue-border);
+    border-radius: 20px;
+    padding: 38px 40px 32px 40px;
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.75),
+        0 0 35px rgba(21, 151, 255, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(18px);
+    overflow: hidden;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-console-card:hover {
+    border-color: rgba(21, 151, 255, 0.55);
+    box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.85),
+        0 0 45px rgba(21, 151, 255, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Technical Corner Brackets */
+.auth-console-card::before,
+.auth-console-card::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+}
+
+.auth-console-card::before {
+    top: 10px;
+    left: 10px;
+    border-top: 2px solid var(--auth-orange-action);
+    border-left: 2px solid var(--auth-orange-action);
+    border-top-left-radius: 6px;
+}
+
+.auth-console-card::after {
+    bottom: 10px;
+    right: 10px;
+    border-bottom: 2px solid var(--auth-blue-system);
+    border-right: 2px solid var(--auth-blue-system);
+    border-bottom-right-radius: 6px;
+}
+
+/* Top Console HUD Ribbon */
+.auth-console-hud-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--auth-text-muted);
+    margin-bottom: 22px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(21, 151, 255, 0.15);
+}
+
+.auth-node-capsule {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.auth-pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--auth-green-verified);
+    box-shadow: 0 0 8px var(--auth-green-verified);
+    animation: auth-dot-pulse 2s infinite ease-in-out;
+}
+
+.auth-pulse-dot.orange {
+    background: var(--auth-orange-action);
+    box-shadow: 0 0 8px var(--auth-orange-action);
+}
+
+@keyframes auth-dot-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.85); }
+}
+
+/* --------------------------------------------------------------------------
+   4. KAVAAI BRAND HEADER & LOGO ANIMATION
+   -------------------------------------------------------------------------- */
+.auth-brand-section {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.auth-logo-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    background: rgba(10, 24, 42, 0.8);
+    border: 1px solid rgba(255, 138, 0, 0.4);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 138, 0, 0.15);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.auth-logo-badge:hover {
+    transform: translateY(-2px) scale(1.04);
+    border-color: var(--auth-orange-action);
+    box-shadow: 0 0 30px rgba(255, 138, 0, 0.35);
+}
+
+/* Thin orange scanning line passes through logo */
+.auth-logo-scan {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, rgba(255, 138, 0, 0.5), transparent);
+    animation: auth-logo-scan-loop 3.5s infinite ease-in-out;
+}
+
+@keyframes auth-logo-scan-loop {
+    0%, 65% { top: -100%; opacity: 0; }
+    75% { opacity: 0.8; }
+    90% { top: 120%; opacity: 0; }
+    100% { top: 120%; opacity: 0; }
+}
+
+.auth-brand-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    margin: 0 0 6px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.brand-kavaai {
+    color: #FFFFFF;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.brand-sovereign {
+    color: var(--auth-orange-action);
+    text-shadow: 0 0 16px var(--auth-orange-glow);
+}
+
+.auth-brand-subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    color: var(--auth-text-muted);
+    text-transform: uppercase;
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   5. AUTHENTICATION FORM & INPUT MICRO-INTERACTIONS
+   -------------------------------------------------------------------------- */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.auth-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    position: relative;
+}
+
+.auth-input-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.auth-input-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--auth-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.auth-input-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--auth-text-muted);
+    transition: color 0.2s ease;
+}
+
+.auth-input-status.active {
+    color: var(--auth-orange-action);
+}
+
+.auth-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.auth-input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--auth-text-muted);
+    pointer-events: none;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.auth-input {
+    width: 100%;
+    height: 46px;
+    background: rgba(5, 13, 24, 0.95);
+    border: 1px solid var(--auth-blue-border);
+    border-radius: 10px;
+    padding: 0 42px 0 40px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 13.5px;
+    color: var(--auth-text-primary);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.auth-input::placeholder {
+    color: rgba(140, 163, 192, 0.35);
+    font-size: 12.5px;
+}
+
+.auth-input:hover {
+    border-color: rgba(21, 151, 255, 0.65);
+    background: rgba(7, 16, 30, 0.98);
+}
+
+/* Hybrid Focus State: Blue Outer Glow + Orange Inner Border Accent */
+.auth-input:focus {
+    border-color: var(--auth-blue-system);
+    background: rgba(8, 18, 34, 1);
+    box-shadow: 
+        0 0 0 3px rgba(21, 151, 255, 0.22),
+        inset 0 0 0 1px var(--auth-orange-action);
+}
+
+.auth-input:focus + .auth-input-icon,
+.auth-input-wrap:focus-within .auth-input-icon {
+    color: var(--auth-blue-system);
+}
+
+/* Password Toggle Button */
+.auth-toggle-pwd {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--auth-text-muted);
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.auth-toggle-pwd:hover {
+    color: var(--auth-text-primary);
+    background: rgba(21, 151, 255, 0.1);
+}
+
+/* Auxiliary Options: Remember Node & Recover Access */
+.auth-aux-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11.5px;
+    margin-top: -2px;
+}
+
+.auth-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--auth-text-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.auth-checkbox {
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background: rgba(6, 14, 25, 0.9);
+    border: 1px solid var(--auth-blue-border);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.auth-checkbox:checked {
+    background: var(--auth-blue-system);
+    border-color: var(--auth-blue-system);
+    box-shadow: 0 0 8px rgba(21, 151, 255, 0.5);
+}
+
+.auth-checkbox:checked::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 4.5px;
+    width: 4px;
+    height: 7px;
+    border: solid #FFF;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.auth-link-recover {
+    color: var(--auth-orange-action);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.auth-link-recover:hover {
+    color: var(--auth-orange-bright);
+    text-shadow: 0 0 10px rgba(255, 138, 0, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   6. PRIMARY AUTHENTICATE BUTTON (MULTI-STAGE)
+   -------------------------------------------------------------------------- */
+.btn-auth-primary {
+    position: relative;
+    height: 48px;
+    background: linear-gradient(180deg, #0E2038 0%, #071324 100%);
+    border: 1px solid var(--auth-orange-action);
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4), 0 0 14px rgba(255, 138, 0, 0.15);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease, background 0.25s ease;
+    margin-top: 6px;
+}
+
+.btn-auth-primary:hover:not(:disabled) {
+    border-color: var(--auth-orange-bright);
+    background: linear-gradient(180deg, #132A4A 0%, #0B1C33 100%);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5), 0 0 22px rgba(255, 138, 0, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-auth-primary:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+/* Scanning Light across button on hover */
+.btn-auth-primary::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 138, 0, 0.35), transparent);
+    transform: skewX(-25deg);
+    transition: left 0.75s ease-in-out;
+}
+
+.btn-auth-primary:hover::before {
+    left: 140%;
+}
+
+/* Button Loading & Granted States */
+.btn-auth-primary.state-loading {
+    background: #09172B;
+    border-color: var(--auth-blue-system);
+    box-shadow: 0 0 20px rgba(21, 151, 255, 0.3);
+    cursor: wait;
+}
+
+.btn-auth-primary.state-granted {
+    background: linear-gradient(180deg, #07291F 0%, #031711 100%);
+    border-color: var(--auth-green-verified);
+    box-shadow: 0 0 25px rgba(0, 214, 143, 0.45);
+    color: #FFFFFF;
+}
+
+.auth-btn-spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: var(--auth-orange-action);
+    border-radius: 50%;
+    animation: auth-spin 0.8s linear infinite;
+}
+
+.btn-auth-primary.state-loading .auth-btn-spinner {
+    display: inline-block;
+    border-top-color: var(--auth-blue-system);
+}
+
+@keyframes auth-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Secondary CTA: Continue With Local Node */
+.btn-auth-secondary {
+    height: 38px;
+    background: transparent;
+    border: 1px solid rgba(21, 151, 255, 0.25);
+    border-radius: 8px;
+    color: var(--auth-text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-auth-secondary:hover {
+    background: rgba(21, 151, 255, 0.08);
+    border-color: var(--auth-blue-system);
+    color: var(--auth-text-primary);
+}
+
+/* Error Banner */
+.auth-error-banner {
+    display: none;
+    background: rgba(45, 12, 14, 0.85);
+    border: 1px solid rgba(255, 77, 79, 0.5);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #FFA39E;
+    box-shadow: 0 0 15px rgba(255, 77, 79, 0.2);
+    animation: auth-shake 0.35s ease;
+}
+
+.auth-error-banner.visible {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+@keyframes auth-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+/* --------------------------------------------------------------------------
+   7. INDUSTRIAL SYSTEM STATUS STRIP (BELOW CONSOLE)
+   -------------------------------------------------------------------------- */
+.auth-status-strip {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(21, 151, 255, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    color: var(--auth-text-secondary);
+}
+
+.auth-status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auth-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--auth-green-verified);
+    box-shadow: 0 0 6px var(--auth-green-verified);
+}
+
+.auth-status-dot.orange {
+    background: var(--auth-orange-action);
+    box-shadow: 0 0 6px var(--auth-orange-action);
+}
+
+.auth-status-dot.red {
+    background: var(--auth-red-critical);
+    box-shadow: 0 0 6px var(--auth-red-critical);
+}
+
+/* --------------------------------------------------------------------------
+   8. UNLOCK TRANSITION SEQUENCE (600–1000ms)
+   -------------------------------------------------------------------------- */
+.auth-unlock-laser {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #FF8A00, #00C8FF, #FF8A00, transparent);
+    box-shadow: 0 0 25px #FF8A00, 0 0 40px #00C8FF;
+    transform: scaleX(0);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 100000;
+}
+
+.auth-unlock-laser.active {
+    animation: auth-laser-burst 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes auth-laser-burst {
+    0% { transform: scaleX(0); opacity: 0; }
+    30% { transform: scaleX(1); opacity: 1; height: 3px; }
+    70% { transform: scaleX(1); opacity: 0.9; height: 6px; }
+    100% { transform: scaleX(1.2); opacity: 0; height: 1px; }
+}
+
+/* Dashboard Wrapper transition states */
+.dashboard-wrapper {
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dashboard-wrapper.auth-locked {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: scale(0.98);
+}
+
+/* --------------------------------------------------------------------------
+   9. OPERATOR LOGOUT CONTROLS (HEADER)
+   -------------------------------------------------------------------------- */
+.operator-profile-wrap {
+    position: relative;
+    cursor: pointer;
+}
+
+.operator-profile-wrap:hover .operator-avatar {
+    border-color: var(--auth-orange-action);
+    box-shadow: 0 0 10px var(--auth-orange-glow);
+}
+
+.operator-logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 77, 79, 0.12);
+    border: 1px solid rgba(255, 77, 79, 0.35);
+    border-radius: 4px;
+    color: #FFA39E;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    margin-left: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.operator-logout-btn:hover {
+    background: rgba(255, 77, 79, 0.25);
+    border-color: #FF4D4F;
+    color: #FFFFFF;
+    box-shadow: 0 0 8px rgba(255, 77, 79, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   10. RESPONSIVE OPTIMIZATIONS
+   -------------------------------------------------------------------------- */
+@media (max-width: 600px) {
+    .auth-console-card {
+        padding: 26px 20px 22px 20px;
+        border-radius: 14px;
+    }
+    .auth-floating-coords {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-scanline,
+    .auth-logo-scan,
+    .auth-pulse-dot {
+        animation: none !important;
+    }
+    .btn-auth-primary::before {
+        display: none !important;
+    }
+}

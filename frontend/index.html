@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=58">
+    <link rel="stylesheet" href="auth.css?v=1">
+    <!-- Supabase JS Client (With graceful offline fallback in supabase-client.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -22,6 +25,152 @@
 
 <!-- CUSTOM CRYSTAL TOOLTIP -->
 <div id="crystalTooltip"></div>
+
+<!-- UNLOCK LASER TRANSITION BURST -->
+<div class="auth-unlock-laser" id="authUnlockLaser"></div>
+
+<!-- ======================================================================== -->
+<!-- KAVAAI SOVEREIGN — SECURE INDUSTRIAL AUTHENTICATION GATEWAY              -->
+<!-- ======================================================================== -->
+<section id="kavaai-auth-screen" aria-label="Operator Authentication Console">
+    <!-- Layered Technical Environment -->
+    <div class="auth-bg-grid" aria-hidden="true"></div>
+    <div class="auth-bg-radial-blue" aria-hidden="true"></div>
+    <div class="auth-bg-radial-orange" aria-hidden="true"></div>
+    <div class="auth-scanline" aria-hidden="true"></div>
+
+    <!-- Sparse Floating Diagnostic Coordinates -->
+    <div class="auth-floating-coords coords-tl" aria-hidden="true">
+        <div><span class="auth-hud-tag">[SYS]</span>KAVAAI SOVEREIGN // NODE_01</div>
+        <div><span class="auth-hud-tag">[COORD]</span>42.819&deg; N, 71.058&deg; W</div>
+    </div>
+    <div class="auth-floating-coords coords-tr" aria-hidden="true">
+        <div><span class="auth-hud-tag-orange">[SEC]</span>AIR-GAP PROTOCOL ENFORCED</div>
+        <div><span class="auth-hud-tag">[NET]</span>LOOPBACK: 127.0.0.1:8000</div>
+    </div>
+    <div class="auth-floating-coords coords-bl" aria-hidden="true">
+        <div><span class="auth-hud-tag">[HARDWARE]</span>NVIDIA RTX 3050 &bull; LOCAL AI</div>
+        <div><span class="auth-hud-tag">[BUS]</span>ECC MEMORY ISOLATED</div>
+    </div>
+    <div class="auth-floating-coords coords-br" aria-hidden="true">
+        <div><span class="auth-hud-tag-orange">[ROUTER]</span>QWEN2.5:7B DEDICATED</div>
+        <div><span class="auth-hud-tag">[VERSION]</span>v1.0.0 INDUSTRIAL</div>
+    </div>
+
+    <!-- Center Industrial Authentication Console -->
+    <div class="auth-console-container">
+        <div class="auth-console-card magnetic-target">
+            <!-- Top Console HUD Ribbon -->
+            <div class="auth-console-hud-bar">
+                <div class="auth-node-capsule">
+                    <span class="auth-pulse-dot"></span>
+                    <span>NODE: KS-LOCAL-01</span>
+                </div>
+                <div>NETWORK: PRIVATE</div>
+            </div>
+
+            <!-- Brand Header -->
+            <div class="auth-brand-section">
+                <div class="auth-logo-badge magnetic-target">
+                    <div class="auth-logo-scan"></div>
+                    <svg width="28" height="28" viewBox="0 0 40 40">
+                        <polygon points="6,6 14,6 14,18 24,6 34,6 22,20 35,34 25,34 14,21 14,34 6,34" fill="#FF8A00" />
+                    </svg>
+                </div>
+                <h1 class="auth-brand-title">
+                    <span class="brand-kavaai">KAVAAI</span>
+                    <span class="brand-sovereign">SOVEREIGN</span>
+                </h1>
+                <p class="auth-brand-subtitle">
+                    PRIVATE INTELLIGENCE &bull; LOCAL EXECUTION &bull; CONTROLLED OUTPUT
+                </p>
+            </div>
+
+            <!-- Mapped Error Banner -->
+            <div class="auth-error-banner" id="authErrorBanner" role="alert">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FF4D4F" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="authErrorText">ACCESS DENIED: Operator credentials could not be verified.</span>
+            </div>
+
+            <!-- Authentication Form -->
+            <form class="auth-form" id="authForm" autocomplete="on">
+                <!-- Operator ID / Email Field -->
+                <div class="auth-input-group">
+                    <div class="auth-input-header">
+                        <label class="auth-input-label" for="authEmail">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            OPERATOR ID / EMAIL
+                        </label>
+                        <span class="auth-input-status" id="authEmailStatus">READY</span>
+                    </div>
+                    <div class="auth-input-wrap">
+                        <input type="text" id="authEmail" class="auth-input" placeholder="e.g. operator@kavaai.local" required autocomplete="username" spellcheck="false">
+                        <span class="auth-input-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="auth-input-group">
+                    <div class="auth-input-header">
+                        <label class="auth-input-label" for="authPassword">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            PASSCODE / SECURITY KEY
+                        </label>
+                        <span class="auth-input-status" id="authPasswordStatus">READY</span>
+                    </div>
+                    <div class="auth-input-wrap">
+                        <input type="password" id="authPassword" class="auth-input" placeholder="Enter workstation access key" required autocomplete="current-password">
+                        <span class="auth-input-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-2-2l2 2"/><path d="M15.5 7.5L14 9"/><path d="M3 21l9-9"/><circle cx="15.5" cy="8.5" r="4.5"/></svg>
+                        </span>
+                        <button type="button" class="auth-toggle-pwd" id="authTogglePwd" aria-label="Toggle password visibility" title="Toggle password visibility">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Auxiliary Row: Remember Node & Recover Access -->
+                <div class="auth-aux-row">
+                    <label class="auth-checkbox-label">
+                        <input type="checkbox" id="authRemember" class="auth-checkbox" checked>
+                        <span>REMEMBER THIS NODE</span>
+                    </label>
+                    <a href="javascript:void(0)" class="auth-link-recover" onclick="alert('Contact Station Security Administrator to reset Local Node Credentials.')">RECOVER ACCESS</a>
+                </div>
+
+                <!-- Primary CTA: Authenticate Operator (Multi-stage) -->
+                <button type="submit" class="btn-auth-primary magnetic-target" id="btnAuthenticate">
+                    <span class="auth-btn-spinner"></span>
+                    <span id="btnAuthText">AUTHENTICATE OPERATOR</span>
+                </button>
+
+                <!-- Secondary CTA: Continue With Local Node (Air-Gapped Offline Bypass) -->
+                <button type="button" class="btn-auth-secondary magnetic-target" id="btnContinueLocal" title="Air-gapped on-premise fallback without cloud auth">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    CONTINUE WITH LOCAL NODE
+                </button>
+            </form>
+
+            <!-- Industrial System Status Strip -->
+            <div class="auth-status-strip">
+                <div class="auth-status-row">
+                    <span class="auth-status-dot"></span>
+                    <span>LOCAL NODE ONLINE (127.0.0.1)</span>
+                </div>
+                <div class="auth-status-row">
+                    <span class="auth-status-dot" id="authStatusAuthDot"></span>
+                    <span id="authStatusAuthLabel">AUTH SERVICE READY</span>
+                </div>
+                <div class="auth-status-row">
+                    <span class="auth-status-dot"></span>
+                    <span>NETWORK MODE: PRIVATE (ZERO-WAN ENFORCED)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 <div class="dashboard-wrapper">
     <!-- ==================================================================== -->
@@ -2366,6 +2515,8 @@ STATUS: WARNING (Conditional Operation Allowed)</div>
     </div>
 </div>
 
+<script src="supabase-client.js?v=1"></script>
+<script src="auth.js?v=1"></script>
 <script src="app.js?v=58"></script>
 </body>
 </html>
